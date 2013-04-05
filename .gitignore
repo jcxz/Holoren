@@ -5,6 +5,7 @@
 /build/msvc2012/IBP_holoren/Release/
 /build/msvc2012/IBP_holoren/*.bmp
 /build/msvc2012/IBP_holoren/*.sdf
+/build/msvc2012/IBP_holoren/*.suo
 /build/msvc2012/IBP_holoren/*.user
 /build/msvc2012/IBP_holoren/*.filters
 
