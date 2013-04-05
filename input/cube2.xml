@@ -1,0 +1,5 @@
+<scene>
+  <cuboid x="0" y="0" z="0" width="100" height="100" depth="100" />
+  <cuboid x="20" y="20" z="20" width="200" height="200" depth="200" />
+  <cuboid x="30" y="30" z="30" width="300" height="300" depth="300" />
+</scene>

@@ -1,0 +1,7 @@
+-o "../../../df/out.df" -i "D:\AC601\ostatne\Programovanie\C_and_C++\skola\IBP\CorticalCafe_CGHMake\CGHapplication\data\letterA.gif"
+
+-z "0.7" -o "../../../df/out.df" -i "../../../../../data/fb_logo.jpg"
+
+-o "../../../df/out.df" -i "../../../input/img/FIT-logo.png"
+
+-o "../../../df/out.df" -i "../../../input/real/F.xml"

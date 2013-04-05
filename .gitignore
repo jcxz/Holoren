@@ -1,0 +1,12 @@
+# ignore debug and release build directories and all build shit
+/build/debug/
+/build/release/
+/msvc2012/IBP_holoren/Debug/
+/msvc2012/IBP_holoren/Release/
+/msvc2012/IBP_holoren/*.bmp
+/msvc2012/IBP_holoren/*.sdf
+/msvc2012/IBP_holoren/*.user
+/msvc2012/IBP_holoren/*.filters
+
+# ignore df directory as it changes often and contains binary files
+/df/
