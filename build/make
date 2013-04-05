@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+##########################################
+#  A script to trigger cmake processing  #
+##########################################
+
+
+WORK_DIR="${PWD}"
+
+
+# create a debug build configuration
+make_debug()
+{
+  echo "Creating debug build ..."
+  mkdir -p debug
+  cd debug
+  cmake -DCMAKE_BUILD_TYPE=Debug ../../
+  cd "${WORK_DIR}"
+}
+
+# create a release build configuration
+make_release()
+{
+  echo "Creating release build ..."
+  mkdir -p release
+  cd release
+  cmake -DCMAKE_BUILD_TYPE=Release ../../
+  cd "${WORK_DIR}"
+}
+
+# a function to clean build directories
+clean_all()
+{
+  echo "Removing build directories ..."
+  rm -rf debug release;
+}
+
+
+
+# parse command line arguments
+case $1 in
+  debug)
+    make_debug;
+    ;;
+
+  release)
+    make_release;
+    ;;
+
+  clean)
+    clean_all;
+    ;;
+
+  rebuild)
+    clean_all;
+    make_debug;
+    make_release;
+    ;;
+
+  *)
+    make_debug;
+    make_release;
+    ;;
+esac
