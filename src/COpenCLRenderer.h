@@ -5,9 +5,9 @@
 #ifndef COPENCLRENDERER_H
 #define COPENCLRENDERER_H
 
-#include "IRenderer.h"
+#include "CBaseRenderer.h"
+#include "ocl.h"
 
-#include <CL/cl.h>
 #include <vector>
 #include <string>
 
@@ -15,19 +15,20 @@
 /**
  * A class to render holograms using OpenCL
  */
-class COpenCLRenderer : public IRenderer
+class COpenCLRenderer : public CBaseRenderer
 {
   public:
     /**
      * Default constructor
      */
     explicit COpenCLRenderer(double hologram_z = 0)
-      : m_err(""),
+      : CBaseRenderer(hologram_z),
         m_context(),
         m_cmd_queue(),
         m_program(),
         m_kernel(),
-        m_hologram_z(hologram_z)
+        m_device(),
+        m_err_msg("")
     {
     }
 
@@ -39,14 +40,8 @@ class COpenCLRenderer : public IRenderer
       close();
     }
 
-    void setHologramLocation(double z)
-    {
-      m_hologram_z = z;
-      return;
-    }
-
     /* implement the IRenderer interface */
-    virtual bool open(void);
+    virtual bool open(const char *filename = NULL);
     virtual bool close(void);
     virtual std::string getError(void) const;
     virtual bool renderObjectWave(const CPointCloud & pc, COpticalField *of);
@@ -55,16 +50,6 @@ class COpenCLRenderer : public IRenderer
     
   private:
     /**
-     * A method to get all devices of a given type
-     *
-     * @param type the type of devices to be queried for
-     *
-     * @return a pointer to dynamically allocated array fo device id-s,
-     *         or NULL on error
-     */
-    static cl_int getDevices(cl_platform_id platform, cl_device_type type, std::vector<cl_device_id> *devices);
-
-    /**
      * A method to read the opencl program from a file
      *
      * On error values of program_buf and program_buf_size are undefined
@@ -72,17 +57,33 @@ class COpenCLRenderer : public IRenderer
     bool readCLSource(const char *filename, std::string *program_buf);
 
     /**
-     * A method to translate OpenCL error
+     * A function to select the most appropriate of all available devices
      */
-    static const char *clErrToStr(cl_int err);
+    cl_device_id selectDevice(void);
+
+    /**
+     * A function to create a build log fot the device
+     */
+    void constructBuildLog(cl_int err);
 
   private:
-    const char *m_err;              /// an error string
-    cl_context m_context;           /// OpenCL context (needed for buffer creation and cannot be destroyd before all computations are done)
-    cl_command_queue m_cmd_queue;   /// OpenCL command queue (needed to enqueue commands to devices - reads, writes, start of computation, ...)
-    cl_program m_program;           /// OpenCL program (destroying it before the computations are done, won't probably do any good)
-    cl_kernel m_kernel;             /// kernel that will be executed (will be sent to device for execution)
-    double m_hologram_z;            /// hologram location on the z axis
+    /** An enumeration of error codes */
+    enum EErrorCode {
+      ERR_OK = 0,     /// no error
+      ERR_OPEN,       /// error opening OpenCL source file
+      ERR_EMPTY,      /// the file with OpenCL program was empty
+      ERR_READ,       /// an error reading OpenCL source file
+      ERR_BUILD,      /// an error building OpenCL source
+      ERR_UNKNOWN     /// an undefined error
+    };
+
+  private:
+    cl_context m_context;          /// OpenCL context (needed for buffer creation and cannot be destroyd before all computations are done)
+    cl_command_queue m_cmd_queue;  /// OpenCL command queue (needed to enqueue commands to devices - reads, writes, start of computation, ...)
+    cl_program m_program;          /// OpenCL program (destroying it before the computations are done, won't probably do any good)
+    cl_kernel m_kernel;            /// kernel that will be executed (will be sent to device for execution)
+    cl_device_id m_device;         /// the device used
+    std::string m_err_msg;         /// a string to hold the error message and a build log
 };
 
 #endif

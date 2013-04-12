@@ -1,97 +1,112 @@
 /**
  */
 
-#include "COpenCLRenderer.h"
 #include "global.h"
+#include "COpenCLRenderer.h"
+#include "CPointCloud.h"
+#include "COpticalField.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cerrno>
+#include <fstream>
+#include <cmath>
+
+#ifndef M_PI
+# define M_PI 3.1415926535897932384626433832795f
+#endif
+
 
 
 /** Kernel file */
-static const char *DEF_KERNEL = "holoren.cl";
+static const char *DEF_CL_SOURCE = "../../src/OpenCL/holoren.cl";
 
-/** Kernal function (a main entry point to OpenCL program) */
+/** Kernel function (a main entry point to OpenCL program) */
 static const char *KERNEL_NAME = "compObjWave";
 
 
 
 /**
  */
-bool COpenCLRenderer::open(void)
+bool COpenCLRenderer::open(const char *filename)
 {
-  m_err = "";  // reset all previous errors
+  /* make sure all is reset before initializing something */
+  std::string program_buf;
+  cl_int err = CL_SUCCESS;
+  m_err_msg = "";
 
-  /* get information about underlying platform */
-  cl_platform_id platform;
-  cl_int err = clGetPlatformIDs(1, &platform, NULL);
-  if (err != CL_SUCCESS)
+  /* select the most suitable device */
+  m_device = selectDevice();
+  if (m_device == NULL)
   {
-    m_err = clErrToStr(err);
-    return false;
+    goto error;
   }
 
-  /* get all GPU devices from the platform */
-  std::vector<cl_device_id> devices;
-  err = getDevices(platform, CL_DEVICE_TYPE_GPU, &devices);
-  if (err == CL_SUCCESS)
-  {
-    m_err = clErrToStr(err);
-    return false;
-  }
-
-  /* create OpenCL context */
-  m_context = clCreateContext(NULL, devices.size(), devices.data(), NULL, NULL, &err);
+  /* create OpenCL context for all GPU devices on the machine */
+  m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
   if (err != CL_SUCCESS)
   {
-    m_err = clErrToStr(err);
-    return false;
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto error;
   }
 
   /* read the OpenCL source file */
-  std::string program_buf;
-  if (!readCLSource(DEF_KERNEL, &program_buf))
+  if (!readCLSource(((filename == NULL) ? (DEF_CL_SOURCE) : (filename)), &program_buf))
   {
-    return false;
+    goto error;
   }
 
-  /* create program */
-  const char *src_strings = program_buf.c_str();
-  size_t src_sizes = program_buf.size();
-  m_program = clCreateProgramWithSource(m_context, 1, &src_strings, &src_sizes, &err);
-  if (err != CL_SUCCESS)
+  /* create program object */
   {
-    return false;
+    const char *src_strings = program_buf.c_str();
+    size_t src_sizes = program_buf.size();
+    m_program = clCreateProgramWithSource(m_context, 1, &src_strings, &src_sizes, &err);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      goto error;
+    }
   }
 
-  /* compile program */
-  err = clBuildProgram(m_program,  // program
-                       0,          // 0 as we are not providing any device list
-                       NULL,       // if NULL, then the program is built for all devices, that the program is assocated with (so probably all devices from the context)
-                       "",         // compilation options
-                       NULL, 
-                       NULL);
-  if (err != CL_SUCCESS)
+  /* build program */
   {
-    return false;
+    std::string options("-g -s ");
+    options += filename;
+
+    err = clBuildProgram(m_program,        // program
+                         0,                // 0 as we are not providing any device list
+                         NULL,             // if NULL, then the program is built for all devices, that the program is assocated with (so probably all devices from the context)
+                         options.c_str(),  // compilation options
+                         NULL,
+                         NULL);
+    if (err != CL_SUCCESS)
+    {
+      constructBuildLog(err);
+      goto error;
+    }
   }
 
   /* create kernels from program */
   m_kernel = clCreateKernel(m_program, KERNEL_NAME, &err);
   if (err != CL_SUCCESS)
   {
-    return false;
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto error;
   }
 
   /* create command queue */
-  m_cmd_queue = clCreateCommandQueue(m_context, devices[0], NULL, &err);
+  m_cmd_queue = clCreateCommandQueue(m_context, m_device, 0, &err);
   if (err != CL_SUCCESS)
   {
-    return false;
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto error;
   }
 
   return true;
+
+error:
+  close();
+  return false;
 }
 
 
@@ -99,8 +114,17 @@ bool COpenCLRenderer::open(void)
  */
 bool COpenCLRenderer::close(void)
 {
+  clReleaseCommandQueue(m_cmd_queue);
+  m_cmd_queue = NULL;
+
+  clReleaseKernel(m_kernel);
+  m_kernel = NULL;
+
   clReleaseProgram(m_program);
+  m_program = NULL;
+
   clReleaseContext(m_context);
+  m_context = NULL;
 
   return true;
 }
@@ -110,7 +134,7 @@ bool COpenCLRenderer::close(void)
  */
 std::string COpenCLRenderer::getError(void) const
 {
-  return std::string(m_err);
+  return m_err_msg;
 }
 
 
@@ -118,15 +142,104 @@ std::string COpenCLRenderer::getError(void) const
  */
 bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of)
 {
+  /* intialize local variables */
+  cl_int err = CL_SUCCESS;
+  cl_mem pc_buf = NULL;     // point cloud buffer
+  cl_mem of_buf = NULL;     // optical field buffer
+
   /* create memory objects from data passed in as arguments */
+  pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto finalize;
+  }
+
+  of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto finalize;
+  }
+
+  /* a macro to set the given kernel argument type */
+  #define SET_ARG(num, arg) \
+    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
+    if (err != CL_SUCCESS) \
+    { \
+      m_err_msg = OpenCL::clErrToStr(err); \
+      goto finalize; \
+    }
 
   /* set kernel arguments */
+  {
+    cl_int rows = of->getNumRows();
+    cl_int cols = of->getNumCols();
+    cl_float hologram_z = (cl_float) m_hologram_z;
+    cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
+    cl_float pitch = of->getPitch();
+    cl_float corner_x = -(cols - 1) * pitch / 2;
+    cl_float corner_y = -(rows - 1) * pitch / 2;
+    
+    DBG("rows       : " << rows);
+    DBG("cols       : " << cols);
+    DBG("hologram_z : " << hologram_z);
+    DBG("k          : " << k);
+    DBG("sampling   : " << pitch);
+    DBG("size_x     : " << (cols - 1) * pitch);
+    DBG("size_y     : " << (rows - 1) * pitch);
+    DBG("corner_x   : " << corner_x);
+    DBG("corner_y   : " << corner_y);
+
+    SET_ARG(0, pc_buf);
+    SET_ARG(1, of_buf);
+    SET_ARG(2, rows);
+    SET_ARG(3, cols);
+    SET_ARG(4, hologram_z);
+    SET_ARG(5, k);
+    SET_ARG(6, pitch);
+    SET_ARG(7, corner_x);
+    SET_ARG(8, corner_y);
+  }
+
+  /* to cancel kernel argument setting macro */
+  #undef SET_ARG
 
   /* execute kernel */
+  {
+    // this is an array which defines the number of items in each nested loop
+    size_t global_work_size[3] = { pc.size(), of->getNumRows(), of->getNumCols() };
+    err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
+                                 m_kernel,          // the kernel to be excuted
+                                 3,                 // the number of nested for loops that OpenCL will generate
+                                 NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                                 global_work_size,  // the number of items in each nested for loop
+                                 NULL,              // this is a local work size, not really sure how it relates to the above parameters
+                                 0,
+                                 NULL,
+                                 NULL);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      goto finalize;
+    }
+  }
 
   /* read the result */
+  err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto finalize;
+  }
 
-  return true;
+ 
+finalize:
+  /* clean-up */
+  clReleaseMemObject(pc_buf);
+  clReleaseMemObject(of_buf);
+
+  return (err == CL_SUCCESS);
 }
 
 
@@ -140,125 +253,153 @@ bool COpenCLRenderer::renderHologram(const CPointCloud & pc, COpticalField *of)
 
 /**
  */
-cl_int COpenCLRenderer::getDevices(cl_platform_id platform, cl_device_type type, std::vector<cl_device_id> *devices)
-{
-  HOLOREN_ASSERT(devices != NULL);
-
-  /* query for the number of devices */
-  cl_uint num_devices = 0;
-  cl_int err = clGetDeviceIDs(platform, type, 0, NULL, &num_devices);
-  if (err != CL_SUCCESS)
-  {
-    return err;
-  }
-
-  /* resize the vector to have enough space for device id-s */
-  devices->resize(num_devices);
-
-  /* query for the devices ids */
-  return clGetDeviceIDs(platform, type, num_devices, &devices->front(), NULL);
-}
-
-
-/**
- */
 bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_buf)
 {
+  HOLOREN_ASSERT(filename != NULL);
   HOLOREN_ASSERT(program_buf != NULL);
 
-  /* read the program kernel */
-  FILE *f = fopen(filename, "rb");
-  if (f == NULL)
+  /* open the input file */
+  std::ifstream is(filename, std::ifstream::binary);
+  if (!is)
   {
-    m_err = "Failed to open kernel file";
+    m_err_msg = "Failed to open OpenCL program file";
     return false;
   }
 
-  /* read the kernel size */
-  struct stat st;
+  /* get the size of the file to be read */
+  is.seekg(0, is.end);
+  long program_size = is.tellg();
+  is.seekg(0, is.beg);
 
-  if (fstat(fileno(f), &st) == -1)
+  DBG("Kernel size: " << program_size);
+
+  /* this check protects from accessing invalid memory
+     in is.read() (as the size of program buf will be changed to 0) */
+  if (program_size == 0)
   {
-    fclose(f);
-    m_err = "Failed to get the kernel size";
+    m_err_msg = "OpenCL program file is empty";
     return false;
   }
 
-  DBG("Kernel size: " << st.st_size);
+  /* allocate the memory in string */
+  program_buf->resize(program_size);
+  //program_buf->clear();
+  //program_buf->reserve();
 
-  /* allocate memory for kernel */
-  program_buf->resize(st.st_size + 1);  // +1 for terminating 0
-
-  /* read the kernel program and close the file */
-  if (fread(&program_buf->front(), sizeof(char), st.st_size, f) != st.st_size)
-  {
-    fclose(f);
-    m_err = "Failed to read kernel program";
-    return false;
-  }
-
-  fclose(f);
-
+  /* read contents of the file */
+  is.read(&program_buf->front(), program_size);
+   
   DBG("Kernel Program:\n" << *program_buf);
+  
+  if (!is)
+  {
+    m_err_msg = "Failed to read OpenCL program";
+    return false;
+  }
+
+  is.close();
 
   return true;
 }
 
 
 /**
- * A function to translate the OpenCL error
  */
-const char *COpenCLRenderer::clErrToStr(cl_int err)
+cl_device_id COpenCLRenderer::selectDevice(void)
 {
-  switch (err)
+  /* declare local variables */
+  cl_platform_id platform;
+
+  /* get the first available platform */
+  cl_int err = clGetPlatformIDs(1, &platform, NULL);
+  if (err != CL_SUCCESS)
   {
-    case CL_SUCCESS:                            return "Success!";
-    case CL_DEVICE_NOT_FOUND:                   return "Device not found.";
-    case CL_DEVICE_NOT_AVAILABLE:               return "Device not available";
-    case CL_COMPILER_NOT_AVAILABLE:             return "Compiler not available";
-    case CL_MEM_OBJECT_ALLOCATION_FAILURE:      return "Memory object allocation failure";
-    case CL_OUT_OF_RESOURCES:                   return "Out of resources";
-    case CL_OUT_OF_HOST_MEMORY:                 return "Out of host memory";
-    case CL_PROFILING_INFO_NOT_AVAILABLE:       return "Profiling information not available";
-    case CL_MEM_COPY_OVERLAP:                   return "Memory copy overlap";
-    case CL_IMAGE_FORMAT_MISMATCH:              return "Image format mismatch";
-    case CL_IMAGE_FORMAT_NOT_SUPPORTED:         return "Image format not supported";
-    case CL_BUILD_PROGRAM_FAILURE:              return "Program build failure";
-    case CL_MAP_FAILURE:                        return "Map failure";
-    case CL_INVALID_VALUE:                      return "Invalid value";
-    case CL_INVALID_DEVICE_TYPE:                return "Invalid device type";
-    case CL_INVALID_PLATFORM:                   return "Invalid platform";
-    case CL_INVALID_DEVICE:                     return "Invalid device";
-    case CL_INVALID_CONTEXT:                    return "Invalid context";
-    case CL_INVALID_QUEUE_PROPERTIES:           return "Invalid queue properties";
-    case CL_INVALID_COMMAND_QUEUE:              return "Invalid command queue";
-    case CL_INVALID_HOST_PTR:                   return "Invalid host pointer";
-    case CL_INVALID_MEM_OBJECT:                 return "Invalid memory object";
-    case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:    return "Invalid image format descriptor";
-    case CL_INVALID_IMAGE_SIZE:                 return "Invalid image size";
-    case CL_INVALID_SAMPLER:                    return "Invalid sampler";
-    case CL_INVALID_BINARY:                     return "Invalid binary";
-    case CL_INVALID_BUILD_OPTIONS:              return "Invalid build options";
-    case CL_INVALID_PROGRAM:                    return "Invalid program";
-    case CL_INVALID_PROGRAM_EXECUTABLE:         return "Invalid program executable";
-    case CL_INVALID_KERNEL_NAME:                return "Invalid kernel name";
-    case CL_INVALID_KERNEL_DEFINITION:          return "Invalid kernel definition";
-    case CL_INVALID_KERNEL:                     return "Invalid kernel";
-    case CL_INVALID_ARG_INDEX:                  return "Invalid argument index";
-    case CL_INVALID_ARG_VALUE:                  return "Invalid argument value";
-    case CL_INVALID_ARG_SIZE:                   return "Invalid argument size";
-    case CL_INVALID_KERNEL_ARGS:                return "Invalid kernel arguments";
-    case CL_INVALID_WORK_DIMENSION:             return "Invalid work dimension";
-    case CL_INVALID_WORK_GROUP_SIZE:            return "Invalid work group size";
-    case CL_INVALID_WORK_ITEM_SIZE:             return "Invalid work item size";
-    case CL_INVALID_GLOBAL_OFFSET:              return "Invalid global offset";
-    case CL_INVALID_EVENT_WAIT_LIST:            return "Invalid event wait list";
-    case CL_INVALID_EVENT:                      return "Invalid event";
-    case CL_INVALID_OPERATION:                  return "Invalid operation";
-    case CL_INVALID_GL_OBJECT:                  return "Invalid OpenGL object";
-    case CL_INVALID_BUFFER_SIZE:                return "Invalid buffer size";
-    case CL_INVALID_MIP_LEVEL:                  return "Invalid mip-map level";
+    m_err_msg = OpenCL::clErrToStr(err);
+    return NULL;
   }
 
-  return "Unknown";
+  DBG(platform);
+
+  /* select all devices available on the platform */
+  std::vector<cl_device_id> devices;
+  err = OpenCL::getDevices(platform, CL_DEVICE_TYPE_ALL, &devices);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return NULL;
+  }
+
+  /* select the one that is the most suitable (that is prefer GPU-s) */
+  std::vector<cl_device_id>::iterator it = devices.begin();
+  cl_device_id cpu_device = NULL;
+  cl_device_id other_device = NULL;
+
+  while (it != devices.end())
+  {
+    DBG(*it);
+
+    cl_device_type type;
+
+    err = OpenCL::getDeviceInfo(*it, CL_DEVICE_TYPE, &type);
+    if (err != CL_SUCCESS)
+    {
+      ++it;
+      continue;
+    }
+
+    if (type == CL_DEVICE_TYPE_GPU)
+    {
+      // immediately return if the device found was a GPU
+      return *it;
+    }
+    else if (type == CL_DEVICE_TYPE_CPU)
+    {
+      cpu_device = *it; 
+    }
+    else
+    {
+      other_device = *it;
+    }
+
+    ++it;
+  }
+
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+  }
+
+  return ((cpu_device == NULL) ? other_device : cpu_device);
+}
+
+
+/**
+ */
+void COpenCLRenderer::constructBuildLog(cl_int err)
+{
+  m_err_msg = OpenCL::clErrToStr(err);
+  std::string str;
+  
+  if (OpenCL::getDeviceInfo(m_device, CL_DEVICE_NAME, &str) == CL_SUCCESS)
+  {
+    m_err_msg += "\n\"";
+    m_err_msg += str;
+    m_err_msg += "\"\n";
+  }
+  else
+  {
+    m_err_msg += "\"Unknown device\"\n";
+  }
+  
+  if (OpenCL::getBuildLog(m_program, m_device, &str) == CL_SUCCESS)
+  {
+    m_err_msg += str;
+    m_err_msg += '\n';
+  }
+  else
+  {
+    m_err_msg += "Failed to get log\n";
+  }
+
+  return;
 }

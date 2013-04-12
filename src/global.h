@@ -5,6 +5,19 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+/** OS detection */
+#if defined(__FreeBSD__) || defined(__NetBSD__) || \
+    defined(__OpenBSD__) || defined(__bsdi__)   || \
+    defined(__DragonFly__)
+# define HOLOREN_OS_BSD
+#elif defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+# define HOLOREN_OS_WIN
+#elif defined(__linux__) || defined(linux) || defined(__linux)
+# define HOLOREN_OS_LINUX
+#else
+# error Unsupported operating system
+#endif
+
 /** Compiler detection */
 #if defined(_MSC_VER)
 # define HOLOREN_CC_MSVC
@@ -52,12 +65,20 @@
 /** Portable types */
 #include <stdint.h>
 
-/* a debugging macro */
-#ifdef DEBUG
+/* A debugging macro */
+#ifdef HOLOREN_DEBUG
 #  include <iostream>
-#  define DBG(x) std::cerr << x << std::endl;
+#  define DBG(x) std::cerr << x << std::endl
 #else
 #  define DBG(x)
+#endif
+
+/* A macro to print diagnostic messages */
+#ifndef HOLOREN_NO_WARNINGS
+#  include <iostream>
+#  define WARN(x) std::cerr << x << std::endl
+#else
+#  define WARN(x)
 #endif
 
 #endif

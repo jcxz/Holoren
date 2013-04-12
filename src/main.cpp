@@ -9,12 +9,14 @@
 #include "CPointCloud.h"
 #include "COpticalField.h"
 #include "CSimpleRenderer.h"
-#include "COpenCLrenderer.h"
+#include "COpenCLRenderer.h"
+#include "CTimer.h"
 
 #include <iostream>
 
 
-/* a usage message */
+
+/** a usage message */
 static const char * const g_usage = "USAGE:\n"
                                     "./holoren -i input_file\n"
                                     "          -o output_file\n"
@@ -23,7 +25,11 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -s sampling\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
-                                    "          -r simple|opencl|none\n";
+                                    "          -r simple|opencl|none\n"
+                                    "          -f cl_source_file\n";
+
+/** a timer to meassure exection time of different sections of code */
+static CTimer g_timer;
 
 
 /** Defines the type of renderer that shall be used */
@@ -41,10 +47,11 @@ typedef struct {
   const char *ofilename;   /// output file
   unsigned int of_rows;    /// optical field number of rows
   unsigned int of_cols;    /// optical field number of columns
+  const char *cl_source;   /// the location of OpenCL source file
+  ERendererType renderer;  /// the type of rendering engine
   double sampling;         /// pitch between individual samples
   double lambda;           /// light wavelength
   double hologram_z;       /// hologram placement
-  ERendererType renderer;  /// the type of rendering engine
 } tParams;
 
 
@@ -73,14 +80,15 @@ static const char *renToStr(ERendererType type)
  */
 std::ostream & operator<<(std::ostream & os, const tParams & params)
 {
-  os << "input file            : " << params.ifilename          << std::endl;
-  os << "output file           : " << params.ofilename          << std::endl;
-  os << "optical field n. rows : " << params.of_rows            << std::endl;
-  os << "optical field n. cols : " << params.of_cols            << std::endl;
-  os << "sampling              : " << params.sampling           << std::endl;
-  os << "light wavelength      : " << params.lambda             << std::endl;
-  os << "hologram z            : " << params.hologram_z         << std::endl;
-  os << "Rendering engine      : " << renToStr(params.renderer) << std::endl;
+  os << "input file            : " << ((params.ifilename == NULL) ? "NULL" : params.ifilename) << std::endl;
+  os << "output file           : " << ((params.ofilename == NULL) ? "NULL" : params.ofilename) << std::endl;
+  os << "optical field n. rows : " << params.of_rows                                           << std::endl;
+  os << "optical field n. cols : " << params.of_cols                                           << std::endl;
+  os << "sampling              : " << params.sampling                                          << std::endl;
+  os << "light wavelength      : " << params.lambda                                            << std::endl;
+  os << "hologram z            : " << params.hologram_z                                        << std::endl;
+  os << "Rendering engine      : " << renToStr(params.renderer)                                << std::endl;
+  os << "OpenCL source file    : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
 
   return os;
 }
@@ -101,6 +109,7 @@ static void resetParams(tParams *params)
   params->lambda = 630e-9;
   params->hologram_z = 0.0f;
   params->renderer = REN_SIMPLE;
+  params->cl_source = NULL;
 
   return;
 }
@@ -251,6 +260,22 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
         return false;
       }
     }
+    else if (CMP_SHORT_OPT(argv[i], 'f'))
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Option -f requires an argument" << std::endl;
+        return false;
+      }
+
+      if (params->cl_source != NULL)
+      {
+        std::cerr << "OpenCL source file already given" << std::endl;
+        return false;
+      }
+
+      params->cl_source = argv[i];
+    }
     else
     {
       std::cerr << "Unrecognized option: " << argv[i] << std::endl;
@@ -294,6 +319,8 @@ int main(int argc, char *argv[])
 
   DBG(params);
 
+  DBG_T_START(g_timer, "** Starting point cloud conversion:\n");
+
   /* instantiate the class that can convert the given file to point cloud */
   CBasePointCloudRW *rw = g_pcrw_factory.getReaderWriter(params.ifilename);
   if (rw == NULL)
@@ -319,13 +346,15 @@ int main(int argc, char *argv[])
 
   delete rw;
 
+  DBG_T_END(g_timer, "** Point cloud conversion finished: ");
+
   std::cout << "Point cloud was loaded successfully" << std::endl;
   std::cout << "Total number of point sources that have to be rendered: " << pc.size() << std::endl;
 
   /* set up renderer */
   std::cout << "Setting up renderer" << std::endl;
 
-  IRenderer *p_ren = NULL;
+  CBaseRenderer *p_ren = NULL;
 
   switch (params.renderer)
   {
@@ -347,12 +376,16 @@ int main(int argc, char *argv[])
 
   /* render the object wave from scene */
   std::cout << "Rendering object wave" << std::endl;
+  
+  DBG_T_START(g_timer, "** Starting rendering:\n");
 
   COpticalField of(params.of_rows, params.of_cols, params.lambda, params.sampling);
 
-  if (!p_ren->open())
+  if (!p_ren->open(params.cl_source))
   {
     std::cerr << "Failed to initialize " << renToStr(params.renderer) << " renderer" << std::endl;
+    std::cerr << p_ren->getError() << std::endl;
+    delete p_ren;
     return false;
   }
 
@@ -362,7 +395,11 @@ int main(int argc, char *argv[])
 
   delete p_ren;
 
+  DBG_T_END(g_timer, "** Rendering finished: ");
+
   std::cout << "Point cloud rendered successfully" << std::endl;
+
+  DBG_T_START(g_timer, "** Starting saving:\n");
 
   /* save computed results */
   if (!of.save(params.ofilename))
@@ -370,6 +407,8 @@ int main(int argc, char *argv[])
     std::cerr << "Failed to save the computed results" << std::endl;
     return 1;
   }
+
+  DBG_T_END(g_timer, "** Saving finished: ");
 
   std::cout << "Point cloud saved successfully to \"" << params.ofilename << "\"" << std::endl;
 

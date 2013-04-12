@@ -21,8 +21,9 @@
 
 /**
  */
-bool CSimpleRenderer::open(void)
+bool CSimpleRenderer::open(const char *filename)
 {
+  HOLOREN_UNUSED(filename);
   return true;
 }
 
@@ -58,13 +59,16 @@ bool CSimpleRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   double pitch = of->getPitch();
   double corner_x = -(cols - 1) * pitch / 2;
   double corner_y = -(rows - 1) * pitch / 2;
-
-  DBG("k        : " << k);
-  DBG("sampling : " << pitch);
-  DBG("size_x   : " << (cols - 1) * pitch);
-  DBG("size_y   : " << (rows - 1) * pitch);
-  DBG("corner_x : " << corner_x);
-  DBG("corner_y : " << corner_y);
+  
+  DBG("rows       : " << rows);
+  DBG("cols       : " << cols);
+  DBG("hologram_z : " << m_hologram_z);
+  DBG("k          : " << k);
+  DBG("sampling   : " << pitch);
+  DBG("size_x     : " << (cols - 1) * pitch);
+  DBG("size_y     : " << (rows - 1) * pitch);
+  DBG("corner_x   : " << corner_x);
+  DBG("corner_y   : " << corner_y);
 
   /* start rendering */
   for (unsigned int i = 0; i < pc.size(); ++i)

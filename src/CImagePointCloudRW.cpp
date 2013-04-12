@@ -362,7 +362,7 @@ bool CImagePointCloudRW::genPointSources(SDL_Surface *surf, uint8_t treshold, tF
   }
 
   /* extract point sources from all black pixels in image */
-#ifdef DEBUG
+#ifdef HOLOREN_DEBUG
   int ps_cnt = 0;
 #endif
 
@@ -373,7 +373,7 @@ bool CImagePointCloudRW::genPointSources(SDL_Surface *surf, uint8_t treshold, tF
       if (GET_PIXEL8(surf, x, y) <= treshold)
       {
         pc->addPointSource(SPointSource((tFPType) x * sampling, (tFPType) y * sampling, z));
-#ifdef DEBUG
+#ifdef HOLOREN_DEBUG
         ps_cnt++;
 #endif
       }

@@ -27,6 +27,7 @@ class CPointCloud : private std::vector<SPointSource>
     using CPointCloudBase::size;
     using CPointCloudBase::clear;
     using CPointCloudBase::resize;
+    using CPointCloudBase::data;
     using CPointCloudBase::operator[];
 
   public:
@@ -42,10 +43,10 @@ class CPointCloud : private std::vector<SPointSource>
      * A method to get a pointer to contigious memory
      * with point sources
      */
-    const SPointSource *getPointSources(void) const
-    {
-      return &front();
-    }
+    //const SPointSource *getPointSources(void) const
+    //{
+    //  return &front();
+    //}
 
     /**
      * A method to add a single point source to point cloud
@@ -62,6 +63,14 @@ class CPointCloud : private std::vector<SPointSource>
     const SPointSource & getPointSource(unsigned int i) const
     {
       return CPointCloudBase::operator[](i);
+    }
+
+    /**
+     * Get the size of data in bytes held by this container
+     */
+    size_t getByteSize(void) const
+    {
+      return size() * sizeof(SPointSource);
     }
 
     /**

@@ -149,6 +149,14 @@ class COpticalField
     }
 
     /**
+     * Get the size of data in bytes held by this container
+     */
+    size_t getByteSize(void) const
+    {
+      return m_data->m_rows * m_data->m_cols * sizeof(CComplex);
+    }
+
+    /**
      */
     unsigned int getNumRows(void) const
     {

@@ -134,6 +134,7 @@ error:
  */
 bool CXMLPointCloudRW::write(CPointCloud *pc)
 {
+  HOLOREN_UNUSED(pc);
   return false;
 }
 
