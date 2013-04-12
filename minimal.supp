@@ -1,0 +1,315 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libOpenCL.so.1
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:strdup
+   obj:*
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dlerror_run
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:local_strdup
+   fun:_dl_map_object
+   fun:openaux
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:openaux
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:local_strdup
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   fun:call_init
+   fun:_dl_init
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:*
+   obj:*
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/usr/lib/debug/lib/i386-linux-gnu/libc-2.17.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:openaux
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_check_map_versions
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:realloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+   obj:/opt/AMDAPP/lib/x86/libamdocl32.so
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
