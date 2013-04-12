@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E16005FA-7463-4267-920B-CAFB095B4D00}</ProjectGuid>
+    <ProjectGuid>{F904CB0E-B9D3-40C6-8A87-177FE225DA19}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>IBP_holoren</RootNamespace>
   </PropertyGroup>
@@ -19,13 +19,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -58,24 +56,20 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\lib;$(MY_LIB_PATH)\iconv-1.9.2.win32\lib;$(MY_LIB_PATH)\zlib-1.2.5\lib;$(MY_LIB_PATH)\SDL_image-1.2.12\lib\x86;$(MY_LIB_PATH)\SDL-1.2.15\lib\x86;$(AMDAPPSDKROOT)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL.lib;SDL_image.lib;libxml2.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\lib;$(MY_LIB_PATH)\iconv-1.9.2.win32\lib;$(MY_LIB_PATH)\zlib-1.2.5\lib;$(MY_LIB_PATH)\SDL_image-1.2.12\lib\x86;$(MY_LIB_PATH)\SDL-1.2.15\lib\x86;$(AMDAPPSDKROOT)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\CBasePointCloudRW.h" />
+    <ClInclude Include="..\..\..\src\CBaseRenderer.h" />
     <ClInclude Include="..\..\..\src\CImagePointCloudRW.h" />
     <ClInclude Include="..\..\..\src\config.h" />
     <ClInclude Include="..\..\..\src\COpenCLRenderer.h" />
@@ -115,7 +110,6 @@
     <ClInclude Include="..\..\..\src\CXMLPointCloudRW.h" />
     <ClInclude Include="..\..\..\src\Geometry.h" />
     <ClInclude Include="..\..\..\src\global.h" />
-    <ClInclude Include="..\..\..\src\CBaseRenderer.h" />
     <ClInclude Include="..\..\..\src\ocl.h" />
     <ClInclude Include="..\..\..\src\Utils.h" />
   </ItemGroup>

@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 2.8)
 project(HOLOREN)
 
 # release and debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF")
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3")
 
 # include a non-standard module from a local directory
@@ -33,6 +33,7 @@ set(HOLOREN_SOURCES
   src/global.h
   src/Utils.h
   src/Utils.cpp
+  src/CTimer.h
   src/CSharedDataPtr.h
   src/Geometry.h
   src/COpticalField.h
@@ -49,9 +50,11 @@ set(HOLOREN_SOURCES
   src/CPCPointCloudRW.cpp
   src/CPointCloudRWFactory.h
   src/CPointCloudRWFactory.cpp
-  src/IRenderer.h
+  src/CBaseRenderer.h
   src/CSimpleRenderer.h
   src/CSimpleRenderer.cpp
+  src/ocl.h
+  src/ocl.cpp
   src/COpenCLRenderer.h
   src/COpenCLRenderer.cpp
   src/main.cpp
@@ -124,3 +127,41 @@ set(TEST_PCRW_FACTORY_SOURCES
 
 add_executable(test_pcrw_factory ${TEST_PCRW_FACTORY_SOURCES})
 target_link_Libraries(test_pcrw_factory ${LIBS})
+
+# ocl library testing
+set(TEST_OCL_SOURCES
+  src/config.h
+  src/global.h
+  src/CPointCloud.h
+  src/CPointCloud.cpp
+  src/COpticalField.h
+  src/COpticalField.cpp
+  src/ocl.h
+  src/ocl.cpp
+  tests/test_ocl.cpp
+)
+
+add_executable(test_ocl ${TEST_OCL_SOURCES})
+target_link_Libraries(test_ocl ${LIBS})
+
+# to test performance timers on unix
+set(TEST_TIMER_UNIX_SOURCES
+  src/config.h
+  src/global.h
+  src/CTimer.h
+  tests/test_timer_unix.cpp
+)
+
+add_executable(test_timer_unix ${TEST_TIMER_UNIX_SOURCES})
+
+# to test device selecting
+set(TEST_OCL_SELECT_DEVICE_SOURCES
+  src/config.h
+  src/global.h
+  src/ocl.h
+  src/ocl.cpp
+  tests/test_ocl_selectDevice.cpp
+)
+
+add_executable(test_ocl_selectDevice ${TEST_OCL_SELECT_DEVICE_SOURCES})
+target_link_Libraries(test_ocl_selectDevice ${LIBS})

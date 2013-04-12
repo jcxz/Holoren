@@ -11,23 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E16005FA-7463-4267-920B-CAFB095B4D00}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>IBP_holoren</RootNamespace>
+    <ProjectGuid>{848BC3EA-20FF-4334-8F26-3C1784693FF8}</ProjectGuid>
+    <RootNamespace>test_ocl_selectDevice</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,24 +38,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DHOLOREN_DEBUG  /DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;$(ProjectDir)\..\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DHOLOREN_DEBUG /DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\lib;$(MY_LIB_PATH)\iconv-1.9.2.win32\lib;$(MY_LIB_PATH)\zlib-1.2.5\lib;$(MY_LIB_PATH)\SDL_image-1.2.12\lib\x86;$(MY_LIB_PATH)\SDL-1.2.15\lib\x86;$(AMDAPPSDKROOT)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL.lib;SDL_image.lib;libxml2.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -64,60 +54,25 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>EnableAllWarnings</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <Optimization>Full</Optimization>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL.lib;SDL_image.lib;libxml2.lib;OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\lib;$(MY_LIB_PATH)\iconv-1.9.2.win32\lib;$(MY_LIB_PATH)\zlib-1.2.5\lib;$(MY_LIB_PATH)\SDL_image-1.2.12\lib\x86;$(MY_LIB_PATH)\SDL-1.2.15\lib\x86;$(AMDAPPSDKROOT)\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\CBasePointCloudRW.cpp" />
-    <ClCompile Include="..\..\..\src\CImagePointCloudRW.cpp" />
-    <ClCompile Include="..\..\..\src\COpenCLRenderer.cpp" />
-    <ClCompile Include="..\..\..\src\COpticalField.cpp" />
-    <ClCompile Include="..\..\..\src\CPCPointCloudRW.cpp" />
-    <ClCompile Include="..\..\..\src\CPointCloud.cpp" />
-    <ClCompile Include="..\..\..\src\CPointCloudRWFactory.cpp" />
-    <ClCompile Include="..\..\..\src\CSimpleRenderer.cpp" />
-    <ClCompile Include="..\..\..\src\CXMLPointCloudRW.cpp" />
-    <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\ocl.cpp" />
-    <ClCompile Include="..\..\..\src\Utils.cpp" />
+    <ClCompile Include="..\..\..\tests\test_ocl_selectDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\CBasePointCloudRW.h" />
-    <ClInclude Include="..\..\..\src\CImagePointCloudRW.h" />
-    <ClInclude Include="..\..\..\src\config.h" />
-    <ClInclude Include="..\..\..\src\COpenCLRenderer.h" />
-    <ClInclude Include="..\..\..\src\COpticalField.h" />
-    <ClInclude Include="..\..\..\src\CPCPointCloudRW.h" />
-    <ClInclude Include="..\..\..\src\CPointCloud.h" />
-    <ClInclude Include="..\..\..\src\CPointCloudRWFactory.h" />
-    <ClInclude Include="..\..\..\src\CSharedDataPtr.h" />
-    <ClInclude Include="..\..\..\src\CSimpleRenderer.h" />
-    <ClInclude Include="..\..\..\src\CTimer.h" />
-    <ClInclude Include="..\..\..\src\CXMLPointCloudRW.h" />
-    <ClInclude Include="..\..\..\src\Geometry.h" />
-    <ClInclude Include="..\..\..\src\global.h" />
-    <ClInclude Include="..\..\..\src\CBaseRenderer.h" />
     <ClInclude Include="..\..\..\src\ocl.h" />
-    <ClInclude Include="..\..\..\src\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
