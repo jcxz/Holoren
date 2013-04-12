@@ -5,3 +5,12 @@
 -o "../../../df/out.df" -i "../../../input/img/FIT-logo.png"
 
 -o "../../../df/out.df" -i "../../../input/real/F.xml"
+
+-o "../../../df/out.df" -i "../../../input/real/F.xml" -r opencl -f "../../../src/OpenCL/holoren.cl" > out.txt 2>&1
+
+-o "../../../df/out.df" -i "../../../input/real/F.xml" -r simple > out.txt 2>&1
+
+
+-o "../../../df/out.df" -i "../../../input/real/3points.xml" -r opencl -f "../../../src/OpenCL/holoren.cl"
+
+-o "../../../df/out.df" -i "../../../input/real/3points.xml" -r simple

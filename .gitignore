@@ -1,12 +1,17 @@
 # ignore debug and release build directories and all build shit
 
+#### ignore all vim swap files ###
+*.swp
+
 #### Linux build directories ####
 /build/debug/
 /build/release/
 
 #### Visual Studio 2012 ####
 /build/msvc2012/IBP_holoren/Debug/
+/build/msvc2012/IBP_holoren/Debug/*
 /build/msvc2012/IBP_holoren/Release/    
+/build/msvc2012/IBP_holoren/Release/*
 /build/msvc2012/IBP_holoren/*.sdf
 /build/msvc2012/IBP_holoren/*.opensdf
 /build/msvc2012/IBP_holoren/*.suo
@@ -16,7 +21,9 @@
 /build/msvc2012/IBP_holoren/out.txt
     
 /build/msvc2012/test_ocl_selectDevice/Debug/
+/build/msvc2012/test_ocl_selectDevice/Debug/*
 /build/msvc2012/test_ocl_selectDevice/Release/    
+/build/msvc2012/test_ocl_selectDevice/Release/*
 /build/msvc2012/test_ocl_selectDevice/*.sdf
 /build/msvc2012/test_ocl_selectDevice/*.opensdf
 /build/msvc2012/test_ocl_selectDevice/*.suo
@@ -25,7 +32,9 @@
 /build/msvc2012/test_ocl_selectDevice/out.txt
 
 /build/msvc2012/test_timer_win/Debug/
-/build/msvc2012/test_timer_win/Release/    
+/build/msvc2012/test_timer_win/Debug/*
+/build/msvc2012/test_timer_win/Release/ 
+/build/msvc2012/test_timer_win/Release/*   
 /build/msvc2012/test_timer_win/*.sdf
 /build/msvc2012/test_timer_win/*.opensdf
 /build/msvc2012/test_timer_win/*.suo
@@ -34,9 +43,12 @@
 /build/msvc2012/test_timer_win/out.txt
 
 #### Visual Studio 2010 ####
+/build/msvc2010/IBP_holoren/ipch/
+/build/msvc2010/IBP_holoren/ipch/*
 /build/msvc2010/IBP_holoren/Debug/
-/build/msvc2010/IBP_holoren/Release/    
-/build/msvc2010/IBP_holoren/ipch/  
+/build/msvc2010/IBP_holoren/Debug/*
+/build/msvc2010/IBP_holoren/Release/   
+/build/msvc2010/IBP_holoren/Release/* 
 /build/msvc2010/IBP_holoren/*.sdf
 /build/msvc2010/IBP_holoren/*.opensdf
 /build/msvc2010/IBP_holoren/*.suo
@@ -45,9 +57,12 @@
 /build/msvc2010/IBP_holoren/*.bmp
 /build/msvc2010/IBP_holoren/out.txt
 
+/build/msvc2010/test_ocl_selectDevice/ipch/
+/build/msvc2010/test_ocl_selectDevice/ipch/*
 /build/msvc2010/test_ocl_selectDevice/Debug/
+/build/msvc2010/test_ocl_selectDevice/Debug/*
 /build/msvc2010/test_ocl_selectDevice/Release/  
-/build/msvc2010/test_ocl_selectDevice/ipch/  
+/build/msvc2010/test_ocl_selectDevice/Release/*
 /build/msvc2010/test_ocl_selectDevice/*.sdf
 /build/msvc2010/test_ocl_selectDevice/*.opensdf
 /build/msvc2010/test_ocl_selectDevice/*.suo
@@ -57,7 +72,9 @@
 
 #### Qt Creator ####
 /build/qt_creator/IBP_holoren/bin/
+/build/qt_creator/IBP_holoren/bin/*
 /build/qt_creator/IBP_holoren/obj/
+/build/qt_creator/IBP_holoren/obj/*
 /build/qt_creator/IBP_holoren/IBP_holoren.pro.user
 /build/qt_creator/IBP_holoren/Makefile
 /build/qt_creator/IBP_holoren/Makefile.Debug
