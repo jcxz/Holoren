@@ -49,6 +49,14 @@ class COpenCLRenderer : public CBaseRenderer
 
     
   private:
+    /* disable assignment, copy and move
+       If I wanted to implement these someday in future
+       I would have to do so in terms of retain and release */
+    COpenCLRenderer(const COpenCLRenderer & );
+    COpenCLRenderer(COpenCLRenderer && );
+    COpenCLRenderer & operator=(const COpenCLRenderer & );
+
+  private:
     /**
      * A method to read the opencl program from a file
      *
@@ -57,12 +65,7 @@ class COpenCLRenderer : public CBaseRenderer
     bool readCLSource(const char *filename, std::string *program_buf);
 
     /**
-     * A function to select the most appropriate of all available devices
-     */
-    cl_device_id selectDevice(void);
-
-    /**
-     * A function to create a build log fot the device
+     * A function to create a build log for the device
      */
     void constructBuildLog(cl_int err);
 

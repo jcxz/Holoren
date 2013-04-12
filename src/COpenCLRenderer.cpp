@@ -128,17 +128,29 @@ error:
  */
 bool COpenCLRenderer::close(void)
 {
-  clReleaseCommandQueue(m_cmd_queue);
-  m_cmd_queue = NULL;
+  if (m_cmd_queue != NULL)
+  {
+    clReleaseCommandQueue(m_cmd_queue);
+    m_cmd_queue = NULL;
+  }
 
-  clReleaseKernel(m_kernel);
-  m_kernel = NULL;
+  if (m_kernel != NULL)
+  {
+    clReleaseKernel(m_kernel);
+    m_kernel = NULL;
+  }
 
-  clReleaseProgram(m_program);
-  m_program = NULL;
+  if (m_program != NULL)
+  {
+    clReleaseProgram(m_program);
+    m_program = NULL;
+  }
 
-  clReleaseContext(m_context);
-  m_context = NULL;
+  if (m_context != NULL)
+  {
+    clReleaseContext(m_context);
+    m_context = NULL;
+  }
 
   return true;
 }
@@ -316,76 +328,6 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   is.close();
 
   return true;
-}
-
-
-/**
- */
-cl_device_id COpenCLRenderer::selectDevice(void)
-{
-  /* declare local variables */
-  cl_platform_id platform;
-
-  /* get the first available platform */
-  cl_int err = clGetPlatformIDs(1, &platform, NULL);
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = OpenCL::clErrToStr(err);
-    return NULL;
-  }
-
-  DBG(platform);
-
-  /* select all devices available on the platform */
-  std::vector<cl_device_id> devices;
-  err = OpenCL::getDevices(platform, CL_DEVICE_TYPE_ALL, &devices);
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = OpenCL::clErrToStr(err);
-    return NULL;
-  }
-
-  /* select the one that is the most suitable (that is prefer GPU-s) */
-  std::vector<cl_device_id>::iterator it = devices.begin();
-  cl_device_id cpu_device = NULL;
-  cl_device_id other_device = NULL;
-
-  while (it != devices.end())
-  {
-    DBG(*it);
-
-    cl_device_type type;
-
-    err = OpenCL::getDeviceInfo(*it, CL_DEVICE_TYPE, &type);
-    if (err != CL_SUCCESS)
-    {
-      ++it;
-      continue;
-    }
-
-    if (type == CL_DEVICE_TYPE_GPU)
-    {
-      // immediately return if the device found was a GPU
-      return *it;
-    }
-    else if (type == CL_DEVICE_TYPE_CPU)
-    {
-      cpu_device = *it; 
-    }
-    else
-    {
-      other_device = *it;
-    }
-
-    ++it;
-  }
-
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = OpenCL::clErrToStr(err);
-  }
-
-  return ((cpu_device == NULL) ? other_device : cpu_device);
 }
 
 

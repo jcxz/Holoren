@@ -97,6 +97,12 @@ class CBaseRenderer
      */
     virtual bool renderHologram(const CPointCloud & pc, COpticalField *of) = 0;
 
+  private:
+    /* disable assignment, copy and move */
+    CBaseRenderer(const CBaseRenderer & );
+    CBaseRenderer(CBaseRenderer && );
+    CBaseRenderer & operator=(const CBaseRenderer & );
+
   protected:
     double m_hologram_z;  /// hologram location on the z axis
 };

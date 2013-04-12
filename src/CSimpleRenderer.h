@@ -24,6 +24,14 @@ class CSimpleRenderer : public CBaseRenderer
     virtual std::string getError(void) const;
     virtual bool renderObjectWave(const CPointCloud & pc, COpticalField *of);
     virtual bool renderHologram(const CPointCloud & pc, COpticalField *of);
+
+  private:
+    /* disable assignment, copy and move
+       Though this is not technically necessary for this class,
+       it is to keep it consistent with OpenCL renderer */
+    CSimpleRenderer(const CSimpleRenderer & );
+    CSimpleRenderer(CSimpleRenderer && );
+    CSimpleRenderer & operator=(const CSimpleRenderer & );
 };
 
 #endif
