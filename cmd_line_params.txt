@@ -14,3 +14,5 @@
 -o "../../../df/out.df" -i "../../../input/real/3points.xml" -r opencl -f "../../../src/OpenCL/holoren.cl"
 
 -o "../../../df/out.df" -i "../../../input/real/3points.xml" -r simple
+
+-o "../../../df/out.df" -i "../../../input/real/3points.xml" -r opencl -f "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\src\OpenCL\holoren.cl"
