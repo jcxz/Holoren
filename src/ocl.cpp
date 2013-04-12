@@ -8,6 +8,7 @@
 
 
 
+
 /* a private namespace for helper functions */
 namespace {
 
@@ -80,6 +81,7 @@ cl_int getDeviceType(cl_device_id device, OpenCL::ESelectionOpts *type)
 
 
 
+
 /* OpenCL namespace */
 namespace OpenCL {
 
@@ -87,7 +89,6 @@ namespace OpenCL {
  */
 cl_int getPlatformInfo(cl_platform_id platform, cl_platform_info info, std::string *ret)
 {
-#if 0
   HOLOREN_ASSERT(ret != NULL);
 
   /* get the size of platform info */
@@ -98,32 +99,19 @@ cl_int getPlatformInfo(cl_platform_id platform, cl_platform_info info, std::stri
     return err;
   }
 
-  /* allocate size for platform info */
-  ret->resize(info_size);
-  //ret->clear();
-  //ret->reserve();
-
-  /* get the actual information */
-  return clGetPlatformInfo(platform, info, info_size, &ret->front(), NULL);
-#endif
-  HOLOREN_ASSERT(ret != NULL);
-
-  /* get the size of platform info */
-  size_t info_size = 0;
-  cl_int err = clGetPlatformInfo(platform, info, 0, NULL, &info_size);
-  if (err != CL_SUCCESS)
+  /* make sure the returned size is valid */
+  if (info_size <= 0)
   {
-    return err;
+    ret->clear();
+    return CL_SUCCESS;
   }
 
   /* allocate size for platform info */
   char *tmp = (char *) malloc(info_size);
   if (tmp == NULL)
   {
-    return CL_SUCCESS;
+    return CL_OUT_OF_HOST_MEMORY;   // just throw some random bullshit, this is highly unlikely anyways
   }
-  //ret->clear();
-  //ret->reserve();
 
   /* get the actual information */
   err = clGetPlatformInfo(platform, info, info_size, tmp, NULL);
@@ -154,6 +142,13 @@ cl_int getPlatforms(std::vector<cl_platform_id> *platforms)
   {
     return err;
   }
+  
+  /* make sure the returned number of platforms is correct */
+  if (num_platforms <= 0)
+  {
+    platforms->clear();  // reset the contents of output
+    return CL_SUCCESS;
+  }
 
   /* resize the vector to have enough space for device id-s */
   platforms->resize(num_platforms);
@@ -171,21 +166,41 @@ cl_int getDeviceInfo(cl_device_id device, cl_device_info info, std::string *ret)
 {
   HOLOREN_ASSERT(ret != NULL);
 
-  /* get the size of platform info */
+  /* get the size of device info */
   size_t info_size = 0;
   cl_int err = clGetDeviceInfo(device, info, 0, NULL, &info_size);
   if (err != CL_SUCCESS)
   {
     return err;
   }
-
-  /* allocate size for platform info */
-  ret->resize(info_size);
-  //ret->clear();
-  //ret->reserve();
+  
+  /* make sure the returned size is valid */
+  if (info_size <= 0)
+  {
+    ret->clear();
+    return CL_SUCCESS;
+  }
+  
+  /* allocate size for device info */
+  char *tmp = (char *) malloc(info_size);
+  if (tmp == NULL)
+  {
+    return CL_OUT_OF_HOST_MEMORY;   // just throw some random bullshit, this is highly unlikely anyways
+  }
 
   /* get the actual information */
-  return clGetDeviceInfo(device, info, info_size, &ret->front(), NULL);
+  err = clGetDeviceInfo(device, info, info_size, tmp, NULL);
+  if (err !=  CL_SUCCESS)
+  {
+    free(tmp);
+    return err;
+  }
+
+  *ret = tmp;
+
+  free(tmp);
+
+  return CL_SUCCESS;
 }
 
 
@@ -201,6 +216,13 @@ cl_int getDevices(cl_platform_id platform, cl_device_type type, std::vector<cl_d
   if (err != CL_SUCCESS)
   {
     return err;
+  }
+
+  /* make sure the returned number of devices is correct */
+  if (num_devices <= 0)
+  {
+    devices->clear();  // reset the contents of output
+    return CL_SUCCESS;
   }
 
   /* resize the vector to have enough space for device id-s */
@@ -236,56 +258,53 @@ cl_device_id selectDevice(uint32_t *options, cl_int *cl_err)
   {      
     DBG(*platforms_it);
 
-    ESelectionOpts type;
-    err = getPlatformType(*platforms_it, &type);
+    ESelectionOpts platform_type;
+    err = getPlatformType(*platforms_it, &platform_type);
     if (err != NULL)
     {
       continue;  // ignore the error in case there are more platforms
     }
     
-    if (opts & type)
+    /* make there are suitable devices after we found a suitable platform */
+    if (opts & platform_type)
     {
-      opts &= (~OPT_PLATFORM_PREFER_ANY);  /// clear all platforms
-      opts |= type;                        /// set the platform found
-      break;
+      /* enumerate all devices available on platform */
+      err = OpenCL::getDevices(*platforms_it, CL_DEVICE_TYPE_ALL, &devices);
+      if (err != CL_SUCCESS)
+      {
+        continue;  // ignore device enumeration errors for a single platform (others may work)
+      }
+      
+      ESelectionOpts device_type;
+
+      /* select the one that is the most suitable according to given options */
+      for (devices_it = devices.begin(); devices_it != devices.end(); ++devices_it)
+      {
+        DBG(*devices_it);
+    
+        err = getDeviceType(*devices_it, &device_type);
+        if (err != NULL)
+        {
+          continue;  // ignore the error in case there are more platforms
+        }
+    
+        if (opts & device_type)
+        {
+          break;
+        }
+      }
+
+      /* make sure that at least one device has been found */
+      if (devices_it != devices.end())
+      {
+        opts = (device_type | platform_type);  // set the options to selected combination
+        break;
+      }
     }
   }
 
   /* make sure that we have at least one platform */
   if (platforms_it == platforms.end())
-  {
-    goto error;
-  }
-
-  /* enumerate all devices available on platform */
-  err = OpenCL::getDevices(*platforms_it, CL_DEVICE_TYPE_ALL, &devices);
-  if (err != CL_SUCCESS)
-  {
-    goto error;
-  }
-
-  /* select the one that is the most suitable according to given options */
-  for (devices_it = devices.begin(); devices_it != devices.end(); ++devices_it)
-  {
-    DBG(*devices_it);
-    
-    ESelectionOpts type;
-    err = getDeviceType(*devices_it, &type);
-    if (err != NULL)
-    {
-      continue;  // ignore the error in case there are more platforms
-    }
-    
-    if (opts & type)
-    {
-      opts &= (~OPT_DEVICE_PREFER_ANY);  /// clear all platforms
-      opts |= type;                      /// set the platform found
-      break;
-    }
-  }
-
-  /* make sure that at least one device has been found */
-  if (devices_it == devices.end())
   {
     goto error;
   }
@@ -317,7 +336,8 @@ cl_int getContextDevices(cl_context context, std::vector<cl_device_id> *ret)
     return err;
   }
 
-  if (device_num == 0)
+  /* make sure the returned number of devices is correct */
+  if (device_num <= 0)
   {
     ret->clear();  // reset the contents of output
     return CL_SUCCESS;
@@ -347,19 +367,32 @@ cl_int getBuildLog(cl_program program, cl_device_id device, std::string *ret)
     return err;
   }
 
-  if (log_size == 0)
+  if (log_size <= 0)
   {
     ret->clear();  // reset the contents of output
     return CL_SUCCESS;
   }
+  
+  /* allocate size for device info */
+  char *tmp = (char *) malloc(log_size);
+  if (tmp == NULL)
+  {
+    return CL_OUT_OF_HOST_MEMORY;   // just throw some random bullshit, this is highly unlikely anyways
+  }
 
-  /* allocate memory for the string */
-  ret->resize(log_size);
-  //ret->clear();
-  //ret->reserve(log_size);
+  /* get the actual information */
+  err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, log_size, tmp, NULL);
+  if (err !=  CL_SUCCESS)
+  {
+    free(tmp);
+    return err;
+  }
 
-  /* get the actual data */
-  return clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, log_size, &ret->front(), NULL);
+  *ret = tmp;
+
+  free(tmp);
+
+  return CL_SUCCESS;
 }
 
 
@@ -423,7 +456,8 @@ const char *clErrToStr(cl_int err)
 } // End of OpenCL namespace
 
 
-/* debug output fucntions */
+
+/* debug output functions */
 
 /**
  */
