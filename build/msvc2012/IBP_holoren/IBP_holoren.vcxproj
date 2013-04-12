@@ -53,7 +53,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DHOLOREN_DEBUG  /DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DHOLOREN_DEBUG  /DHOLOREN_DEBUG_PERF /DHOLOREN_DEBUG_KERNEL %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +118,9 @@
     <ClInclude Include="..\..\..\src\CBaseRenderer.h" />
     <ClInclude Include="..\..\..\src\ocl.h" />
     <ClInclude Include="..\..\..\src\Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\OpenCL\holoren.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

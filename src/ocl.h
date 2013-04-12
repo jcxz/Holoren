@@ -88,9 +88,9 @@ enum ESelectionOpts
  *               function and cl_err is CL_SUCCESS, then the given combination of options could not
  *               be satisfied.
  *
- * @return the cl_device_id handle of the device that have been selected, or NULL on error.
- *                          Note that NULL is returned in both cases, when OpenCL error occures and
- *                          when the given combination of selection options could not be satisfied.
+ * @return the cl_device_id handle of the device that has been selected, or NULL on error.
+ *                          Note that NULL is returned in both cases, when an OpenCL error occures and
+ *                          when the given combination of selection options can not be satisfied.
  */
 cl_device_id selectDevice(uint32_t *options = NULL, cl_int *cl_err = NULL);
 

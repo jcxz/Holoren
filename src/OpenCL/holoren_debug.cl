@@ -1,4 +1,8 @@
 /**
+ * This version works, but is heavily unoptimized and should be used only for debugging
+ */
+
+/**
  * A function to compute spherical wave equation for a single point source
  */
 __kernel void compObjWave(__global float *pc,   /// a point cloud with point sources

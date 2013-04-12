@@ -85,7 +85,15 @@ bool CSimpleRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
         double z = m_hologram_z - ps.z;
         double r = std::sqrt(x * x + y * y + z * z);
 
+#ifdef HOLOREN_DEBUG_KERNEL
+        float re = std::cos((float) (k * r));
+        float im = std::sin((float) (k * r));
+        COpticalField::CComplex sample(of->getSample(row, col));
+        sample += COpticalField::CComplex(re, im);
+        of->setSample(row, col, sample);
+#else
         of->getSample(row, col) += std::exp(COpticalField::CComplex(0, k * r));
+#endif
       }
     }
   }

@@ -33,12 +33,19 @@ bool COpenCLRenderer::open(const char *filename)
   /* make sure all is reset before initializing something */
   std::string program_buf;
   cl_int err = CL_SUCCESS;
+#ifdef HOLOREN_DEBUG_KERNEL
+  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
+#else
+  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
+#endif
   m_err_msg = "";
 
   /* select the most suitable device */
-  m_device = selectDevice();
+  //m_device = selectDevice();
+  m_device = OpenCL::selectDevice(&flags, &err);
   if (m_device == NULL)
   {
+    m_err_msg = (err != CL_SUCCESS) ? OpenCL::clErrToStr(err) : ("The given combination of devices and platforms could not be matched");
     goto error;
   }
 
@@ -70,8 +77,15 @@ bool COpenCLRenderer::open(const char *filename)
 
   /* build program */
   {
-    std::string options("-g -s ");
-    options += filename;
+    std::string options;
+
+    /* enable debugging options on intel platform */
+    if (flags & OpenCL::OPT_PLATFORM_PREFER_INTEL)
+    {
+      options += "-g -s \"";
+      options += filename;
+      options += '\"';
+    }
 
     err = clBuildProgram(m_program,        // program
                          0,                // 0 as we are not providing any device list
@@ -146,6 +160,8 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   cl_int err = CL_SUCCESS;
   cl_mem pc_buf = NULL;     // point cloud buffer
   cl_mem of_buf = NULL;     // optical field buffer
+
+  of->zero();
 
   /* create memory objects from data passed in as arguments */
   pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
