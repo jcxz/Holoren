@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Config>
+	<ProcessLineCnt>512</ProcessLineCnt>  
+  <!-- 
+	<KsiXDeg>0</KsiXDeg>
+	<KsiYDeg>-17406.7</KsiYDeg>
+  -->
+	<KsiXDeg>0.5</KsiXDeg>
+	<KsiYDeg>0.5</KsiYDeg>
+	<Input>out.df</Input>
+	<Target>out.Hologram.png</Target>
+	<UsePhase>false</UsePhase>
+	<HologramInterference>false</HologramInterference>
+	<HologramBipolar>true</HologramBipolar>
+	<PsDPI>150</PsDPI>
+	<PsDotSize>1</PsDotSize>
+	<Binarize>false</Binarize>
+	<Halftonize>false</Halftonize>
+	<HalftonizeCellSize>3</HalftonizeCellSize>
+	<HalftonizeLevelCount>4</HalftonizeLevelCount>
+	<HalftonizeLevelByPixel>false</HalftonizeLevelByPixel>
+</Config>

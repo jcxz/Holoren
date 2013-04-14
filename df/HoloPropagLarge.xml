@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<Config>
+	<Lambda>630e-9</Lambda>
+	<Pitch>20e-6</Pitch>
+	<ForceSettings>false</ForceSettings>
+	<RandomizePhase>false</RandomizePhase>
+	<ImageContainsIntensity>false</ImageContainsIntensity>
+	<ImageContainsAmplitude>true</ImageContainsAmplitude>
+	<ImageContainsPhase>false</ImageContainsPhase>
+	
+	<!--
+  <Input>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v2\df\out.df</Input>
+  <Target>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v2\df\out.png</Target>  
+  -->
+		
+  <!-- Use the hologram image for propagation -->
+  <Input>out.Hologram.png</Input>
+  <Target>out.png</Target>  
+  
+	<ImageIntensityMaximum>-1</ImageIntensityMaximum>
+	<ImageIntensityMinimum>0</ImageIntensityMinimum>
+	<Frame>true</Frame>
+	
+	<FrameX>1024</FrameX>
+	<FrameY>1024</FrameY>
+	<!--
+  <FrameX>2048</FrameX>
+	<FrameY>2048</FrameY>
+	-->
+	<FrameRemove>false</FrameRemove>
+	<Operations>
+	-0.5 prop
+	</Operations>
+</Config>
