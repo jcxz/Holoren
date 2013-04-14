@@ -62,6 +62,10 @@ Converting generated object waves (holograms) to images, which can then be manuf
    3.2) In source directory go to folder `HoloPropagLarge` and run `make`
 
 
+4) In folder `df` in script `post_process_and_verify.sh` you will have to adjust
+   the `holo_toolkit_path` variable to reflect the current location of compiled
+   Holography Toolkit binaries.
+
 =========================================================================================
 Optional installation steps:
 
