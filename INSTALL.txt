@@ -1,0 +1,73 @@
+
+I made these notes mostly for myself before I forget all the cruft that had to be done
+to get this working.
+
+
+
+=========================================================================================
+Instalation steps that have to be taken on a new Linux system:
+
+1) Install the latest AMD's GPU driver (named fglrx) if you do not have one yet.
+   To check this, type `fglrxinfo` in a terminal, you should see output like this:
+
+     display: :0.0  screen: 0
+     OpenGL vendor string: Advanced Micro Devices, Inc.
+     OpenGL renderer string: ATI Mobility Radeon HD 5000 Series 
+     OpenGL version string: 4.2.12173 Compatibility Profile Context 12.10.17
+   
+2) Install OpenCL SDK:
+   1.1) Goto to AMD's website http://developer.amd.com/tools/heterogeneous-computing/amd-accelerated-parallel-processing-app-sdk/downloads/
+   1.2) Unpack the downloaded archive and run the installation script:
+
+         sudo ./Install-AMD-APP.sh
+
+   1.3) Now you have to reboot, for the environment to adapt to changes:
+
+         sudo reboot
+
+
+3) Install cmake:
+
+     sudo apt-get install cmake
+
+4) Install libxml2:
+
+     sudo apt-get install libxml2-dev
+
+5) Install SDL libraries:
+
+     sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev
+
+
+=========================================================================================
+Testing installation:
+
+1) Try out program from command line with one of the command line argument combinations
+   from file `cmd_line_params.txt` to see that is works
+
+
+=========================================================================================
+Converting generated object waves (holograms) to images, which can then be manufactured (printed)
+
+1) This is done via DFtoHologram and HoloPropagLarge utilities from Holography Toolkit developed
+   at `University of West Bohemia` (download link: http://www.kiv.zcu.cz/en/research/downloads/product-detail-en.html?produkt_id=31)
+
+2) Install Holography Toolkit dependancies:
+
+    sudo apt-get install libxerces-c-dev libfftw3-dev
+
+3) Compile Holography Toolkit (there may be a few compilation errors but they are easy to fix).
+   3.1) In source directory go to folder `holoClibs` and run `make`
+   3.2) In source directory go to folder `DFtoHologram` and run `make`
+   3.2) In source directory go to folder `HoloPropagLarge` and run `make`
+
+
+=========================================================================================
+Optional installation steps:
+
+1) Install CodeXL for kernel debugging:
+    - the driver should be installed as long as the OpenCL SDK is installed
+      so just go to http://developer.amd.com/tools/heterogeneous-computing/codexl/
+      and dowload the approriate version
+    - CodeXL does not reguire installation, just run the CodeXL script from bin
+      directory inside the downloaded release
