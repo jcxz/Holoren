@@ -33,11 +33,11 @@ bool COpenCLRenderer::open(const char *filename)
   /* make sure all is reset before initializing something */
   std::string program_buf;
   cl_int err = CL_SUCCESS;
-#ifdef HOLOREN_DEBUG_KERNEL
-  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
-#else
+//#ifdef HOLOREN_DEBUG_KERNEL
+//  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
+//#else
   uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
-#endif
+//#endif
   m_err_msg = "";
 
   /* select the most suitable device */
@@ -77,20 +77,28 @@ bool COpenCLRenderer::open(const char *filename)
 
   /* build program */
   {
-    std::string options;
+#ifdef HOLOREN_DEBUG_KERNEL
+    std::string options("-g");
 
     /* enable debugging options on intel platform */
     if (flags & OpenCL::OPT_PLATFORM_PREFER_INTEL)
     {
-      options += "-g -s \"";
+      options += "-s \"";
       options += filename;
       options += '\"';
     }
+#endif
 
     err = clBuildProgram(m_program,        // program
                          0,                // 0 as we are not providing any device list
-                         NULL,             // if NULL, then the program is built for all devices, that the program is assocated with (so probably all devices from the context)
+                         NULL,             // if NULL, then the program is built for all devices,
+                                           // that the program is assocated with
+                                           // (so probably all devices from the context)
+#ifdef HOLOREN_DEBUG_KERNEL
                          options.c_str(),  // compilation options
+#else
+                         "",
+#endif
                          NULL,
                          NULL);
     if (err != CL_SUCCESS)

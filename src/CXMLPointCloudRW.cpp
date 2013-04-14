@@ -5,7 +5,7 @@
 #include "global.h"
 #include "Utils.h"
 #include "CPointCloud.h"
-#include "CXMLPointcloudRW.h"
+#include "CXMLPointCloudRW.h"
 
 
 static void cleanup_handler(void)

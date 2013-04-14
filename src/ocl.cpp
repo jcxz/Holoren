@@ -260,7 +260,7 @@ cl_device_id selectDevice(uint32_t *options, cl_int *cl_err)
 
     ESelectionOpts platform_type;
     err = getPlatformType(*platforms_it, &platform_type);
-    if (err != NULL)
+    if (err != CL_SUCCESS)
     {
       continue;  // ignore the error in case there are more platforms
     }
@@ -283,7 +283,7 @@ cl_device_id selectDevice(uint32_t *options, cl_int *cl_err)
         DBG(*devices_it);
     
         err = getDeviceType(*devices_it, &device_type);
-        if (err != NULL)
+        if (err != CL_SUCCESS)
         {
           continue;  // ignore the error in case there are more platforms
         }

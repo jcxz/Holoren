@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 2.8)
 project(HOLOREN)
 
 # release and debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF")
+set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF -DHOLOREN_DEBUG_KERNEL")
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3")
 
 # include a non-standard module from a local directory
@@ -24,8 +24,9 @@ find_package(OpenCL REQUIRED)
 # include directories
 include_directories(src ${LIBXML2_INCLUDE_DIR} ${SDLIMAGE_INCLUDE_DIR} ${SDL_INCLUDE_DIR} ${OPENCL_INCLUDE_DIR})
 
-# libraries
-set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} ${SDL_IMAGE_LIBRARIES} ${SDL_LIBRARY} ${OPENCL_LIBRARY})
+# libraries (-lrt for unix timers)
+#set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} ${SDL_IMAGE_LIBRARIES} ${SDL_LIBRARY} ${OPENCL_LIBRARY})
+set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} ${SDLIMAGE_LIBRARY} ${SDL_LIBRARY} ${OPENCL_LIBRARY} -lrt)
 
 # project sources
 set(HOLOREN_SOURCES
@@ -153,6 +154,7 @@ set(TEST_TIMER_UNIX_SOURCES
 )
 
 add_executable(test_timer_unix ${TEST_TIMER_UNIX_SOURCES})
+target_link_Libraries(test_timer_unix -lrt)
 
 # to test device selecting
 set(TEST_OCL_SELECT_DEVICE_SOURCES
