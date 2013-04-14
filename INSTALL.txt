@@ -75,3 +75,18 @@ Optional installation steps:
       and dowload the approriate version
     - CodeXL does not reguire installation, just run the CodeXL script from bin
       directory inside the downloaded release
+
+
+=========================================================================================
+Compilation options
+
+to tweak the program at compilation time you can use the following macros:
+
+HOLOREN_DEBUG         ... if defined turns on debugging mode (will print a lot of additional diagonstic messages)
+HOLOREN_DEBUG_KERNEL  ... define this macro when debugging kernel code. This macro makes the application pass additional
+                          compilation flags to OpenCL compiler
+HOLOREN_NO_WARNINGS   ... if defined, then turns off warning messages (these may be emited when programs winds up in an
+                          unexpected code path and may reveal the source of crash or of a weird behaviour)
+NDEBUG                ... standard macro to turn of asserts (on Unix see `man 3 assert`)
+HOLOREN_DEBUG_PERF    ... if defined, then enables the use of high precision timer to allow simple application profiling
+

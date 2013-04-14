@@ -1,7 +1,7 @@
 /**
  * A function to compute spherical wave equation for a single point source
  */
-__kernel void compObjWave(__global float *pc,   /// a point cloud with point sources
+__kernel void compObjWave(__global float4 *pc,   /// a point cloud with point sources
                           __global float2 *of,   /// an output optical field (float2 because this is an array of complex numbers)
                           uint of_rows,          /// the number of rows of optical field
                           uint of_cols,          /// the number of columns of optical field
@@ -16,8 +16,9 @@ __kernel void compObjWave(__global float *pc,   /// a point cloud with point sou
   //float corner_x = -(cols - 1) * pitch / 2;
   //float corner_y = -(rows - 1) * pitch / 2;
   
-  int pc_pos = get_global_id(0) * 3;
-  float3 ps = (float3) (pc[pc_pos], pc[pc_pos + 1], pc[pc_pos + 2]);
+  //int pc_pos = get_global_id(0) * 3;
+  //float3 ps = (float3) (pc[pc_pos], pc[pc_pos + 1], pc[pc_pos + 2]);
+  float4 ps = pc[get_global_id(0)];
   float x = (((col - 1) * pitch) + corner_x) - ps.x; // tu uz rovno odcitavam aj point source (nerobim to pri vypocte exp)
   float y = (((row - 1) * pitch) + corner_y) - ps.y;
   float z = hologram_z - ps.z;

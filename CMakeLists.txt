@@ -34,6 +34,8 @@ set(HOLOREN_SOURCES
   src/global.h
   src/Utils.h
   src/Utils.cpp
+  src/Debug.h
+  src/Debug.cpp
   src/CTimer.h
   src/CSharedDataPtr.h
   src/Geometry.h
@@ -155,6 +157,17 @@ set(TEST_TIMER_UNIX_SOURCES
 
 add_executable(test_timer_unix ${TEST_TIMER_UNIX_SOURCES})
 target_link_Libraries(test_timer_unix -lrt)
+
+# to test debugging subsystem
+set(TEST_DEBUG_SOURCES
+  src/config.h
+  src/global.h
+  src/Debug.h
+  src/Debug.cpp
+  tests/test_debug.cpp
+)
+
+add_executable(test_debug ${TEST_DEBUG_SOURCES})
 
 # to test device selecting
 set(TEST_OCL_SELECT_DEVICE_SOURCES

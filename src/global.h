@@ -1,5 +1,5 @@
 /**
- * globally applicable definitions and declarations
+ * Globally applicable definitions and declarations
  */
 
 #ifndef GLOBAL_H
@@ -58,27 +58,7 @@
 /** A macro to designate unused parameters */
 #define HOLOREN_UNUSED(x) ((void) (x))
 
-/** A macro for assert statements */
-#include <cassert>
-#define HOLOREN_ASSERT(x) assert(x)
-
-/** Portable types */
-#include <stdint.h>
-
-/* A debugging macro */
-#ifdef HOLOREN_DEBUG
-#  include <iostream>
-#  define DBG(x) std::cerr << x << std::endl
-#else
-#  define DBG(x)
-#endif
-
-/* A macro to print diagnostic messages */
-#ifndef HOLOREN_NO_WARNINGS
-#  include <iostream>
-#  define WARN(x) std::cerr << x << std::endl
-#else
-#  define WARN(x)
-#endif
+/** include debugging support */
+#include "Debug.h"
 
 #endif

@@ -183,6 +183,9 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 
   of->zero();
 
+  DBG("point cloud byte size: " << pc.getByteSize());
+  DBG("point cloud data:\n" << pc.data());
+
   /* create memory objects from data passed in as arguments */
   pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
   if (err != CL_SUCCESS)

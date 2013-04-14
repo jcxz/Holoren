@@ -2,6 +2,12 @@
  * A project to do some simple tests of the CTimer class
  */
 
+/* Make sure that this test will work even in case 
+   this macro is not defined by compiler */
+#ifndef HOLOREN_DEBUG_PERF
+#  define HOLOREN_DEBUG_PERF
+#endif
+
 #include "CTimer.h"
 
 
