@@ -1,5 +1,5 @@
 /**
- * This file contains the implementation of the logger class
+ * This file contains the implementation of debugging functionality
  *
  * @author Matus Fedorko (xfedor01)
  * @date 18.11.2012

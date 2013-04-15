@@ -258,7 +258,7 @@ cl_device_id selectDevice(uint32_t *options, cl_int *cl_err)
   {      
     DBG(*platforms_it);
 
-    ESelectionOpts platform_type;
+    ESelectionOpts platform_type = (ESelectionOpts) 0;
     err = getPlatformType(*platforms_it, &platform_type);
     if (err != CL_SUCCESS)
     {

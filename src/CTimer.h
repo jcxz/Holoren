@@ -205,8 +205,11 @@ inline std::ostream & operator<<(std::ostream & os, const CTimer & timer)
        } \
      } while (0)
 #else
-#  define DBG_T_START(timer, msg)
-#  define DBG_T_END(timer, msg)
+#  define DBG_T_START(timer, msg) \
+     (void) (timer), (void) (msg)
+
+#  define DBG_T_END(timer, msg) \
+     (void) (timer), (void) (msg)
 #endif
 
 #endif

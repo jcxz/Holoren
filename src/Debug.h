@@ -19,8 +19,10 @@
 /** A debugging macro */
 #ifdef HOLOREN_DEBUG
 #  define DBG(x) std::cerr << x << std::endl
+#  define DBGHEX(data, len) Debug::hexdump(std::cerr, data, len)
 #else
 #  define DBG(x)
+#  define DBGHEX(data, len)
 #endif
 
 /** A macro to print diagnostic messages */

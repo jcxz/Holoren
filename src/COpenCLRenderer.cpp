@@ -178,90 +178,36 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 {
   /* intialize local variables */
   cl_int err = CL_SUCCESS;
-  cl_mem pc_buf = NULL;     // point cloud buffer
-  cl_mem of_buf = NULL;     // optical field buffer
-
-  of->zero();
 
   DBG("point cloud byte size: " << pc.getByteSize());
-  DBG("point cloud data:\n" << pc.data());
+  DBG("point cloud data:");
+  DBGHEX(pc.data(), pc.getByteSize());
+  DBG("");
 
   /* create memory objects from data passed in as arguments */
-  pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
+  cl_mem pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
-    goto finalize;
+    return false;
   }
 
-  of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
+  cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
-    goto finalize;
+    clReleaseMemObject(pc_buf);
+    return false;
   }
 
-  /* a macro to set the given kernel argument type */
-  #define SET_ARG(num, arg) \
-    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
-    if (err != CL_SUCCESS) \
-    { \
-      m_err_msg = OpenCL::clErrToStr(err); \
-      goto finalize; \
-    }
+  //of->zero();
 
-  /* set kernel arguments */
+  /* render the object wave */
+  if (!renderAlgorithm2(pc, pc_buf, of, of_buf))
   {
-    cl_int rows = of->getNumRows();
-    cl_int cols = of->getNumCols();
-    cl_float hologram_z = (cl_float) m_hologram_z;
-    cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
-    cl_float pitch = of->getPitch();
-    cl_float corner_x = -(cols - 1) * pitch / 2;
-    cl_float corner_y = -(rows - 1) * pitch / 2;
-    
-    DBG("rows       : " << rows);
-    DBG("cols       : " << cols);
-    DBG("hologram_z : " << hologram_z);
-    DBG("k          : " << k);
-    DBG("sampling   : " << pitch);
-    DBG("size_x     : " << (cols - 1) * pitch);
-    DBG("size_y     : " << (rows - 1) * pitch);
-    DBG("corner_x   : " << corner_x);
-    DBG("corner_y   : " << corner_y);
-
-    SET_ARG(0, pc_buf);
-    SET_ARG(1, of_buf);
-    SET_ARG(2, rows);
-    SET_ARG(3, cols);
-    SET_ARG(4, hologram_z);
-    SET_ARG(5, k);
-    SET_ARG(6, pitch);
-    SET_ARG(7, corner_x);
-    SET_ARG(8, corner_y);
-  }
-
-  /* to cancel kernel argument setting macro */
-  #undef SET_ARG
-
-  /* execute kernel */
-  {
-    // this is an array which defines the number of items in each nested loop
-    size_t global_work_size[3] = { pc.size(), of->getNumRows(), of->getNumCols() };
-    err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
-                                 m_kernel,          // the kernel to be excuted
-                                 3,                 // the number of nested for loops that OpenCL will generate
-                                 NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
-                                 global_work_size,  // the number of items in each nested for loop
-                                 NULL,              // this is a local work size, not really sure how it relates to the above parameters
-                                 0,
-                                 NULL,
-                                 NULL);
-    if (err != CL_SUCCESS)
-    {
-      m_err_msg = OpenCL::clErrToStr(err);
-      goto finalize;
-    }
+    clReleaseMemObject(of_buf);
+    clReleaseMemObject(pc_buf);
+    return false;
   }
 
   /* read the result */
@@ -269,16 +215,15 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
-    goto finalize;
+    clReleaseMemObject(of_buf);
+    clReleaseMemObject(pc_buf);
+    return false;
   }
 
- 
-finalize:
-  /* clean-up */
-  clReleaseMemObject(pc_buf);
   clReleaseMemObject(of_buf);
+  clReleaseMemObject(pc_buf);
 
-  return (err == CL_SUCCESS);
+  return true;
 }
 
 
@@ -286,6 +231,149 @@ finalize:
  */
 bool COpenCLRenderer::renderHologram(const CPointCloud & pc, COpticalField *of)
 {
+  return true;
+}
+
+
+/**
+ */
+bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+{
+  DBG("Algorithm 1");
+
+  /* a macro to set the given kernel argument type */
+  #define SET_ARG(num, arg) \
+    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
+    if (err != CL_SUCCESS) \
+    { \
+      m_err_msg = OpenCL::clErrToStr(err); \
+      return false; \
+    }
+
+  cl_int err = CL_SUCCESS;
+
+  /* set kernel arguments */
+  cl_int rows = of->getNumRows();
+  cl_int cols = of->getNumCols();
+  cl_float hologram_z = (cl_float) m_hologram_z;
+  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
+  cl_float pitch = of->getPitch();
+  cl_float corner_x = -(cols - 1) * pitch / 2;
+  cl_float corner_y = -(rows - 1) * pitch / 2;
+  
+  DBG("rows       : " << rows);
+  DBG("cols       : " << cols);
+  DBG("hologram_z : " << hologram_z);
+  DBG("k          : " << k);
+  DBG("sampling   : " << pitch);
+  DBG("size_x     : " << (cols - 1) * pitch);
+  DBG("size_y     : " << (rows - 1) * pitch);
+  DBG("corner_x   : " << corner_x);
+  DBG("corner_y   : " << corner_y);
+
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, of_buf);
+  SET_ARG(2, rows);
+  SET_ARG(3, cols);
+  SET_ARG(4, hologram_z);
+  SET_ARG(5, k);
+  SET_ARG(6, pitch);
+  SET_ARG(7, corner_x);
+  SET_ARG(8, corner_y);
+
+  /* to cancel kernel argument setting macro */
+  #undef SET_ARG
+
+  /* execute kernel */
+  // this is an array which defines the number of items in each nested loop
+  size_t global_work_size[3] = { pc.size(), of->getNumRows(), of->getNumCols() };
+  err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
+                               m_kernel,          // the kernel to be excuted
+                               3,                 // the number of nested for loops that OpenCL will generate
+                               NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                               global_work_size,  // the number of items in each nested for loop
+                               NULL,              // this is a local work size, not really sure how it relates to the above parameters
+                               0,
+                               NULL,
+                               NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ */
+bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+{
+  DBG("Algorithm 2");
+
+  /* a macro to set the given kernel argument type */
+  #define SET_ARG(num, arg) \
+    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
+    if (err != CL_SUCCESS) \
+    { \
+      m_err_msg = OpenCL::clErrToStr(err); \
+      return false; \
+    }
+
+  cl_int err = CL_SUCCESS;
+
+  /* set kernel arguments */
+  cl_uint pc_size = pc.size();
+  cl_int rows = of->getNumRows();
+  cl_int cols = of->getNumCols();
+  cl_float hologram_z = (cl_float) m_hologram_z;
+  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
+  cl_float pitch = of->getPitch();
+  cl_float corner_x = -(cols - 1) * pitch / 2;
+  cl_float corner_y = -(rows - 1) * pitch / 2;
+  
+  DBG("pc_size    : " << pc_size);
+  DBG("rows       : " << rows);
+  DBG("cols       : " << cols);
+  DBG("hologram_z : " << hologram_z);
+  DBG("k          : " << k);
+  DBG("sampling   : " << pitch);
+  DBG("size_x     : " << (cols - 1) * pitch);
+  DBG("size_y     : " << (rows - 1) * pitch);
+  DBG("corner_x   : " << corner_x);
+  DBG("corner_y   : " << corner_y);
+
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, pc_size);
+  SET_ARG(2, of_buf);
+  SET_ARG(3, hologram_z);
+  SET_ARG(4, k);
+  SET_ARG(5, pitch);
+  SET_ARG(6, corner_x);
+  SET_ARG(7, corner_y);
+
+  /* to cancel kernel argument setting macro */
+  #undef SET_ARG
+
+  /* execute kernel */
+  // this is an array which defines the number of items in each nested loop
+  size_t global_work_size[2] = { (size_t) rows, (size_t) cols };
+  err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
+                               m_kernel,          // the kernel to be excuted
+                               2,                 // the number of nested for loops that OpenCL will generate
+                               NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                               global_work_size,  // the number of items in each nested for loop
+                               NULL,              // this is a local work size, not really sure how it relates to the above parameters
+                               0,
+                               NULL,
+                               NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return false;
+  }
+
   return true;
 }
 
