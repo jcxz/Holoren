@@ -40,14 +40,13 @@ class CTimerWindows
         m_frekv(1.0f)  // 1.0f to avoid division by zero on QueryPerformanceFrequency failure
     {
       LARGE_INTEGER f;
-      if (!::QueryPerformanceFrequency(&f))
+      if (!::QueryPerformanceFrequency(&f))  // get the frequency in counts per second
       {
         WARN("QueryPerformanceFrequency failed: high resolution timer not available on this platform, you might get incorrect results");
         return;
       }
 
-      // convert frequency from counts per second to counts per milisecond
-      m_frekv = double(f.QuadPart) / 1000.0f;
+      m_frekv = double(f.QuadPart) / 1000000.0f;
     }
 
     /**
@@ -67,7 +66,7 @@ class CTimerWindows
     }
 
     /**
-     * A function to return the time in miliseconds elapsed between
+     * A function to return the time in microseconds elapsed between
      * the calls to start and stop
      */
     inline double getElapsedTime(void) const
@@ -112,8 +111,8 @@ class CTimerUnix
      */
     inline double getElapsedTime(void) const
     {
-      return (m_end.tv_sec - m_start.tv_sec) * 1000.0f +
-             (m_end.tv_nsec - m_start.tv_nsec) * 1e-6;
+      return (m_end.tv_sec - m_start.tv_sec) * 1e6 +
+             (m_end.tv_nsec - m_start.tv_nsec) * 1e-3;
     }
 
   private:
@@ -165,17 +164,15 @@ class CTimerDummy
 
 
 /**
- * A function to output elapsed time meassured by timer
+ * A function to output elapsed time nicely formated into hours, minutes, seconds
+ * and miliseconds
  *
  * @param os an output stream
  * @param timer the class capable of meassuring time
  *
  * @return the output stream originally passed in
  */
-inline std::ostream & operator<<(std::ostream & os, const CTimer & timer)
-{
-  return os << "Elapsed time: " << timer.getElapsedTime() << " ms";
-}
+std::ostream & operator<<(std::ostream & os, const CTimer & timer);
 
 
 /**

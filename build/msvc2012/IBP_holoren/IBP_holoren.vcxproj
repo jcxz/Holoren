@@ -76,6 +76,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,7 +96,9 @@
     <ClCompile Include="..\..\..\src\CPointCloud.cpp" />
     <ClCompile Include="..\..\..\src\CPointCloudRWFactory.cpp" />
     <ClCompile Include="..\..\..\src\CSimpleRenderer.cpp" />
+    <ClCompile Include="..\..\..\src\CTimer.cpp" />
     <ClCompile Include="..\..\..\src\CXMLPointCloudRW.cpp" />
+    <ClCompile Include="..\..\..\src\Debug.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\ocl.cpp" />
     <ClCompile Include="..\..\..\src\Utils.cpp" />
@@ -113,6 +116,7 @@
     <ClInclude Include="..\..\..\src\CSimpleRenderer.h" />
     <ClInclude Include="..\..\..\src\CTimer.h" />
     <ClInclude Include="..\..\..\src\CXMLPointCloudRW.h" />
+    <ClInclude Include="..\..\..\src\Debug.h" />
     <ClInclude Include="..\..\..\src\Geometry.h" />
     <ClInclude Include="..\..\..\src\global.h" />
     <ClInclude Include="..\..\..\src\CBaseRenderer.h" />
@@ -122,6 +126,8 @@
   <ItemGroup>
     <None Include="..\..\..\src\OpenCL\holoren.cl" />
     <None Include="..\..\..\src\OpenCL\holoren_debug.cl" />
+    <None Include="..\..\..\src\OpenCL\holoren_serial.cl" />
+    <None Include="..\..\..\src\OpenCL\holoren_serial_optimized.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

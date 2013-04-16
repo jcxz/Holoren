@@ -53,7 +53,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DHOLOREN_DEBUG_PERF /DHOLOREN_DEBUG %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -78,6 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\CTimer.cpp" />
     <ClCompile Include="..\..\..\tests\test_timer_win.cpp" />
   </ItemGroup>
   <ItemGroup>
