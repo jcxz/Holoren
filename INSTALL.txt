@@ -83,6 +83,8 @@ Compilation options
 to tweak the program at compilation time you can use the following macros:
 
 HOLOREN_DEBUG         ... if defined turns on debugging mode (will print a lot of additional diagonstic messages)
+HOLOREN_HEAVY_DEBUG   ... define this macro to enable operations that display a considerable amount of debug information
+                          or significantly hinder the application with debug processing
 HOLOREN_DEBUG_KERNEL  ... define this macro when debugging kernel code. This macro makes the application pass additional
                           compilation flags to OpenCL compiler
 HOLOREN_NO_WARNINGS   ... if defined, then turns off warning messages (these may be emited when programs winds up in an

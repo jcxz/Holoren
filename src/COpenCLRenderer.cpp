@@ -179,10 +179,12 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   /* intialize local variables */
   cl_int err = CL_SUCCESS;
 
+#ifdef HOLOREN_HEAVY_DEBUG
   DBG("point cloud byte size: " << pc.getByteSize());
   DBG("point cloud data:");
   DBGHEX(pc.data(), pc.getByteSize());
   DBG("");
+#endif
 
   /* create memory objects from data passed in as arguments */
   cl_mem pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);

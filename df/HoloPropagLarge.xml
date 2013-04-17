@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <Config>
 	<Lambda>630e-9</Lambda>
-	<Pitch>20e-6</Pitch>
+	<Pitch>20e-6</Pitch>    
 	<ForceSettings>false</ForceSettings>
 	<RandomizePhase>false</RandomizePhase>
 	<ImageContainsIntensity>false</ImageContainsIntensity>
@@ -15,7 +15,7 @@
 		
   <!-- Use the hologram image for propagation -->
   <Input>out.Hologram.png</Input>
-  <Target>out.png</Target>  
+  <Target>out.png</Target>         
   
 	<ImageIntensityMaximum>-1</ImageIntensityMaximum>
 	<ImageIntensityMinimum>0</ImageIntensityMinimum>

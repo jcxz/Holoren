@@ -119,7 +119,7 @@ bool CImagePointCloudRW::read(CPointCloud *pc)
     return false;
   }
 
-#ifdef DEBUG
+#ifdef HOLOREN_HEAVY_DEBUG
   DBG("Saving greyscale debug image to: \"dbg_gs_img.bmp\"");
   if (SDL_SaveBMP(img_surf, "dbg_gs_img.bmp") == -1)
   {
@@ -144,6 +144,7 @@ bool CImagePointCloudRW::read(CPointCloud *pc)
   /* create point sources from grey pixels */
   DBG("Generating point sources");
   if (!genPointSources(img_surf, treshold, 0.0, 0.000025, pc))
+  //if (!genPointSources(img_surf, treshold, 0.0, 1.0e-3, pc))
   {
     SDL_FreeSurface(img_surf);
     m_error = "Failed to generate point sources from image: \"";
@@ -153,7 +154,7 @@ bool CImagePointCloudRW::read(CPointCloud *pc)
   }
 
   /* binarize surface for debugging purposes */
-#ifdef DEBUG
+#ifdef HOLOREN_HEAVY_DEBUG
   if (toBinary(img_surf, treshold))
   {
     DBG("Saving binarized debug image to: \"dbg_bw_img.bmp\"");
@@ -166,6 +167,8 @@ bool CImagePointCloudRW::read(CPointCloud *pc)
   {
     DBG("Failed to binarize surface");
   }
+
+  DBG("The points of point cloud:\n" << *pc);
 #endif
 
   /* free the SDL surface */
@@ -368,10 +371,11 @@ bool CImagePointCloudRW::genPointSources(SDL_Surface *surf, uint8_t treshold, tF
 
   for (int y = 0; y < surf->h; ++y)
   {
-    for (int x = 0; x < (surf->w * BYTES_PER_PIXEL); x += BYTES_PER_PIXEL)
+    for (int x = 0; x < surf->w; ++x)
     {
-      if (GET_PIXEL8(surf, x, y) <= treshold)
+      if (GET_PIXEL8(surf, x * BYTES_PER_PIXEL, y) <= treshold)
       {
+        //DBG("x == " << x << ", y == " << y);
         pc->addPointSource(SPointSource((tFPType) x * sampling, (tFPType) y * sampling, z));
 #ifdef HOLOREN_DEBUG
         ps_cnt++;
