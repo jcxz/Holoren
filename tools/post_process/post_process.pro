@@ -24,7 +24,6 @@ HEADERS += \
   src/CDFtoHologramEditor.h \
   src/CHoloPropagLargeEditor.h \
   src/CMainWindow.h \
-    src/CBaseEditor.h \
     src/CPathPicker.h \
     src/CImageViewer.h
 

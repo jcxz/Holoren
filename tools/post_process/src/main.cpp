@@ -4,6 +4,7 @@
 #include "CMainWindow.h"
 
 #include <QApplication>
+#include <QDesktopWidget>
 
 
 
@@ -14,7 +15,9 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
   CMainWindow main_window;
 
-  main_window.show();
+  QDesktopWidget desktop;
+
+  main_window.showMaximized();
 
   return app.exec();
 }

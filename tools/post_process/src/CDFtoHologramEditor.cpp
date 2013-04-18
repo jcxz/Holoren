@@ -388,8 +388,6 @@ bool CDFtoHologramEditor::reload(void)
 
   if ((!reader.readNextStartElement()) || (reader.name() != "Config"))
   {
-    qDebug() << "token:" << reader.tokenString();
-    qDebug() << "name:" << reader.name();
     emit error("Failed to load config file from " + m_cfg_file->getPath() + ": root element is not 'config'");
     return false;
   }
@@ -437,11 +435,11 @@ bool CDFtoHologramEditor::reload(void)
     }
     else if (name == "Input")
     {
-      m_entry_Input->setText(reader.readElementText());
+      m_entry_Input->setText(reader.readElementText().trimmed());
     }
     else if (name == "Target")
     {
-      m_entry_Target->setText(reader.readElementText());
+      m_entry_Target->setText(reader.readElementText().trimmed());
     }
     else if (name == "UsePhase")
     {
