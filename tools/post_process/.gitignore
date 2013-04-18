@@ -1,0 +1,13 @@
+# ignore compiled binaries
+bin/*
+
+# ignore temporary compilation files
+obj/*
+
+# ignore generated makefiles
+Makefile
+Makefile.Debug
+Makefile.Release
+
+# ignore Qt Creator user files
+*.pro.user
