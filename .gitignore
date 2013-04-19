@@ -1,5 +1,3 @@
-# ignore debug and release build directories and all build shit
-
 #### ignore all vim swap files ###
 *.swp
 
