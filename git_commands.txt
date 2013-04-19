@@ -1,0 +1,40 @@
+This is a quick reference of usefull git commands.
+I place this file here to have it allways immediately at hand.
+
+--------------------------------------------------------------------------------
+git clone https://github.com/{user_name}/{repo_name}
+  
+  this is like svn checkout, copies the working directory to another location
+
+-------------------------------------------------------------------------------- 
+git add .
+
+  add all new files and changes to git repository 
+  
+--------------------------------------------------------------------------------
+git push
+
+   push commits to github
+   
+--------------------------------------------------------------------------------
+git status
+
+   show a list of changes that will be made on the next commit
+   
+--------------------------------------------------------------------------------
+git rm file
+
+   remove file from git repository and delete it from computer
+   
+--------------------------------------------------------------------------------
+git rm --cached file
+
+   remove file from git repository only
+
+--------------------------------------------------------------------------------
+git mv file file.txt
+
+   rename file to file.txt
+   
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
