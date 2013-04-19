@@ -1,0 +1,7 @@
+Xsampling: 2.117E-5
+Ysampling: 2.117E-5
+Xres: 200
+Yres: 200 
+wavelength: 600e-9
+depth: 0,54               /// ???
+gif sampling: 1.0e-3
