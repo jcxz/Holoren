@@ -22,10 +22,11 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFormLayout>
+
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QFile>
-
+#include <QDir>
 #include <QProcess>
 
 
@@ -271,13 +272,13 @@ bool CDFtoHologramEditor::loadHistory(const QString & hist_file)
   if (reader.readNext() != QXmlStreamReader::StartDocument)
   {
     qDebug() << reader.tokenString();
-    emit error(tr("Failed to load DFtoHologramEditor history file %1: Missing start document").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load DFtoHologramEditor history file %1: Missing start document").arg(hist_file));
     return false;
   }
 
   if ((!reader.readNextStartElement()) || (reader.name() != "DFtoHologramEditor"))
   {
-    emit error(tr("Failed to load DFtoHologramEditor history file %1: root element is not 'DFtoHologramEditor'").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load DFtoHologramEditor history file %1: root element is not 'DFtoHologramEditor'").arg(hist_file));
     return false;
   }
 
@@ -286,27 +287,57 @@ bool CDFtoHologramEditor::loadHistory(const QString & hist_file)
   {
     if (reader.name() == "CfgFiles")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load DFtoHologramEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_cfg_file->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "File"))
       {
         m_cfg_file->addPath(reader.readElementText().trimmed());
       }
+
+      m_cfg_file->setSelectedPath(index);
     }
     else if (reader.name() == "BinFiles")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load DFtoHologramEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_binary_file->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "File"))
       {
         m_binary_file->addPath(reader.readElementText().trimmed());
       }
+
+      m_binary_file->setSelectedPath(index);
     }
     else if (reader.name() == "WorkingDirs")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load DFtoHologramEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_working_dir->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "Dir"))
       {
         m_working_dir->addPath(reader.readElementText().trimmed());
       }
+
+      m_working_dir->setSelectedPath(index);
     }
     else if (reader.name() == "ShowOutput")
     {
@@ -321,7 +352,7 @@ bool CDFtoHologramEditor::loadHistory(const QString & hist_file)
       }
       else
       {
-        emit error(tr("Failed to load DFtoHologramEditor history file %1: error converting ShowOutput to boolean").arg(m_cfg_file->getSelectedPath()));
+        emit error(tr("Failed to load DFtoHologramEditor history file %1: error converting ShowOutput to boolean").arg(hist_file));
         return false;
       }
     }
@@ -334,7 +365,7 @@ bool CDFtoHologramEditor::loadHistory(const QString & hist_file)
 
   if (reader.hasError())
   {
-    emit error(tr("Failed to load DFtoHologramEditor history file %1: error while reading XML").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load DFtoHologramEditor history file %1: error while reading XML").arg(hist_file));
     return false;
   }
 
@@ -364,6 +395,7 @@ bool CDFtoHologramEditor::saveHistory(const QString & hist_file)
 
   /* config files */
   writer.writeStartElement("CfgFiles");
+  writer.writeAttribute("selected", QString::number(m_cfg_file->getSelectedPathIndex()));
 
   CPathPickerIterator cfg_it = m_cfg_file->getPathsIterator();
   while (cfg_it.hasNext())
@@ -376,6 +408,7 @@ bool CDFtoHologramEditor::saveHistory(const QString & hist_file)
 
   /* binary files */
   writer.writeStartElement("BinFiles");
+  writer.writeAttribute("selected", QString::number(m_binary_file->getSelectedPathIndex()));
 
   CPathPickerIterator bin_it = m_binary_file->getPathsIterator();
   while (bin_it.hasNext())
@@ -388,6 +421,7 @@ bool CDFtoHologramEditor::saveHistory(const QString & hist_file)
 
   /* working dirs */
   writer.writeStartElement("WorkingDirs");
+  writer.writeAttribute("selected", QString::number(m_working_dir->getSelectedPathIndex()));
 
   CPathPickerIterator dir_it = m_working_dir->getPathsIterator();
   while (dir_it.hasNext())
@@ -398,6 +432,7 @@ bool CDFtoHologramEditor::saveHistory(const QString & hist_file)
 
   writer.writeEndElement();
 
+  /* ShowOutput check box */
   writer.writeTextElement("ShowOutput", (m_show_output->isChecked() ? "true" : "false"));
 
   writer.writeEndElement();
@@ -494,9 +529,22 @@ void CDFtoHologramEditor::handleProcessFinished(int exitCode, QProcess::ExitStat
 
   if (m_show_output->isChecked())
   {
+    QString path;
+    QDir info(m_entry_Target->text());
+    if (info.isRelative())
+    {
+      path = QDir::cleanPath(m_working_dir->getSelectedPath() +
+                             QDir::separator() +
+                             m_entry_Target->text());
+    }
+    else
+    {
+      path = m_entry_Target->text();
+    }
+
     CImageViewer *v = new CImageViewer(this);
     v->setWindowTitle(tr("Generated Hologram"));
-    if (v->open(m_working_dir->getSelectedPath() + m_entry_Target->text()))
+    if (v->open(path))
     {
       v->show();
     }
@@ -779,20 +827,20 @@ bool CDFtoHologramEditor::save(void)
   writer.writeStartDocument();
   writer.writeStartElement("Config");
 
-  writer.writeTextElement("ProcessLineCnt",         QString().number(m_entry_ProcessLineCnt->value()));
-  writer.writeTextElement("KsiXDeg",                QString().number(m_entry_KsiXDeg->value()));
-  writer.writeTextElement("KsiYDeg",                QString().number(m_entry_KsiYDeg->value()));
+  writer.writeTextElement("ProcessLineCnt",         QString::number(m_entry_ProcessLineCnt->value()));
+  writer.writeTextElement("KsiXDeg",                QString::number(m_entry_KsiXDeg->value()));
+  writer.writeTextElement("KsiYDeg",                QString::number(m_entry_KsiYDeg->value()));
   writer.writeTextElement("Input",                  m_entry_Input->text());
   writer.writeTextElement("Target",                 m_entry_Target->text());
   writer.writeTextElement("UsePhase",               (m_entry_UsePhase->isChecked() ? "true" : "false"));
   writer.writeTextElement("HologramInterference",   (m_entry_HologramInterference->isChecked() ? "true" : "false"));
   writer.writeTextElement("HologramBipolar",        (m_entry_HologramBipolar->isChecked() ? "true" : "false"));
-  writer.writeTextElement("PsDPI",                  QString().number(m_entry_PsDPI->value()));
-  writer.writeTextElement("PsDotSize",              QString().number(m_entry_PsDotSize->value()));
+  writer.writeTextElement("PsDPI",                  QString::number(m_entry_PsDPI->value()));
+  writer.writeTextElement("PsDotSize",              QString::number(m_entry_PsDotSize->value()));
   writer.writeTextElement("Binarize",               (m_entry_Binarize->isChecked() ? "true" : "false"));
   writer.writeTextElement("Halftonize",             (m_entry_Halftonize->isChecked() ? "true" : "false"));
-  writer.writeTextElement("HalftonizeCellSize",     QString().number(m_entry_HalftonizeCellSize->value()));
-  writer.writeTextElement("HalftonizeLevelCount",   QString().number(m_entry_HalftonizeLevelCount->value()));
+  writer.writeTextElement("HalftonizeCellSize",     QString::number(m_entry_HalftonizeCellSize->value()));
+  writer.writeTextElement("HalftonizeLevelCount",   QString::number(m_entry_HalftonizeLevelCount->value()));
   writer.writeTextElement("HalftonizeLevelByPixel", (m_entry_HalftonizeLevelByPixel->isChecked() ? "true" : "false"));
 
   writer.writeEndElement();

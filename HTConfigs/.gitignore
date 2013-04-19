@@ -3,6 +3,4 @@
 # so a top-level .gitignore did not work
 
 *                   # ignore everything in this directory and its subdirectories
-!*/                 # however do not ignore subdirectories
 !*.xml              # and do not ingore xml files
-!.gitignore         # and of course have this .gitignore file included too

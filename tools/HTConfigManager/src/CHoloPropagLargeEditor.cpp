@@ -22,10 +22,11 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFormLayout>
+
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QFile>
-
+#include <QDir>
 #include <QProcess>
 
 
@@ -274,14 +275,13 @@ bool CHoloPropagLargeEditor::loadHistory(const QString & hist_file)
 
   if (reader.readNext() != QXmlStreamReader::StartDocument)
   {
-    qDebug() << reader.tokenString();
-    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: Missing start document").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: Missing start document").arg(hist_file));
     return false;
   }
 
   if ((!reader.readNextStartElement()) || (reader.name() != "HoloPropagLargeEditor"))
   {
-    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: root element is not 'HoloPropagLargeEditor'").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: root element is not 'HoloPropagLargeEditor'").arg(hist_file));
     return false;
   }
 
@@ -290,27 +290,57 @@ bool CHoloPropagLargeEditor::loadHistory(const QString & hist_file)
   {
     if (reader.name() == "CfgFiles")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_cfg_file->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "File"))
       {
         m_cfg_file->addPath(reader.readElementText().trimmed());
       }
+
+      m_cfg_file->setSelectedPath(index);
     }
     else if (reader.name() == "BinFiles")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_binary_file->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "File"))
       {
         m_binary_file->addPath(reader.readElementText().trimmed());
       }
+
+      m_binary_file->setSelectedPath(index);
     }
     else if (reader.name() == "WorkingDirs")
     {
+      bool ok = false;
+      int index = reader.attributes().value("selected").toAscii().toInt(&ok);
+      if (!ok)
+      {
+        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting attribute selected").arg(hist_file));
+        return false;
+      }
+
       m_working_dir->clearAllPaths();
       while ((reader.readNextStartElement()) && (reader.name() == "Dir"))
       {
         m_working_dir->addPath(reader.readElementText().trimmed());
       }
+
+      m_working_dir->setSelectedPath(index);
     }
     else if (reader.name() == "ShowOutput")
     {
@@ -325,7 +355,7 @@ bool CHoloPropagLargeEditor::loadHistory(const QString & hist_file)
       }
       else
       {
-        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting ShowOuput to boolean").arg(m_cfg_file->getSelectedPath()));
+        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting ShowOuput to boolean").arg(hist_file));
         return false;
       }
     }
@@ -338,7 +368,7 @@ bool CHoloPropagLargeEditor::loadHistory(const QString & hist_file)
 
   if (reader.hasError())
   {
-    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error while reading XML").arg(m_cfg_file->getSelectedPath()));
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error while reading XML").arg(hist_file));
     return false;
   }
 
@@ -368,6 +398,7 @@ bool CHoloPropagLargeEditor::saveHistory(const QString & hist_file)
 
   /* config files */
   writer.writeStartElement("CfgFiles");
+  writer.writeAttribute("selected", QString::number(m_cfg_file->getSelectedPathIndex()));
 
   CPathPickerIterator cfg_it = m_cfg_file->getPathsIterator();
   while (cfg_it.hasNext())
@@ -380,6 +411,7 @@ bool CHoloPropagLargeEditor::saveHistory(const QString & hist_file)
 
   /* binary files */
   writer.writeStartElement("BinFiles");
+  writer.writeAttribute("selected", QString::number(m_binary_file->getSelectedPathIndex()));
 
   CPathPickerIterator bin_it = m_binary_file->getPathsIterator();
   while (bin_it.hasNext())
@@ -392,6 +424,7 @@ bool CHoloPropagLargeEditor::saveHistory(const QString & hist_file)
 
   /* working dirs */
   writer.writeStartElement("WorkingDirs");
+  writer.writeAttribute("selected", QString::number(m_working_dir->getSelectedPathIndex()));
 
   CPathPickerIterator dir_it = m_working_dir->getPathsIterator();
   while (dir_it.hasNext())
@@ -402,6 +435,7 @@ bool CHoloPropagLargeEditor::saveHistory(const QString & hist_file)
 
   writer.writeEndElement();
 
+  /* ShowOutput check box */
   writer.writeTextElement("ShowOutput", (m_show_output->isChecked() ? "true" : "false"));
 
   writer.writeEndElement();
@@ -498,9 +532,22 @@ void CHoloPropagLargeEditor::handleProcessFinished(int exitCode, QProcess::ExitS
 
   if (m_show_output->isChecked())
   {
+    QString path;
+    QDir info(m_entry_Target->text());
+    if (info.isRelative())
+    {
+      path = QDir::cleanPath(m_working_dir->getSelectedPath() +
+                             QDir::separator() +
+                             m_entry_Target->text());
+    }
+    else
+    {
+      path = m_entry_Target->text();
+    }
+
     CImageViewer *v = new CImageViewer(this);
     v->setWindowTitle(tr("Reconstructed Hologram"));
-    if (v->open(m_working_dir->getSelectedPath() + m_entry_Target->text()))
+    if (v->open(path))
     {
       v->show();
     }
@@ -792,8 +839,8 @@ bool CHoloPropagLargeEditor::save(void)
   writer.writeStartDocument();
   writer.writeStartElement("Config");
 
-  writer.writeTextElement("Lambda",                 QString().number(m_entry_Lambda->value()));
-  writer.writeTextElement("Pitch",                  QString().number(m_entry_Pitch->value()));
+  writer.writeTextElement("Lambda",                 QString::number(m_entry_Lambda->value()));
+  writer.writeTextElement("Pitch",                  QString::number(m_entry_Pitch->value()));
   writer.writeTextElement("ForceSettings",          (m_entry_ForceSettings->isChecked() ? "true" : "false"));
   writer.writeTextElement("RandomizePhase",         (m_entry_RandomizePhase->isChecked() ? "true" : "false"));
   writer.writeTextElement("ImageContainsIntensity", (m_entry_ImageContainsIntensity->isChecked() ? "true" : "false"));
@@ -801,11 +848,11 @@ bool CHoloPropagLargeEditor::save(void)
   writer.writeTextElement("ImageContainsPhase",     (m_entry_ImageContainsPhase->isChecked() ? "true" : "false"));
   writer.writeTextElement("Input",                  m_entry_Input->text());
   writer.writeTextElement("Target",                 m_entry_Target->text());
-  writer.writeTextElement("ImageIntensityMaximum",  QString().number(m_entry_ImageIntensityMaximum->value()));
-  writer.writeTextElement("ImageIntensityMinimum",  QString().number(m_entry_ImageIntensityMinimum->value()));
+  writer.writeTextElement("ImageIntensityMaximum",  QString::number(m_entry_ImageIntensityMaximum->value()));
+  writer.writeTextElement("ImageIntensityMinimum",  QString::number(m_entry_ImageIntensityMinimum->value()));
   writer.writeTextElement("Frame",                  (m_entry_Frame->isChecked() ? "true" : "false"));
-  writer.writeTextElement("FrameX",                 QString().number(m_entry_FrameX->value()));
-  writer.writeTextElement("FrameY",                 QString().number(m_entry_FrameY->value()));
+  writer.writeTextElement("FrameX",                 QString::number(m_entry_FrameX->value()));
+  writer.writeTextElement("FrameY",                 QString::number(m_entry_FrameY->value()));
   writer.writeTextElement("FrameRemove",            (m_entry_FrameRemove->isChecked() ? "true" : "false"));
   writer.writeTextElement("Operations",             m_entry_Operations->toPlainText());
 

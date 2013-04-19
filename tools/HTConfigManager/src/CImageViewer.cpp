@@ -13,6 +13,7 @@
 #include <QPrintDialog>
 #include <QPainter>
 #include <QMenuBar>
+#include <QDebug>
 
 
 
@@ -59,6 +60,8 @@ CImageViewer::CImageViewer(QWidget *parent)
  */
 bool CImageViewer::open(const QString & path)
 {
+  qDebug() << "path: " << path;
+
   QImage image(path);
   if (image.isNull())
   {
@@ -152,19 +155,6 @@ void CImageViewer::fitToWindow(void)
 
 /**
  */
-void CImageViewer::scaleToImage(void)
-{
-  m_image_label->adjustSize();
-  m_scale_factor = 1.0;
-  resize(m_image_label->pixmap()->size());
-  m_scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  m_scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  return;
-}
-
-
-/**
- */
 void CImageViewer::createActions(void)
 {
   m_print_act = new QAction(tr("&Print..."), this);
@@ -197,11 +187,6 @@ void CImageViewer::createActions(void)
   m_fit_to_window_act->setShortcut(tr("Ctrl+F"));
   connect(m_fit_to_window_act, SIGNAL(triggered()), SLOT(fitToWindow()));
 
-  m_scale_to_image_act = new QAction(tr("&Scale to image size"), this);
-  m_scale_to_image_act->setCheckable(true);
-  m_scale_to_image_act->setShortcut(tr("Ctrl+I"));
-  connect(m_scale_to_image_act, SIGNAL(triggered()), SLOT(scaleToImage()));
-
   return;
 }
 
@@ -221,7 +206,6 @@ void CImageViewer::createMenus(void)
   m_view_menu->addAction(m_normal_size_act);
   m_view_menu->addSeparator();
   m_view_menu->addAction(m_fit_to_window_act);
-  m_view_menu->addAction(m_scale_to_image_act);
 
   menuBar()->addMenu(m_file_menu);
   menuBar()->addMenu(m_view_menu);

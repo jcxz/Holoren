@@ -48,6 +48,7 @@ CMainWindow::CMainWindow(QWidget *parent)
   //m_propag_editor->loadHistory("./HoloPropagLargeHistory.xml");
 
   /* set layout */
+
   QHBoxLayout *l = new QHBoxLayout;
   l->addWidget(m_df_editor);
   l->addWidget(m_propag_editor);

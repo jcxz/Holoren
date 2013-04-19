@@ -401,6 +401,15 @@ int main(int argc, char *argv[])
 
   DBG_T_START(g_timer, "** Starting saving:\n");
 
+  /* try to guess the name of the output file if not given */
+  std::string out_file(params.ofilename);
+  if (Utils::getFileName(out_file) == NULL)
+  {
+    const char *filename = Utils::getFileName(params.ifilename);
+    HOLOREN_ASSERT(filename != NULL);
+    out_file += filename;
+  }
+  
   /* save computed results */
   if (!of.save(params.ofilename))
   {

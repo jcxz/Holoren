@@ -34,7 +34,6 @@ class CImageViewer : public QMainWindow
     void zoomOut(void);
     void normalSize(void);
     void fitToWindow(void);
-    void scaleToImage(void);
 
   private:
     void createActions(void);
@@ -59,7 +58,6 @@ class CImageViewer : public QMainWindow
     QAction *m_zoom_out_act;
     QAction *m_normal_size_act;
     QAction *m_fit_to_window_act;
-    QAction *m_scale_to_image_act;  /// adjust the windows size according to current image size
 
     QMenu *m_file_menu;
     QMenu *m_view_menu;

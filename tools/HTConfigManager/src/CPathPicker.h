@@ -54,6 +54,10 @@ class CPathPickerIterator
 
 /**
  * A class with widgets to pick a directory or a file
+ *
+ * TODO: make this class serializable (e.g by creating an ISerializable
+*        interface a letting it derive from it ) instead of
+ *       providing methods to get various internal data
  */
 class CPathPicker : public QWidget
 {
@@ -86,6 +90,23 @@ class CPathPicker : public QWidget
     QString getSelectedPath(void) const
     {
       return m_paths->currentText();
+    }
+
+    /**
+     * A method to get the index of the selected path
+     */
+    int getSelectedPathIndex(void) const
+    {
+      return m_paths->currentIndex();
+    }
+
+    /**
+     * A method to set the currently selected path
+     */
+    void setSelectedPath(int path_index)
+    {
+      m_paths->setCurrentIndex(path_index);
+      return;
     }
 
     /**

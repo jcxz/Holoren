@@ -65,6 +65,36 @@ inline int strCaseCmp(const char *str1, const char *str2)
 #endif
 }
 
+
+/**
+ * A function to extract filename from the given path
+ *
+ * @param path the path from which the name will be extracted
+ *       
+ * @return a pointer to the path, where the name starts.
+ *          if the path contains no name or is empty, then NULL is returned
+ *
+ * @note this function only compares strings, it does not check the actual
+ *       names in underlying filesystem, so it may wrongly guess the path
+ *       without trailing '/' (or trailing '\' on Windows) as a path with filename
+ */
+const char *getFileName(const char *path);
+
+
+/**
+ * A function to extract filename from the given path
+ *
+ * @param path the path from which the name will be extracted
+ *       
+ * @return a pointer to the path, where the name starts.
+ *          if the path contains no name or is empty, then NULL is returned
+ *
+ * @note this function only compares strings, it does not check the actual
+ *       names in underlying filesystem, so it may wrongly guess the path
+ *       without trailing '/' (or trailing '\' on Windows) as a path with filename.
+ */
+const char *getFileName(const std::string & path);
+
 } // End of namespace Utils
 
 #endif

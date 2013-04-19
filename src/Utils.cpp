@@ -63,4 +63,32 @@ bool strToUInt(const char *str, unsigned int *res)
   return true;
 }
 
+/**
+ */
+const char *getFileName(const char *path)
+{
+  if ((path == NULL) || (*path == 0))
+  {
+    return NULL;
+  }
+
+//#ifdef HOLOREN_OS_WIN
+//  return ::strrchr(path, '\\');
+//#else
+  return ::strrchr(path, '/');
+//#endif
+}
+
+/**
+ */
+const char *getFileName(const std::string & path)
+{
+#ifdef HOLOREN_OS_WIN
+  size_t pos = path.rfind('\\');
+#else
+  size_t pos = path.rfind('/');
+#endif
+  return (pos == std::string::npos) ? (NULL) : (&path.front() + pos);
+}
+
 } /// End of namespace Utils
