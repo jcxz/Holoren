@@ -29,16 +29,17 @@ class CHoloPropagLargeEditor : public QWidget
     /**
      * Default constructor
      */
-    explicit CHoloPropagLargeEditor(const QString & config_file, QWidget *parent = 0);
+    explicit CHoloPropagLargeEditor(const QString & hist_file = QString(), QWidget *parent = 0);
 
     /**
-     * Set the path to DFtoHologram binary
+     * A method to load the history of config files
      */
-    void setHoloPropagLargePath(const QString & path);
+    bool loadHistory(const QString & hist_file);
 
     /**
+     * A method to set the list of current config files
      */
-    void setHoloPropagLargeWorkingDir(const QString & dir);
+    bool saveHistory(const QString & hist_file);
 
   signals:
     void error(QString error);
@@ -73,7 +74,7 @@ class CHoloPropagLargeEditor : public QWidget
     bool save(void);
 
   private:
-    QGroupBox *createSystemInfo(const QString & config_file = QString());
+    QGroupBox *createSystemInfo(void);
     QGroupBox *createGroupEntries(void);
     QGroupBox *createGroupImageContains(void);
     QGroupBox *createGroupFrame(void);

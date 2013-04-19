@@ -32,7 +32,7 @@
 
 /**
  */
-CHoloPropagLargeEditor::CHoloPropagLargeEditor(const QString & config_file, QWidget *parent)
+CHoloPropagLargeEditor::CHoloPropagLargeEditor(const QString & hist_file, QWidget *parent)
   : QWidget(parent),
     m_HoloPropagLarge_proc(),
     m_caption(0),
@@ -76,7 +76,7 @@ CHoloPropagLargeEditor::CHoloPropagLargeEditor(const QString & config_file, QWid
   vl->addSpacing(20);
   vl->addWidget(m_caption);
   vl->addSpacing(30);
-  vl->addWidget(createSystemInfo(config_file));
+  vl->addWidget(createSystemInfo());
   vl->addWidget(createGroupEntries());
   vl->addWidget(createGroupImageContains());
   vl->addWidget(createGroupFrame());
@@ -85,19 +85,25 @@ CHoloPropagLargeEditor::CHoloPropagLargeEditor(const QString & config_file, QWid
   vl->addLayout(createButtons());
   setLayout(vl);
 
-  /* realod the config file */
-  reload();
+  if (!hist_file.isNull())
+  {
+    /* reload the config' history */
+    loadHistory(hist_file);
+
+    /* realod the first config file */
+    reload();
+  }
 }
 
 
 /**
  */
-QGroupBox *CHoloPropagLargeEditor::createSystemInfo(const QString & config_file)
+QGroupBox *CHoloPropagLargeEditor::createSystemInfo(void)
 {
   /* create widgets */
-  m_cfg_file = new CPathPicker(CPathPicker::PICK_FILES, config_file);
+  m_cfg_file = new CPathPicker;
   m_binary_file = new CPathPicker;
-  m_working_dir = new CPathPicker;
+  m_working_dir = new CPathPicker(CPathPicker::PICK_DIRS);
   m_show_output = new QCheckBox;
   m_show_output->setChecked(true);
 
@@ -245,21 +251,157 @@ QLayout *CHoloPropagLargeEditor::createButtons(void)
 
 
 /**
- * Set the path to DFtoHologram binary
+ * A method to load the history of config files
  */
-void CHoloPropagLargeEditor::setHoloPropagLargePath(const QString & path)
+bool CHoloPropagLargeEditor::loadHistory(const QString & hist_file)
 {
-  m_binary_file->setPath(path);
-  return;
+  QFile file(hist_file);
+  QXmlStreamReader reader(&file);
+
+  if (!file.open(QIODevice::ReadOnly))
+  {
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: Failed to open file").arg(hist_file));
+    return false;
+  }
+
+  if (reader.readNext() != QXmlStreamReader::StartDocument)
+  {
+    qDebug() << reader.tokenString();
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: Missing start document").arg(m_cfg_file->getSelectedPath()));
+    return false;
+  }
+
+  if ((!reader.readNextStartElement()) || (reader.name() != "HoloPropagLargeEditor"))
+  {
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: root element is not 'HoloPropagLargeEditor'").arg(m_cfg_file->getSelectedPath()));
+    return false;
+  }
+
+  /* load config files history */
+  while (reader.readNextStartElement())
+  {
+    if (reader.name() == "CfgFiles")
+    {
+      m_cfg_file->clearAllPaths();
+      while ((reader.readNextStartElement()) && (reader.name() == "File"))
+      {
+        m_cfg_file->addPath(reader.readElementText().trimmed());
+      }
+    }
+    else if (reader.name() == "BinFiles")
+    {
+      m_binary_file->clearAllPaths();
+      while ((reader.readNextStartElement()) && (reader.name() == "File"))
+      {
+        m_binary_file->addPath(reader.readElementText().trimmed());
+      }
+    }
+    else if (reader.name() == "WorkingDirs")
+    {
+      m_working_dir->clearAllPaths();
+      while ((reader.readNextStartElement()) && (reader.name() == "Dir"))
+      {
+        m_working_dir->addPath(reader.readElementText().trimmed());
+      }
+    }
+    else if (reader.name() == "ShowOutput")
+    {
+      const QString text = reader.readElementText();
+      if (text == "true")
+      {
+        m_show_output->setChecked(true);
+      }
+      else if (text == "false")
+      {
+        m_show_output->setChecked(false);
+      }
+      else
+      {
+        emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error converting ShowOuput to boolean").arg(m_cfg_file->getSelectedPath()));
+        return false;
+      }
+    }
+    else
+    {
+      emit error(tr("Failed to load HoloPropagLargeEditor history file: Unknown field %1").arg(reader.name().toString()));
+      return false;
+    }
+  }
+
+  if (reader.hasError())
+  {
+    emit error(tr("Failed to load HoloPropagLargeEditor history file %1: error while reading XML").arg(m_cfg_file->getSelectedPath()));
+    return false;
+  }
+
+  return true;
 }
 
 
 /**
+ * A method to set the list of current config files
  */
-void CHoloPropagLargeEditor::setHoloPropagLargeWorkingDir(const QString & dir)
+bool CHoloPropagLargeEditor::saveHistory(const QString & hist_file)
 {
-  m_working_dir->setPath(dir);
-  return;
+  QFile file(hist_file);
+  QXmlStreamWriter writer(&file);
+
+  if (!file.open(QIODevice::WriteOnly))
+  {
+    emit error(tr("Failed to save HoloPropagLarge history to file %1: Failed to create file").arg(hist_file));
+    return false;
+  }
+
+  writer.setAutoFormatting(true);
+  writer.setAutoFormattingIndent(2);
+
+  writer.writeStartDocument();
+  writer.writeStartElement("HoloPropagLargeEditor");
+
+  /* config files */
+  writer.writeStartElement("CfgFiles");
+
+  CPathPickerIterator cfg_it = m_cfg_file->getPathsIterator();
+  while (cfg_it.hasNext())
+  {
+    writer.writeTextElement("File", cfg_it.getPath());
+    cfg_it.next();
+  }
+
+  writer.writeEndElement();
+
+  /* binary files */
+  writer.writeStartElement("BinFiles");
+
+  CPathPickerIterator bin_it = m_binary_file->getPathsIterator();
+  while (bin_it.hasNext())
+  {
+    writer.writeTextElement("File", bin_it.getPath());
+    bin_it.next();
+  }
+
+  writer.writeEndElement();
+
+  /* working dirs */
+  writer.writeStartElement("WorkingDirs");
+
+  CPathPickerIterator dir_it = m_working_dir->getPathsIterator();
+  while (dir_it.hasNext())
+  {
+    writer.writeTextElement("Dir", dir_it.getPath());
+    dir_it.next();
+  }
+
+  writer.writeEndElement();
+
+  writer.writeTextElement("ShowOutput", (m_show_output->isChecked() ? "true" : "false"));
+
+  writer.writeEndElement();
+  writer.writeEndDocument();
+
+  file.close();
+
+  return false;
 }
 
 
@@ -273,13 +415,13 @@ bool CHoloPropagLargeEditor::run(void)
 
   /* set process arguments */
   QStringList args;
-  args << ("-c" + m_cfg_file->getPath());   // must be like this because the utility expects the params to be glued together
+  args << ("-c" + m_cfg_file->getSelectedPath());   // must be like this because the utility expects the params to be glued together
 
   /* set up processe's environment */
-  m_HoloPropagLarge_proc.setWorkingDirectory(m_working_dir->getPath());
+  m_HoloPropagLarge_proc.setWorkingDirectory(m_working_dir->getSelectedPath());
 
   /* create a process to run the DFtoHologram Utility */
-  m_HoloPropagLarge_proc.start(m_binary_file->getPath(), args);
+  m_HoloPropagLarge_proc.start(m_binary_file->getSelectedPath(), args);
 
   return true;
 }
@@ -350,7 +492,7 @@ void CHoloPropagLargeEditor::handleProcessFinished(int exitCode, QProcess::ExitS
   {
     CImageViewer *v = new CImageViewer(this);
     v->setWindowTitle(tr("Reconstructed Hologram"));
-    if (v->open(m_working_dir->getPath() + m_entry_Target->text()))
+    if (v->open(m_working_dir->getSelectedPath() + m_entry_Target->text()))
     {
       v->show();
     }
@@ -373,27 +515,27 @@ void CHoloPropagLargeEditor::handleProcessFinished(int exitCode, QProcess::ExitS
 bool CHoloPropagLargeEditor::reload(void)
 {
   qDebug("reloading");
-  qDebug() << m_cfg_file->getPath();
+  qDebug() << m_cfg_file->getSelectedPath();
 
-  QFile file(m_cfg_file->getPath());
+  QFile file(m_cfg_file->getSelectedPath());
   QXmlStreamReader reader(&file);
 
   if (!file.open(QIODevice::ReadOnly))
   {
-    emit error("Failed to load config file from " + m_cfg_file->getPath() + ": Cannot open input file");
+    emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": Cannot open input file");
     return false;
   }
 
   if (reader.readNext() != QXmlStreamReader::StartDocument)
   {
     qDebug() << reader.tokenString();
-    emit error("Failed to load config file from " + m_cfg_file->getPath() + ": Missing start document");
+    emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": Missing start document");
     return false;
   }
 
   if ((!reader.readNextStartElement()) || (reader.name() != "Config"))
   {
-    emit error("Failed to load config file from " + m_cfg_file->getPath() + ": root element is not 'config'");
+    emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": root element is not 'config'");
     return false;
   }
 
@@ -408,7 +550,7 @@ bool CHoloPropagLargeEditor::reload(void)
       double val = reader.readElementText().toDouble(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting Lambda to double");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting Lambda to double");
         return false;
       }
 
@@ -420,7 +562,7 @@ bool CHoloPropagLargeEditor::reload(void)
       double val = reader.readElementText().toDouble(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting Pitch to double");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting Pitch to double");
         return false;
       }
 
@@ -439,7 +581,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ForceSettings to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ForceSettings to boolean");
         return false;
       }
     }
@@ -456,7 +598,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting RandomizePhase to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting RandomizePhase to boolean");
         return false;
       }
     }
@@ -473,7 +615,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ImageContainsIntensity to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ImageContainsIntensity to boolean");
         return false;
       }
     }
@@ -490,7 +632,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ImageContainsAmplitude to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ImageContainsAmplitude to boolean");
         return false;
       }
     }
@@ -507,7 +649,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ImageContainsPhase to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ImageContainsPhase to boolean");
         return false;
       }
     }
@@ -525,7 +667,7 @@ bool CHoloPropagLargeEditor::reload(void)
       int val = reader.readElementText().toInt(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ImageIntensityMaximum to int");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ImageIntensityMaximum to int");
         return false;
       }
 
@@ -537,7 +679,7 @@ bool CHoloPropagLargeEditor::reload(void)
       int val = reader.readElementText().toInt(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting ImageIntensityMinimum to int");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting ImageIntensityMinimum to int");
         return false;
       }
 
@@ -556,7 +698,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting Frame to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting Frame to boolean");
         return false;
       }
     }
@@ -566,7 +708,7 @@ bool CHoloPropagLargeEditor::reload(void)
       int val = reader.readElementText().toInt(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting FrameX to int");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting FrameX to int");
         return false;
       }
 
@@ -578,7 +720,7 @@ bool CHoloPropagLargeEditor::reload(void)
       int val = reader.readElementText().toInt(&ok);
       if (!ok)
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting FrameY to int");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting FrameY to int");
         return false;
       }
 
@@ -597,7 +739,7 @@ bool CHoloPropagLargeEditor::reload(void)
       }
       else
       {
-        emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error converting FrameRemove to boolean");
+        emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error converting FrameRemove to boolean");
         return false;
       }
     }
@@ -607,14 +749,14 @@ bool CHoloPropagLargeEditor::reload(void)
     }
     else
     {
-      emit error("Failed to load config file from " + m_cfg_file->getPath() + ": Unknown element " + reader.name().toString());
+      emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": Unknown element " + reader.name().toString());
       return false;
     }
   }
 
   if (reader.hasError())
   {
-    emit error("Failed to load config file from " + m_cfg_file->getPath() + ": error while reading XML");
+    emit error("Failed to load config file from " + m_cfg_file->getSelectedPath() + ": error while reading XML");
     return false;
   }
 
@@ -627,12 +769,12 @@ bool CHoloPropagLargeEditor::reload(void)
  */
 bool CHoloPropagLargeEditor::save(void)
 {
-  QFile file(m_cfg_file->getPath());
+  QFile file(m_cfg_file->getSelectedPath());
   QXmlStreamWriter writer(&file);
 
   if (!file.open(QIODevice::WriteOnly))
   {
-    emit error("Failed to save config to file " + m_cfg_file->getPath() + ": Cannot open output file");
+    emit error("Failed to save config to file " + m_cfg_file->getSelectedPath() + ": Cannot open output file");
     return false;
   }
 

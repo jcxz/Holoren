@@ -33,16 +33,18 @@ class CDFtoHologramEditor : public QWidget
      *
      * @param config_file the name nad path to the config file that should be displayed and edited
      */
-    explicit CDFtoHologramEditor(const QString & config_file, QWidget *parent = 0);
+    explicit CDFtoHologramEditor(const QString & hist_file = QString(), QWidget *parent = 0);
 
     /**
-     * Set the path to DFtoHologram binary
+     * A method to load the history of config files
      */
-    void setDFtoHologramPath(const QString & path);
+    bool loadHistory(const QString & hist_file);
 
     /**
+     * A method to set the list of current config files
      */
-    void setDFtoHologramWorkingDir(const QString & dir);
+    bool saveHistory(const QString & hist_file);
+
 
   signals:
     void error(QString error);
@@ -77,7 +79,7 @@ class CDFtoHologramEditor : public QWidget
     bool save(void);
 
   private:
-    QGroupBox *createSystemInfo(const QString & config_file = QString());
+    QGroupBox *createSystemInfo(void);
     QGroupBox *createGroupEntries(void);
     QGroupBox *createGroupInterferenceBipolar(void);
     QGroupBox *createGroupBinarizeHalftonize(void);
