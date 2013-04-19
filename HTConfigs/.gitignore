@@ -1,3 +1,7 @@
 # ignore everything in this directory and its subdirectories
+# Note that .gitignore does not support inline comments, comments
+# have to be be their own lines
+
 *
+!*/
 !*.xml

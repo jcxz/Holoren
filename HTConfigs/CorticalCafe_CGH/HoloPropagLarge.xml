@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<Config>
+	<Lambda>600e-9</Lambda>
+	<Pitch>2.117E-5</Pitch> 
+    
+	<ForceSettings>false</ForceSettings>
+	<RandomizePhase>false</RandomizePhase>
+	<ImageContainsIntensity>true</ImageContainsIntensity>
+	<ImageContainsAmplitude>false</ImageContainsAmplitude>
+	<ImageContainsPhase>false</ImageContainsPhase>
+	<!-- <ImageContainsPhase>true</ImageContainsPhase>      -->
+		
+  <!-- Use the hologram image for propagation -->   
+  <Input>CorticalCafe_CGH\letterA_53cm_Phase.png</Input>
+  <Target>CorticalCafe_CGH.png</Target>
+  
+	<ImageIntensityMaximum>-1</ImageIntensityMaximum>
+	<ImageIntensityMinimum>0</ImageIntensityMinimum>
+	<Frame>true</Frame>	
+	<FrameX>1024</FrameX>
+	<FrameY>1024</FrameY>
+	<FrameRemove>false</FrameRemove>
+	<Operations>
+	-0.54 prop
+	</Operations>
+</Config>
