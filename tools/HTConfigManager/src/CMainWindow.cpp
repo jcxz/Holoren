@@ -32,20 +32,20 @@ CMainWindow::CMainWindow(QWidget *parent)
   //m_df_editor->setDFtoHologramPath("D:\\AC601\\VirtualBOXShare\\Ubuntu\\IBP\\holo_toolkit\\DFtoHologram.exe");
   //m_df_editor->setDFtoHologramWorkingDir("D:\\AC601\\VirtualBOXShare\\Ubuntu\\IBP\\code\\v4\\df\\");
 
-  m_df_editor = new CDFtoHologramEditor;
+  m_df_editor = new CDFtoHologramEditor("./DFtoHologramEditorHistory.xml");
   connect(m_df_editor, SIGNAL(error(QString)), SLOT(handleError(const QString &)));
   connect(m_df_editor, SIGNAL(utilityFinished()), SLOT(handleDFtoHologramFinished()));
-  m_df_editor->loadHistory("./DFtoHologramEditorHistory.xml");
+  //m_df_editor->loadHistory("./DFtoHologramEditorHistory.xml");
 
   /* HoloPropagLarge Editor */
   //m_propag_editor = new CHoloPropagLargeEditor("D:\\AC601\\VirtualBOXShare\\Ubuntu\\IBP\\code\\v4\\df\\HoloPropagLarge.xml");
   //m_propag_editor->setHoloPropagLargePath("D:\\AC601\\VirtualBOXShare\\Ubuntu\\IBP\\holo_toolkit\\HoloPropagLarge.exe");
   //m_propag_editor->setHoloPropagLargeWorkingDir("D:\\AC601\\VirtualBOXShare\\Ubuntu\\IBP\\code\\v4\\df\\");
 
-  m_propag_editor = new CHoloPropagLargeEditor;
+  m_propag_editor = new CHoloPropagLargeEditor("./HoloPropagLargeHistory.xml");
   connect(m_propag_editor, SIGNAL(error(QString)), SLOT(handleError(const QString &)));
   connect(m_propag_editor, SIGNAL(utilityFinished()), SLOT(handleHoloPropagLargeFinished()));
-  m_propag_editor->loadHistory("./HoloPropagLargeHistory.xml");
+  //m_propag_editor->loadHistory("./HoloPropagLargeHistory.xml");
 
   /* set layout */
   QHBoxLayout *l = new QHBoxLayout;

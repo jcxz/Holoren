@@ -6,6 +6,8 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QFileDialog>
+#include <QShortcut>
+#include <QDebug>
 
 
 
@@ -15,11 +17,19 @@ CPathPicker::CPathPicker(EMode mode, QWidget *parent)
   : QWidget(parent),
     m_mode(mode),
     m_paths(0),
-    m_pb_pick(0)
+    m_pb_pick(0),
+    m_del_shortcut(0)
 {
   m_paths = new QComboBox;
   m_paths->setEditable(true);
   m_paths->setDuplicatesEnabled(false);   // do not allow user to enter duplicate values (programatically inserting duplicates is still possible)
+  connect(m_paths, SIGNAL(currentIndexChanged(int)), SIGNAL(picked()));
+  //connect(m_paths, SIGNAL(highlighted(int)), SLOT(removePath(int)));
+
+  /* make shortcut to delete items from combobox */
+  m_del_shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this, SLOT(removePath()));
+  m_del_shortcut->setEnabled(true);
+
   m_pb_pick = new QPushButton("...");
   m_pb_pick->setFixedSize(20, 20);
   connect(m_pb_pick, SIGNAL(clicked()), SLOT(handlePickBtnClicked()));
@@ -53,6 +63,16 @@ void CPathPicker::addPath(const QString & path)
     m_paths->setCurrentIndex(m_paths->count() - 1);
   }
 
+  return;
+}
+
+
+/**
+ */
+void CPathPicker::removePath(void)
+{
+  qDebug() << "deleting path:";
+  m_paths->removeItem(m_paths->currentIndex());
   return;
 }
 

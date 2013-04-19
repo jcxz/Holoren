@@ -9,6 +9,7 @@
 
 
 class QPushButton;
+class QShortcut;
 
 /**
  */
@@ -109,15 +110,27 @@ class CPathPicker : public QWidget
      */
     void addPath(const QString & path);
 
+  signals:
+    /**
+     * This signals is emitted when a user picks a new path
+     */
+    void picked(void);
+
   private slots:
     /**
      */
     void handlePickBtnClicked(void);
 
+    /**
+     * A slot to remove a given path from a list of paths
+     */
+    void removePath(void);
+
   private:
-    EMode m_mode;            /// picker mode
+    EMode m_mode;             /// picker mode
     QComboBox *m_paths;       /// an edit box with the picked path
-    QPushButton *m_pb_pick;  /// a button to change the selection
+    QPushButton *m_pb_pick;   /// a button to change the selection
+    QShortcut *m_del_shortcut; /// a shortcut to delete the item from combobox
 };
 
 #endif // CPATHPICKER_H

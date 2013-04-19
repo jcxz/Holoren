@@ -93,6 +93,10 @@ CHoloPropagLargeEditor::CHoloPropagLargeEditor(const QString & hist_file, QWidge
     /* realod the first config file */
     reload();
   }
+
+  /* connect a signal for automatic reloading each time a
+     new config is picked */
+  connect(m_cfg_file, SIGNAL(picked()), SLOT(reload()));
 }
 
 
@@ -195,7 +199,11 @@ QGroupBox *CHoloPropagLargeEditor::createGroupFrame(void)
 {
   m_entry_Frame = new QCheckBox;
   m_entry_FrameX = new QSpinBox;
+  m_entry_FrameX->setMaximum(INT_MAX);
+
   m_entry_FrameY = new QSpinBox;
+  m_entry_FrameY->setMaximum(INT_MAX);
+
   m_entry_FrameRemove = new QCheckBox;
 
   QFormLayout *fl = new QFormLayout;

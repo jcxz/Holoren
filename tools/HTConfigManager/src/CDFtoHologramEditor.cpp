@@ -93,6 +93,10 @@ CDFtoHologramEditor::CDFtoHologramEditor(const QString & hist_file, QWidget *par
     /* realod the first config file */
     reload();
   }
+
+  /* connect a signal for automatic reloading each time a
+     new config is picked */
+  connect(m_cfg_file, SIGNAL(picked()), SLOT(reload()));
 }
 
 
@@ -191,12 +195,17 @@ QGroupBox *CDFtoHologramEditor::createGroupBinarizeHalftonize(void)
 {
   //m_entry_Binarize = new QRadioButton(tr("Binarize"));
   //m_entry_Halftonize = new QRadioButton(tr("Halftonize"));
+
   m_entry_Binarize = new QCheckBox(tr("Binarize"));
   m_entry_Halftonize = new QCheckBox(tr("Halftonize"));
-
   m_entry_Halftonize->setChecked(true);
+
   m_entry_HalftonizeCellSize = new QSpinBox;
+  m_entry_HalftonizeCellSize->setMaximum(INT_MAX);
+
   m_entry_HalftonizeLevelCount = new QSpinBox;
+  m_entry_HalftonizeLevelCount->setMaximum(INT_MAX);
+
   m_entry_HalftonizeLevelByPixel = new QCheckBox;
 
   QHBoxLayout *hl = new QHBoxLayout;
