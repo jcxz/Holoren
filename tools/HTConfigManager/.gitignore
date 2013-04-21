@@ -4,6 +4,9 @@ bin/*
 # ignore temporary compilation files
 obj/*
 
+# ignore all of the contents of deploy directory
+deploy/*
+
 # ignore generated makefiles
 Makefile
 Makefile.Debug

@@ -83,11 +83,11 @@ const char *getFileName(const char *path)
  */
 const char *getFileName(const std::string & path)
 {
-#ifdef HOLOREN_OS_WIN
-  size_t pos = path.rfind('\\');
-#else
+//#ifdef HOLOREN_OS_WIN
+//  size_t pos = path.rfind('\\');
+//#else
   size_t pos = path.rfind('/');
-#endif
+//#endif
   return (pos == std::string::npos) ? (NULL) : (&path.front() + pos);
 }
 

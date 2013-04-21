@@ -37,4 +37,25 @@ git mv file file.txt
    rename file to file.txt
    
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
+Writing .gitignore:
+
+1) All the rules of .gitignore have to be on separate lines, with comments on
+   their own lines too, .gitignore does NOT support inline comments !!!
+
+2) To negate a rule, the rule has to be preceeded with !
+
+3) The precedence of rules in .gitignore is given by their order. The last rule
+   beats all forward declared rules.
+   
+4) Some use case examples:
+    a) ignoring a directory (which is in project root) and its subdirs:
+        /dir/
+        /dir/*
+        
+    b) exclude all files except XML files from a scm:
+        # first we ignore everything
+        *
+        # then we enable recursing to subdirectories
+        !*/
+        # and then we enable XML files
+        !*.xml        

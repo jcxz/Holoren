@@ -24,8 +24,10 @@ HEADERS += \
   src/CDFtoHologramEditor.h \
   src/CHoloPropagLargeEditor.h \
   src/CMainWindow.h \
-    src/CPathPicker.h \
-    src/CImageViewer.h
+  src/CPathPicker.h \
+  src/CImageViewer.h \
+  src/CSettingsDlg.h \
+  src/CConsoleWidget.h
 
 # Source files
 SOURCES += \
@@ -33,6 +35,8 @@ SOURCES += \
   src/CDFtoHologramEditor.cpp \
   src/CHoloPropagLargeEditor.cpp \
   src/CMainWindow.cpp \
-  src/main.cpp \
-    src/CPathPicker.cpp \
-    src/CImageViewer.cpp
+  src/CPathPicker.cpp \
+  src/CImageViewer.cpp \
+  src/CConsoleWidget.cpp \
+  src/CSettingsDlg.cpp \
+  src/main.cpp
