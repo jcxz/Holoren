@@ -190,6 +190,7 @@ void CMainWindow::showConsole(void)
 {
   CConsoleWidget *console = new CConsoleWidget(m_settings_dlg->getStartScript(), "./ConsoleHistory.xml");
   connect(console, SIGNAL(finished()), SLOT(handleConsoleFinished()));
+  connect(console, SIGNAL(error(QString)), SLOT(handleError(QString)));
   connect(console, SIGNAL(destroyed()), SLOT(deleteLater()));   /// destroy the console once it is closed
   console->resize(700, 400);
   console->show();

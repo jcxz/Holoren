@@ -250,6 +250,8 @@ void CConsoleWidget::handleProcessFinished(int exitCode, QProcess::ExitStatus ex
 {
   qDebug() << "exit code == " << exitCode;
 
+  close();
+
   if (exitStatus == QProcess::CrashExit)
   {
     emit error(tr("DFtoHologram Process crashed"));
@@ -258,13 +260,12 @@ void CConsoleWidget::handleProcessFinished(int exitCode, QProcess::ExitStatus ex
 
   if (exitCode != 0)
   {
-    emit error(tr("Utility exited with error: %1").arg(exitCode));
-    return;
+    qDebug() << "Utility exited with error" << exitCode;
+    //emit error(tr("Utility exited with error: %1").arg(exitCode));
+    //return;
   }
 
   emit finished();
-
-  close();
 
   return;
 }
@@ -303,6 +304,12 @@ void CConsoleWidget::keyPressEvent(QKeyEvent *event)
       QTextEdit::keyPressEvent(event);
     }
   }
+  else if (key == Qt::Key_Home)
+  {
+    QTextCursor c = textCursor();
+    c.setPosition(m_fixed_position);
+    setTextCursor(c);
+  }
   else if (key == Qt::Key_Return)
   {
     // Key_Return je je strede klavesnice
@@ -310,9 +317,16 @@ void CConsoleWidget::keyPressEvent(QKeyEvent *event)
 
     // vypocitaj co je prikaz pre shell a co je uz prompt
     int count = toPlainText().count() - m_fixed_position;
-    m_history.append(toPlainText().right(count));
-    writeToShellProc(m_history.last());
-    m_history_selected = m_history.size();
+    if (count > 0)
+    { // save only if the command is not empty
+      m_history.append(toPlainText().right(count));
+      m_history_selected = m_history.size();
+      writeToShellProc(m_history.last());
+    }
+    else
+    {
+      writeToShellProc("");
+    }
   }
   else if (key == Qt::Key_Up)
   {
