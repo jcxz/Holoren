@@ -187,6 +187,8 @@ void CConsoleWidget::handleStdoutRead(void)
   m_fixed_position = textCursor().position();
 #endif
 
+  qDebug() << "Reading stdOUT";
+
   setTextColor(Qt::black);
   append(m_shell_proc.readAllStandardOutput());
   m_fixed_position = textCursor().position();
@@ -201,6 +203,8 @@ void CConsoleWidget::handleStdoutRead(void)
  */
 void CConsoleWidget::handleStderrRead(void)
 {
+  qDebug() << "Reading stdERR";
+
   setTextColor(Qt::red);
   append(m_shell_proc.readAllStandardError());
   m_fixed_position = textCursor().position();
@@ -388,6 +392,8 @@ void CConsoleWidget::replaceUserCommand(const QString & new_cmd)
 
   /* replace the selected text */
   textCursor().insertText(new_cmd);
+
+  ensureCursorVisible();  // make sure the cursor is really visible
 
   return;
 }
