@@ -20,9 +20,9 @@ static const QColor g_col_user(Qt::darkGreen);
 CConsoleWidget::CConsoleWidget(const QString & start_script, const QString & hist_file, QWidget *parent)
   : QTextEdit(parent),
     m_fixed_position(0),
-    m_shell_proc(),
+    m_history_selected(0),
     m_history(),
-    m_history_selected(0)
+    m_shell_proc()
 {
   setUndoRedoEnabled(false);
   connect(this, SIGNAL(cursorPositionChanged()), SLOT(handleCursorPositionChanged()));

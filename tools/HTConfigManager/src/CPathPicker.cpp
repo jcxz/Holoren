@@ -51,7 +51,7 @@ void CPathPicker::addPath(const QString & path)
 #if defined(Q_OS_WIN) || defined(Q_OS_WIN32)
   int index = m_paths->findText(path);
 #else
-  int index = m_paths->findText(path, Qt::CaseSensitive);
+  int index = m_paths->findText(path);
 #endif
   if (index != -1)
   { // just set the current index if found

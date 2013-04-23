@@ -69,9 +69,9 @@ class CConsoleWidget : public QTextEdit
     void writeToShellProc(QString data);
 
   private:
-    QStringList m_history;   /// history of commands
-    int m_history_selected;  /// currently selected command from history
     int m_fixed_position;    /// determines the fixed position on the line, beyond which the cursor cannot go
+    int m_history_selected;  /// currently selected command from history
+    QStringList m_history;   /// history of commands
     QProcess m_shell_proc;   /// the shell process that will be interpreting the console commands
 };
 

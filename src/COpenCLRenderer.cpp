@@ -73,7 +73,7 @@ bool COpenCLRenderer::open(const char *filename)
     goto error;
   }
 
-  DBG("selected device: " << m_device_id);
+  DBG("selected device:\n" << m_device);
 
   /* create OpenCL context for all GPU devices on the machine */
   //m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);

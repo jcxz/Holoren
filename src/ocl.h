@@ -29,13 +29,37 @@ cl_int getPlatforms(std::vector<cl_platform_id> *platforms);
 
 
 /**
- * A function to get the device information without allocaeting them
+ * A function to get the device information without allocating them
  */
 template<typename T>
 inline cl_int getDeviceInfo(cl_device_id device, cl_device_info info, T *ret)
 {
   HOLOREN_ASSERT(ret != NULL);
   return clGetDeviceInfo(device, info, sizeof(T), (void *) ret, NULL);
+}
+
+
+/**
+ * A function to get the device information, whose type is an array of elements
+ */
+template<typename T>
+cl_int getDeviceInfo(cl_device_id device, cl_device_info info, std::vector<T> *ret)
+{
+  HOLOREN_ASSERT(ret != NULL);
+
+  /* get the size of device info */
+  size_t info_size = 0;
+  cl_int err = clGetDeviceInfo(device, info, 0, NULL, &info_size);
+  if (err != CL_SUCCESS)
+  {
+    return err;
+  }
+
+  /* allocate enough memory */
+  ret->resize(info_size / sizeof(T));
+
+  /* get the actual information */
+  return clGetDeviceInfo(device, info, info_size, &ret->front(), NULL);
 }
 
 

@@ -490,39 +490,66 @@ std::ostream & operator<<(std::ostream & os, cl_platform_id platform)
 std::ostream & operator<<(std::ostream & os, cl_device_id device)
 {
   std::string str_info;
+  std::vector<size_t> size_t_infos;
   cl_uint uint_info;
+  cl_ulong ulong_info;
 
   /* name */
   OpenCL::getDeviceInfo(device, CL_DEVICE_NAME, &str_info);
-  os << "Device name                   : \"" << str_info << "\"" << std::endl;
+  os << "Device name                         : \"" << str_info << "\"" << std::endl;
 
   /* vendor */
   OpenCL::getDeviceInfo(device, CL_DEVICE_VENDOR, &str_info);
-  os << "Device vendor                 : \"" << str_info << "\"" << std::endl;
+  os << "Device vendor                       : \"" << str_info << "\"" << std::endl;
 
   /* vendor id */
   OpenCL::getDeviceInfo(device, CL_DEVICE_VENDOR_ID, &uint_info);
-  os << "Device vendor id              : " << uint_info << std::endl;
+  os << "Device vendor id                    : " << uint_info << std::endl;
 
   /* version */
   OpenCL::getDeviceInfo(device, CL_DEVICE_VERSION, &str_info);
-  os << "Device version                : \"" << str_info << "\"" << std::endl;
+  os << "Device version                      : \"" << str_info << "\"" << std::endl;
 
   /* extensions */
   OpenCL::getDeviceInfo(device, CL_DEVICE_EXTENSIONS, &str_info);
-  os << "Device extensions             : \"" << str_info << "\"" << std::endl;
+  os << "Device extensions                   : \"" << str_info << "\"" << std::endl;
 
   /* available memory */
-  OpenCL::getDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, &str_info);
-  os << "Device global memory size     : \"" << str_info << "\"" << std::endl;
+  OpenCL::getDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, &ulong_info);
+  os << "Device global memory size           : " << ulong_info << " B == " << (ulong_info / 1048576) << " MB" << std::endl;
+
+  /* maximum size of memory object allocation */
+  OpenCL::getDeviceInfo(device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &ulong_info);
+  os << "Device memobj allocation max        : " << ulong_info << " B == " << (ulong_info / 1048576) << " MB" << std::endl;
+
+  /* device maximum work sizes in each dimension */
+  OpenCL::getDeviceInfo(device, CL_DEVICE_MAX_WORK_ITEM_SIZES, &size_t_infos);
+  {
+    os << "Device max. work group items sizes  : (";
+
+    std::vector<size_t>::iterator it = size_t_infos.begin(); 
+    if (it != size_t_infos.end())
+    {
+      os << *it;
+      ++it;
+    }
+
+    while (it != size_t_infos.end())
+    {
+      os << ", " << *it;
+      ++it;
+    }
+
+    os << ")" << std::endl;
+  }
 
   /* maximum number of compute units */
   OpenCL::getDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS, &uint_info);
-  os << "Device max compute units      : " << uint_info << std::endl;
+  os << "Device max. compute units           : " << uint_info << std::endl;
 
   /* device's preferred vector width (in chars) */
   OpenCL::getDeviceInfo(device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, &uint_info);
-  os << "Device preferred vector width : " << uint_info << " (in chars)" << std::endl;
+  os << "Device preferred vector width       : " << uint_info << " (in chars)" << std::endl;
 
   return os;
 }
