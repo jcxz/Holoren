@@ -37,6 +37,7 @@ set(HOLOREN_SOURCES
   src/Debug.h
   src/Debug.cpp
   src/CTimer.h
+  src/CTimer.cpp
   src/CSharedDataPtr.h
   src/Geometry.h
   src/COpticalField.h
@@ -152,6 +153,7 @@ set(TEST_TIMER_UNIX_SOURCES
   src/config.h
   src/global.h
   src/CTimer.h
+  src/CTimer.cpp
   tests/test_timer_unix.cpp
 )
 

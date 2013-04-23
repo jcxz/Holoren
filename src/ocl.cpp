@@ -512,6 +512,10 @@ std::ostream & operator<<(std::ostream & os, cl_device_id device)
   OpenCL::getDeviceInfo(device, CL_DEVICE_EXTENSIONS, &str_info);
   os << "Device extensions             : \"" << str_info << "\"" << std::endl;
 
+  /* available memory */
+  OpenCL::getDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, &str_info);
+  os << "Device global memory size     : \"" << str_info << "\"" << std::endl;
+
   /* maximum number of compute units */
   OpenCL::getDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS, &uint_info);
   os << "Device max compute units      : " << uint_info << std::endl;
