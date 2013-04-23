@@ -304,6 +304,25 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
 }
 
 
+/**
+ * A debug function to display current platform data type sizes
+ */
+#ifdef HOLOREN_DEBUG
+static void testPlatform(void)
+{
+  DBG("Platform sizes:");
+  DBG("sizeof(tFPType) == " << sizeof(tFPType) << " B");
+  DBG("sizeof(COpticalField::CComplex) == " << sizeof(COpticalField::CComplex) << " B");
+  DBG("sizeof(SPointSource) == " << sizeof(SPointSource) << " B");
+  DBG("");
+
+  return;
+}
+#else
+#  define testPlatform()  // else undefine the function
+#endif
+
+
 
 /////////////////////
 //// Main Program
@@ -318,6 +337,8 @@ int main(int argc, char *argv[])
   }
 
   DBG(params);
+
+  testPlatform();
 
   DBG_T_START(g_timer, "** Starting point cloud conversion:\n");
 
@@ -335,9 +356,9 @@ int main(int argc, char *argv[])
   CPointCloud pc;
   if (!rw->read(&pc))
   {
-    std::cerr << "Failed to convert the file "
+    std::cerr << "Failed to convert the file \""
               << params.ifilename
-              << "the point cloud: "
+              << "\" to point cloud: "
               << rw->getErrorMsg()
               << std::endl;
     delete rw;

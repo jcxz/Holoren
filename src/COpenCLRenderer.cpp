@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <fstream>
 #include <cmath>
+#include <mutex>
 
 #ifndef M_PI
 # define M_PI 3.1415926535897932384626433832795f
@@ -24,6 +25,29 @@ static const char *DEF_CL_SOURCE = "../../src/OpenCL/holoren.cl";
 /** Kernel function (a main entry point to OpenCL program) */
 static const char *KERNEL_NAME = "compObjWave";
 
+/** a mutex to synchronize output in nofifyFunc called by OpenCL */
+static std::mutex g_nofify_func_mutex;
+
+
+
+
+/**
+ * A helper function that is passed as an OpenCL callback
+ * and is used for printing additional OpenCL errors,
+ * that occur while it is running
+ *
+ * Note that the calling convention is written in front of function name in C++
+ */
+static void CL_CALLBACK nofityFunc(const char *errinfo,
+                                   const void *private_info,
+                                   size_t cb,
+                                   void *user_data)
+{
+  g_nofify_func_mutex.lock();
+  std::cerr << "notifyFunc: " << errinfo << std::endl;
+  g_nofify_func_mutex.unlock();
+  return;
+}
 
 
 /**
@@ -50,7 +74,8 @@ bool COpenCLRenderer::open(const char *filename)
   }
 
   /* create OpenCL context for all GPU devices on the machine */
-  m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
+  //m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
+  m_context = clCreateContext(NULL, 1, &m_device, &nofityFunc, NULL, &err);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
@@ -211,6 +236,8 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     clReleaseMemObject(pc_buf);
     return false;
   }
+
+  //clFinish(m_cmd_queue);
 
   /* read the result */
   err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
