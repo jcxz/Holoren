@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3")
 # include a non-standard module from a local directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
-# find pcap libraries nad header files
+# find required libraries and header files
 find_package(LibXml2 REQUIRED)
 find_package(SDL_image REQUIRED)
 find_package(SDL REQUIRED)

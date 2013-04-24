@@ -24,7 +24,12 @@ PKGCONFIG += sdl
 unix:QMAKE_CXXFLAGS += \
   -std=c++11 \
   -pedantic \
-  -Wextra
+  -Wextra \
+  -DHOLOREN_DEBUG_PERF
+
+unix:QMAKE_CXXFLAGS_DEBUG += \
+  -DHOLOREN_DEBUG \
+  -DHOLOREN_DEBUG_KERNEL
 
 #
 DEPENDPATH += .
