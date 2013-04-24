@@ -37,6 +37,16 @@ git mv file file.txt
    rename file to file.txt
    
 --------------------------------------------------------------------------------
+git diff HEAD file.txt
+
+   find out the differences between local `file.txt` and the `file.txt`
+   from repository
+
+git diff HEAD~2 file.txt
+
+  differences between current `file.txt` and `file.txt` two revisions back
+
+--------------------------------------------------------------------------------
 Writing .gitignore:
 
 1) All the rules of .gitignore have to be on separate lines, with comments on

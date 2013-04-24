@@ -11,7 +11,7 @@
   <Target>out.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
-  <Frame>false</Frame>
+  <Frame>true</Frame>
   <FrameX>1024</FrameX>
   <FrameY>1024</FrameY>
   <FrameRemove>false</FrameRemove>
