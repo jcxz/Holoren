@@ -51,7 +51,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(MY_LIB_PATH)\libxml2-2.7.8.win32\include;$(MY_LIB_PATH)\iconv-1.9.2.win32\include;$(MY_LIB_PATH)\zlib-1.2.5\include;$(MY_LIB_PATH)\SDL_image-1.2.12\include;$(MY_LIB_PATH)\SDL-1.2.15\include;$(AMDAPPSDKROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DHOLOREN_DEBUG  /DHOLOREN_DEBUG_PERF %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DHOLOREN_DEBUG  /DHOLOREN_DEBUG_PERF /DHOLOREN_DEBUG_KERNEL %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -89,7 +89,9 @@
     <ClCompile Include="..\..\..\src\CPointCloud.cpp" />
     <ClCompile Include="..\..\..\src\CPointCloudRWFactory.cpp" />
     <ClCompile Include="..\..\..\src\CSimpleRenderer.cpp" />
+    <ClCompile Include="..\..\..\src\CTimer.cpp" />
     <ClCompile Include="..\..\..\src\CXMLPointCloudRW.cpp" />
+    <ClCompile Include="..\..\..\src\Debug.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\ocl.cpp" />
     <ClCompile Include="..\..\..\src\Utils.cpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="..\..\..\src\CSimpleRenderer.h" />
     <ClInclude Include="..\..\..\src\CTimer.h" />
     <ClInclude Include="..\..\..\src\CXMLPointCloudRW.h" />
+    <ClInclude Include="..\..\..\src\Debug.h" />
     <ClInclude Include="..\..\..\src\Geometry.h" />
     <ClInclude Include="..\..\..\src\global.h" />
     <ClInclude Include="..\..\..\src\ocl.h" />
@@ -116,6 +119,7 @@
   <ItemGroup>
     <None Include="..\..\..\src\OpenCL\holoren.cl" />
     <None Include="..\..\..\src\OpenCL\holoren_debug.cl" />
+    <None Include="..\..\..\src\OpenCL\holoren_obj_wave.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -21,6 +21,11 @@
 /** Compiler detection */
 #if defined(_MSC_VER)
 # define HOLOREN_CC_MSVC
+# if (_MSC_VER >= 1600 && _MSC_VER < 1700)
+#  define HOLOREN_CC_MSVC2010
+# elif (_MSC_VER >= 1500 && _MSC_VER < 1600)
+#  define HOLOREN_CC_MSVC2008
+# endif
 #elif defined(__GNUC__)
 # define HOLOREN_CC_GCC
 #else

@@ -48,8 +48,8 @@ __kernel void compObjWave_small(__global float *pc,    /// a point cloud with po
 __kernel void compObjWave_big(__global float *pc,    /// a point cloud with point sources
                               uint pc_size,          /// the number of elements in point cloud
                               __global float2 *of,   /// an output optical field (float2 because this is an array of complex numbers)
-                              uint of_row_offset,    /// offset in row of the resulting optical field
-                              uint of_col_offset,    /// offset in column of the resulting optical field
+                              int of_row_offset,     /// offset in row of the resulting optical field
+                              int of_col_offset,     /// offset in column of the resulting optical field
                               float hologram_z,      /// the z depth of hologram
                               float k,               /// wavenumber
                               float pitch,           /// pitch between samples
@@ -84,13 +84,4 @@ __kernel void compObjWave_big(__global float *pc,    /// a point cloud with poin
 
   // put the result to a correct place in global memory
   of[row * get_global_size(1) + col] = sample;
-
-#if 0
-  size_t gid0 = get_global_id(0);
-  size_t gs1 = get_global_size(1);
-  size_t gid1 = get_global_id(1);
-  size_t index = gid0 * gs1 + gid1;
-  of[index] = sample;
-  //of[get_global_id(0) * get_global_size(1) + get_global_id(1)] = sample;
-#endif
 }

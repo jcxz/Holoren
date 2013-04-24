@@ -2,10 +2,15 @@
  * Implementation of timing functionality
  */
 
+#include "global.h"
 #include "CTimer.h"
 
 #include <cmath>
 
+/* a workaround for MSVC 2010 */
+#ifdef HOLOREN_CC_MSVC2010
+# define fmod(x, y) fmod(static_cast<double>((x)), static_cast<double>((y)))
+#endif
 
 
 /**

@@ -11,7 +11,6 @@
 #include <cerrno>
 #include <fstream>
 #include <cmath>
-#include <mutex>
 
 #ifndef M_PI
 # define M_PI 3.1415926535897932384626433832795f
@@ -28,29 +27,7 @@ static const char *KERNEL_ALGORITHM2 = "compObjWave_small";
 /** Kernel function (a main entry point to OpenCL program) for the third algorithm */
 static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
 
-/** a mutex to synchronize output in nofifyFunc called by OpenCL */
-static std::mutex g_nofify_func_mutex;
 
-
-
-
-/**
- * A helper function that is passed as an OpenCL callback
- * and is used for printing additional OpenCL errors,
- * that occur while it is running
- *
- * Note that the calling convention is written in front of function name in C++
- */
-static void CL_CALLBACK nofityFunc(const char *errinfo,
-                                   const void *private_info,
-                                   size_t cb,
-                                   void *user_data)
-{
-  g_nofify_func_mutex.lock();
-  std::cerr << "notifyFunc: " << errinfo << std::endl;
-  g_nofify_func_mutex.unlock();
-  return;
-}
 
 
 /**
@@ -90,8 +67,7 @@ bool COpenCLRenderer::open(const char *filename)
   // TODO
 
   /* create OpenCL context for all GPU devices on the machine */
-  //m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
-  m_context = clCreateContext(NULL, 1, &m_device, &nofityFunc, NULL, &err);
+  m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
@@ -124,6 +100,12 @@ bool COpenCLRenderer::open(const char *filename)
     /* enable debugging options on intel platform */
     if (flags & OpenCL::OPT_PLATFORM_PREFER_INTEL)
     {
+	  /* ATTENTION: when debugging with intel OpenCL SDK,
+	                this MUST be the FULL path to the OpenCL kernel,
+					i.e. this cannot be a relative path like "../../my_kernel.cl".
+					It MUST be "C:\kernels\my_kernel.cl"
+					Otherwise intel's debugger will silently fail to break into
+					kernel's code */
       options += " -s \"";
       options += filename;
       options += '\"';
@@ -425,6 +407,15 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
     return false;
   }
 
+#ifdef HOLOREN_DEBUG_KERNEL
+  err = clFinish(m_cmd_queue);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return false;
+  }
+#endif
+
   /* read out results */
   err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
   if (err != CL_SUCCESS)
@@ -444,12 +435,13 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   DBG("Algorithm 3");
 
   /* a macro to set the given kernel argument type */
+  // the static_cast<> is for msvc 2010, which lacks the proper support of c++11
   #define SET_ARG(num, arg) \
     err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
     if (err != CL_SUCCESS) \
     { \
       m_err_msg = "Argument "; \
-      m_err_msg += std::to_string(num);\
+      m_err_msg += std::to_string(static_cast<long long>(num));\
       m_err_msg += ": "; \
       m_err_msg += OpenCL::clErrToStr(err); \
       return false; \
@@ -501,8 +493,8 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   SET_ARG(7, corner_y);
 #endif
 
-  cl_uint row_offset = 0;
-  cl_uint col_offset = 0;
+  cl_int row_offset = 0;
+  cl_int col_offset = 0;
   size_t of_byte_size = of->getByteSize();
  
 #if 0
@@ -555,6 +547,15 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
       m_err_msg = OpenCL::clErrToStr(err);
       return false;
     }
+
+#ifdef HOLOREN_DEBUG_KERNEL
+    err = clFinish(m_cmd_queue);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      return false;
+    }
+#endif
 
     /* read the result */
     err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of_byte_size - chunk, (((char *) of->data()) + chunk), 0, NULL, NULL);
