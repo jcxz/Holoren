@@ -18,6 +18,12 @@
 class COpenCLRenderer : public CBaseRenderer
 {
   public:
+    enum EAlgorithmType {
+      ALGORITHM_TYPE_2,
+      ALGORITHM_TYPE_3
+    };
+
+  public:
     /**
      * Default constructor
      */
@@ -29,6 +35,7 @@ class COpenCLRenderer : public CBaseRenderer
         m_kernel(),
         m_device(),
         m_max_chunk_size(0),
+        m_alg_type(),
         m_err_msg("")
     {
     }
@@ -39,6 +46,12 @@ class COpenCLRenderer : public CBaseRenderer
     virtual ~COpenCLRenderer(void)
     {
       close();
+    }
+
+    void setAlgorithmType(EAlgorithmType type)
+    {
+      m_alg_type = type;
+      return;
     }
 
     /* implement the IRenderer interface */
@@ -104,6 +117,7 @@ class COpenCLRenderer : public CBaseRenderer
     cl_kernel m_kernel;            /// kernel that will be executed (will be sent to device for execution)
     cl_device_id m_device;         /// the device used
     cl_ulong m_max_chunk_size;     /// determines the maximum size amount of data that can be allocated and processed at once by the device
+    EAlgorithmType m_alg_type;     /// the type of algorithm to be used
     std::string m_err_msg;         /// a string to hold the error message and a build log
 };
 

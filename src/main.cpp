@@ -26,9 +26,10 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
                                     "          -r simple|opencl|none\n"
+                                    "          -a alg2|alg3\n"
                                     "          -f cl_source_file\n";
 
-/** a timer to meassure exection time of different sections of code */
+/** a timer to meassure execution time of different sections of code */
 static CTimer g_timer;
 
 
@@ -43,15 +44,16 @@ enum ERendererType
 
 /* a structure of command line arguments */
 typedef struct {
-  const char *ifilename;   /// input file
-  const char *ofilename;   /// output file
-  unsigned int of_rows;    /// optical field number of rows
-  unsigned int of_cols;    /// optical field number of columns
-  const char *cl_source;   /// the location of OpenCL source file
-  ERendererType renderer;  /// the type of rendering engine
-  double sampling;         /// pitch between individual samples
-  double lambda;           /// light wavelength
-  double hologram_z;       /// hologram placement
+  const char *ifilename;                     /// input file
+  const char *ofilename;                     /// output file
+  unsigned int of_rows;                      /// optical field number of rows
+  unsigned int of_cols;                      /// optical field number of columns
+  const char *cl_source;                     /// the location of OpenCL source file
+  ERendererType renderer;                    /// the type of rendering engine
+  COpenCLRenderer::EAlgorithmType alg_type;  /// the type of rendering algorithm that will be used
+  double sampling;                           /// pitch between individual samples
+  double lambda;                             /// light wavelength
+  double hologram_z;                         /// hologram placement
 } tParams;
 
 
@@ -59,6 +61,26 @@ typedef struct {
  * A function to convert ERendererType enum to string
  */
 static const char *renToStr(ERendererType type)
+{
+  static const char *strings[] = {
+    "Simple",
+    "OpenCL",
+    "None"
+  };
+
+  if ((type < REN_SIMPLE) || (type > REN_NONE))
+  {
+    return "Unknown";
+  }
+
+  return strings[type];
+}
+
+
+/**
+ * A function to convert COpenCLRenderer::EAlgorithmType to string
+ */
+static const char *algToStr(COpenCLRenderer::EAlgorithmType type)
 {
   static const char *strings[] = {
     "Simple",
@@ -88,6 +110,7 @@ std::ostream & operator<<(std::ostream & os, const tParams & params)
   os << "light wavelength      : " << params.lambda                                            << std::endl;
   os << "hologram z            : " << params.hologram_z                                        << std::endl;
   os << "Rendering engine      : " << renToStr(params.renderer)                                << std::endl;
+  os << "Rendering algorithm   : " << algToStr(params.alg_type)                                << std::endl;
   os << "OpenCL source file    : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
 
   return os;
@@ -109,6 +132,7 @@ static void resetParams(tParams *params)
   params->lambda = 630e-9;
   params->hologram_z = 0.0f;
   params->renderer = REN_SIMPLE;
+  params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
   params->cl_source = NULL;
 
   return;
@@ -187,6 +211,28 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
       else
       {
         std::cerr << "Uknown rendering engine: \"" << argv[i] << "\"" << std::endl;
+        return false;
+      }
+    }
+    else if (CMP_SHORT_OPT(argv[i], 'a'))
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Option -a requires an argument" << std::endl;
+        return false;
+      }
+
+      if (Utils::strCaseCmp(argv[i], "alg2") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
+      }
+      else if (Utils::strCaseCmp(argv[i], "alg3") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_3;
+      }
+      else
+      {
+        std::cerr << "Uknown rendering algorithm: \"" << argv[i] << "\"" << std::endl;
         return false;
       }
     }
@@ -323,6 +369,37 @@ static void testPlatform(void)
 #endif
 
 
+/**
+ * A function to initialize a correct renderer
+ */
+static CBaseRenderer *createRenderer(const tParams & params)
+{
+  switch (params.renderer)
+  {
+    case REN_SIMPLE:
+      {
+        std::cout << "Renderer engine: Simple" << std::endl;
+        return new CSimpleRenderer(params.hologram_z);
+      }
+      break;
+
+    case REN_OPENCL:
+      {
+        std::cout << "Renderer engine: OpenCL" << std::endl;
+        COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
+        ren->setAlgorithmType(params.alg_type);
+        return ren;
+      }
+      break;
+
+    case REN_NONE:
+      std::cout << "Renderer engine: None" << std::endl;
+      return NULL;
+  }
+
+  return NULL;
+}
+
 
 /////////////////////
 //// Main Program
@@ -375,30 +452,14 @@ int main(int argc, char *argv[])
   /* set up renderer */
   std::cout << "Setting up renderer" << std::endl;
 
-  CBaseRenderer *p_ren = NULL;
+  DBG_T_START(g_timer, "** Starting renderer setup:\n");
 
-  switch (params.renderer)
+  CBaseRenderer *p_ren = createRenderer(params);
+  if (p_ren == NULL)
   {
-    case REN_SIMPLE:
-      p_ren = new CSimpleRenderer(params.hologram_z);
-      std::cout << "Renderer engine: Simple" << std::endl;
-      break;
-
-    case REN_OPENCL:
-      p_ren = new COpenCLRenderer(params.hologram_z);
-      std::cout << "Renderer engine: OpenCL" << std::endl;
-      break;
-
-    case REN_NONE:
-      std::cout << "Renderer engine: None" << std::endl;
-      std::cout << "No rendering done" << std::endl;
-      return 0;
+    std::cerr << "Failed to create renderer. No rendering done." << std::endl;
+    return 1;
   }
-
-  /* render the object wave from scene */
-  std::cout << "Rendering object wave" << std::endl;
-  
-  DBG_T_START(g_timer, "** Starting rendering:\n");
 
   COpticalField of(params.of_rows, params.of_cols, params.lambda, params.sampling);
 
@@ -409,6 +470,13 @@ int main(int argc, char *argv[])
     delete p_ren;
     return 1;
   }
+  
+  DBG_T_END(g_timer, "** Finished renderer setup: ");
+  
+  /* render the object wave from scene */
+  std::cout << "Rendering object wave" << std::endl;
+  
+  DBG_T_START(g_timer, "** Starting rendering:\n");
 
   if (!p_ren->renderObjectWave(pc, &of))
   {

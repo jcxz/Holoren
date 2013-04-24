@@ -20,10 +20,13 @@
 
 
 /** Kernel file */
-static const char *DEF_CL_SOURCE = "../../src/OpenCL/holoren.cl";
+static const char *DEF_CL_SOURCE = "holoren_obj_wave.cl";
 
-/** Kernel function (a main entry point to OpenCL program) */
-static const char *KERNEL_NAME = "compObjWave";
+/** Kernel function (a main entry point to OpenCL program) for the second algorithm */
+static const char *KERNEL_ALGORITHM2 = "compObjWave_small";
+
+/** Kernel function (a main entry point to OpenCL program) for the third algorithm */
+static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
 
 /** a mutex to synchronize output in nofifyFunc called by OpenCL */
 static std::mutex g_nofify_func_mutex;
@@ -57,11 +60,11 @@ bool COpenCLRenderer::open(const char *filename)
   /* make sure all is reset before initializing something */
   std::string program_buf;
   cl_int err = CL_SUCCESS;
-//#ifdef HOLOREN_DEBUG_KERNEL
-//  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
-//#else
+#ifdef HOLOREN_DEBUG_KERNEL
+  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
+#else
   uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
-//#endif
+#endif
   m_err_msg = "";
 
   /* select the most suitable device */
@@ -121,7 +124,7 @@ bool COpenCLRenderer::open(const char *filename)
     /* enable debugging options on intel platform */
     if (flags & OpenCL::OPT_PLATFORM_PREFER_INTEL)
     {
-      options += "-s \"";
+      options += " -s \"";
       options += filename;
       options += '\"';
     }
@@ -147,11 +150,21 @@ bool COpenCLRenderer::open(const char *filename)
   }
 
   /* create kernels from program */
-  m_kernel = clCreateKernel(m_program, KERNEL_NAME, &err);
-  if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
-    goto error;
+    const char *kernel = "";
+    switch (m_alg_type)
+    {
+      case ALGORITHM_TYPE_2: kernel = KERNEL_ALGORITHM2; break;
+      case ALGORITHM_TYPE_3: kernel = KERNEL_ALGORITHM3; break;
+      default: m_err_msg = "Unknown algorithm type"; goto error;
+    }
+
+    m_kernel = clCreateKernel(m_program, kernel, &err);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      goto error;
+    }
   }
 
   /* create command queue */
@@ -248,20 +261,20 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     clReleaseMemObject(pc_buf);
     return false;
   }
-
+  
   /* render the hologram */
-  if (!renderAlgorithm3(pc, pc_buf, of, of_buf))
-  //if (!renderAlgorithm2(pc, pc_buf, of, of_buf))
+  bool ret = false;
+  switch (m_alg_type)
   {
-    clReleaseMemObject(of_buf);
-    clReleaseMemObject(pc_buf);
-    return false;
+    case ALGORITHM_TYPE_2: ret = renderAlgorithm2(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_3: ret = renderAlgorithm3(pc, pc_buf, of, of_buf); break;
+    default: m_err_msg = "Unknown algorithm type"; break;
   }
 
   clReleaseMemObject(of_buf);
   clReleaseMemObject(pc_buf);
 
-  return true;
+  return ret;
 }
 
 
@@ -465,6 +478,7 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   DBG("corner_x   : " << corner_x);
   DBG("corner_y   : " << corner_y);
 
+#if 1
   SET_ARG(0, pc_buf);
   SET_ARG(1, pc_size);
   SET_ARG(2, of_buf);
@@ -474,10 +488,35 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   SET_ARG(7, pitch);
   SET_ARG(8, corner_x);
   SET_ARG(9, corner_y);
+#endif
+
+#if 0
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, pc_size);
+  SET_ARG(2, of_buf);
+  SET_ARG(3, hologram_z);
+  SET_ARG(4, k);
+  SET_ARG(5, pitch);
+  SET_ARG(6, corner_x);
+  SET_ARG(7, corner_y);
+#endif
 
   cl_uint row_offset = 0;
   cl_uint col_offset = 0;
   size_t of_byte_size = of->getByteSize();
+ 
+#if 0
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, pc_size);
+  SET_ARG(2, of_buf);
+  SET_ARG(3, row_offset);
+  SET_ARG(4, col_offset);
+  SET_ARG(5, hologram_z);
+  SET_ARG(6, k);
+  SET_ARG(7, pitch);
+  SET_ARG(8, corner_x);
+  SET_ARG(9, corner_y);
+#endif
 
   /* break the optical field into chunks that can be processed by gpu and
      render the object wave of hologram */
@@ -489,8 +528,10 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     DBG("row_offset           : " << (row_offset));
     DBG("col_offset           : " << (col_offset));
 
+#if 1
     SET_ARG(3, row_offset);
     SET_ARG(4, col_offset);
+#endif
 
     // this is an array which defines the number of items in each nested loop
     size_t global_work_size[2] = { (size_t) rows - row_offset, (size_t) cols - col_offset };
@@ -541,6 +582,8 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   HOLOREN_ASSERT(filename != NULL);
   HOLOREN_ASSERT(program_buf != NULL);
 
+  DBG("OpenCL source: " << filename);
+
   /* open the input file */
   std::ifstream is(filename, std::ifstream::binary);
   if (!is)
@@ -554,7 +597,7 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   long program_size = is.tellg();
   is.seekg(0, is.beg);
 
-  DBG("Kernel size: " << program_size);
+  DBG("Source size: " << program_size);
 
   /* this check protects from accessing invalid memory
      in is.read() (as the size of program buf will be changed to 0) */
@@ -572,8 +615,10 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   /* read contents of the file */
   is.read(&program_buf->front(), program_size);
    
+#ifdef HOLOREN_HEAVY_DEBUG
   DBG("Kernel Program:\n" << *program_buf);
-  
+#endif
+
   if (!is)
   {
     m_err_msg = "Failed to read OpenCL program";
