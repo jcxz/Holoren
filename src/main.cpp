@@ -407,10 +407,16 @@ int main(int argc, char *argv[])
     std::cerr << "Failed to initialize " << renToStr(params.renderer) << " renderer" << std::endl;
     std::cerr << p_ren->getError() << std::endl;
     delete p_ren;
-    return false;
+    return 1;
   }
 
-  p_ren->renderObjectWave(pc, &of);
+  if (!p_ren->renderObjectWave(pc, &of))
+  {
+    std::cerr << "Failed to render object wave: " << p_ren->getError() << std::endl;
+    p_ren->close();
+    delete p_ren;
+    return 1;
+  }
 
   p_ren->close();
 

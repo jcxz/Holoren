@@ -28,6 +28,7 @@ class COpenCLRenderer : public CBaseRenderer
         m_program(),
         m_kernel(),
         m_device(),
+        m_max_chunk_size(0),
         m_err_msg("")
     {
     }
@@ -66,6 +67,12 @@ class COpenCLRenderer : public CBaseRenderer
      * The second rendering algorithm
      */
     bool renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+
+    /**
+     * The third rendering algorithm, can render large holograms, by dividing the calculation
+     * in several smaller chunks
+     */
+    bool renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
     
     /**
      * A method to read the opencl program from a file
@@ -96,6 +103,7 @@ class COpenCLRenderer : public CBaseRenderer
     cl_program m_program;          /// OpenCL program (destroying it before the computations are done, won't probably do any good)
     cl_kernel m_kernel;            /// kernel that will be executed (will be sent to device for execution)
     cl_device_id m_device;         /// the device used
+    cl_ulong m_max_chunk_size;     /// determines the maximum size amount of data that can be allocated and processed at once by the device
     std::string m_err_msg;         /// a string to hold the error message and a build log
 };
 

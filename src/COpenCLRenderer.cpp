@@ -75,6 +75,17 @@ bool COpenCLRenderer::open(const char *filename)
 
   DBG("selected device:\n" << m_device);
 
+  /* get the value of how many bytes of data can be allocated (and processed) at once by GPU */
+  err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_max_chunk_size);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    goto error;
+  }
+
+  /* calculate the number of pixels in row and column for a given chunk size */
+  // TODO
+
   /* create OpenCL context for all GPU devices on the machine */
   //m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
   m_context = clCreateContext(NULL, 1, &m_device, &nofityFunc, NULL, &err);
@@ -201,6 +212,14 @@ std::string COpenCLRenderer::getError(void) const
 
 /**
  */
+bool COpenCLRenderer::renderHologram(const CPointCloud & pc, COpticalField *of)
+{
+  return true;
+}
+
+
+/**
+ */
 bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of)
 {
   /* intialize local variables */
@@ -221,7 +240,8 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     return false;
   }
 
-  cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
+  //cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
+  cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, m_max_chunk_size, NULL, &err);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
@@ -229,23 +249,10 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     return false;
   }
 
-  //of->zero();
-
-  /* render the object wave */
-  if (!renderAlgorithm2(pc, pc_buf, of, of_buf))
+  /* render the hologram */
+  if (!renderAlgorithm3(pc, pc_buf, of, of_buf))
+  //if (!renderAlgorithm2(pc, pc_buf, of, of_buf))
   {
-    clReleaseMemObject(of_buf);
-    clReleaseMemObject(pc_buf);
-    return false;
-  }
-
-  //clFinish(m_cmd_queue);
-
-  /* read the result */
-  err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = OpenCL::clErrToStr(err);
     clReleaseMemObject(of_buf);
     clReleaseMemObject(pc_buf);
     return false;
@@ -254,14 +261,6 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   clReleaseMemObject(of_buf);
   clReleaseMemObject(pc_buf);
 
-  return true;
-}
-
-
-/**
- */
-bool COpenCLRenderer::renderHologram(const CPointCloud & pc, COpticalField *of)
-{
   return true;
 }
 
@@ -327,6 +326,14 @@ bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, CO
                                0,
                                NULL,
                                NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return false;
+  }
+
+  /* read out results */
+  err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
   if (err != CL_SUCCESS)
   {
     m_err_msg = OpenCL::clErrToStr(err);
@@ -404,6 +411,124 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
     m_err_msg = OpenCL::clErrToStr(err);
     return false;
   }
+
+  /* read out results */
+  err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = OpenCL::clErrToStr(err);
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ */
+bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+{
+  DBG("Algorithm 3");
+
+  /* a macro to set the given kernel argument type */
+  #define SET_ARG(num, arg) \
+    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
+    if (err != CL_SUCCESS) \
+    { \
+      m_err_msg = "Argument "; \
+      m_err_msg += std::to_string(num);\
+      m_err_msg += ": "; \
+      m_err_msg += OpenCL::clErrToStr(err); \
+      return false; \
+    }
+
+  cl_int err = CL_SUCCESS;
+
+  /* set kernel arguments */
+  cl_uint pc_size = pc.size();
+  cl_int rows = of->getNumRows();
+  cl_int cols = of->getNumCols();
+  cl_float hologram_z = (cl_float) m_hologram_z;
+  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
+  cl_float pitch = of->getPitch();
+  cl_float corner_x = -(cols - 1) * pitch / 2;
+  cl_float corner_y = -(rows - 1) * pitch / 2;
+  
+  DBG("pc_size    : " << pc_size);
+  DBG("rows       : " << rows);
+  DBG("cols       : " << cols);
+  DBG("hologram_z : " << hologram_z);
+  DBG("k          : " << k);
+  DBG("sampling   : " << pitch);
+  DBG("size_x     : " << (cols - 1) * pitch);
+  DBG("size_y     : " << (rows - 1) * pitch);
+  DBG("corner_x   : " << corner_x);
+  DBG("corner_y   : " << corner_y);
+
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, pc_size);
+  SET_ARG(2, of_buf);
+
+  SET_ARG(5, hologram_z);
+  SET_ARG(6, k);
+  SET_ARG(7, pitch);
+  SET_ARG(8, corner_x);
+  SET_ARG(9, corner_y);
+
+  cl_uint row_offset = 0;
+  cl_uint col_offset = 0;
+  size_t of_byte_size = of->getByteSize();
+
+  /* break the optical field into chunks that can be processed by gpu and
+     render the object wave of hologram */
+  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += m_max_chunk_size)
+  {
+    DBG("chunk                : " << chunk);
+    DBG("of_byte_size - chunk : " << (of_byte_size - chunk));
+    DBG("of->data() + chunk   : " << (unsigned long long int) ((const char *) (of->data()) + chunk));
+    DBG("row_offset           : " << (row_offset));
+    DBG("col_offset           : " << (col_offset));
+
+    SET_ARG(3, row_offset);
+    SET_ARG(4, col_offset);
+
+    // this is an array which defines the number of items in each nested loop
+    size_t global_work_size[2] = { (size_t) rows - row_offset, (size_t) cols - col_offset };
+
+    DBG("global_work_size[0] == " << global_work_size[0]);
+    DBG("global_work_size[1] == " << global_work_size[1]);
+    DBG("");
+
+    /* execute kernel */
+    err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
+                                 m_kernel,          // the kernel to be excuted
+                                 2,                 // the number of nested for loops that OpenCL will generate
+                                 NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                                 global_work_size,  // the number of items in each nested for loop
+                                 NULL,              // this is a local work size, not really sure how it relates to the above parameters
+                                 0,
+                                 NULL,
+                                 NULL);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      return false;
+    }
+
+    /* read the result */
+    err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of_byte_size - chunk, (((char *) of->data()) + chunk), 0, NULL, NULL);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      return false;
+    }
+
+    row_offset += 4096;
+    col_offset += 4096;
+  }
+
+  /* to cancel kernel argument setting macro */
+  #undef SET_ARG
 
   return true;
 }
