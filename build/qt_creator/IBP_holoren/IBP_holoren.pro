@@ -2,30 +2,20 @@
 #                                                                              #
 # Copyright (C) 2012-2013 Matus Fedorko <xfedor01@stud.fit.vutbr.cz>           #
 #                                                                              #
-# This file is part of Pexeso3D.                                               #
-#                                                                              #
-# Pexeso3D is free software: you can redistribute it and/or modify             #
-# it under the terms of the GNU General Public License as published by         #
-# the Free Software Foundation, either version 3 of the License, or            #
-# (at your option) any later version.                                          #
-#                                                                              #
-# Pexeso3D is distributed in the hope that it will be useful,                  #
-# but WITHOUT ANY WARRANTY; without even the implied warranty of               #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 #
-# GNU General Public License for more details.                                 #
-#                                                                              #
-# You should have received a copy of the GNU General Public License            #
-# along with Pexeso3D. If not, see <http://www.gnu.org/licenses/>.             #
 #                                                                              #
 ################################################################################
 
-TEMPLATE = app    # project type
-TARGET = holoren  # the application name
-DESTDIR = bin     # the destination directory
-MOC_DIR = obj     # meta object compoliler directory
-RCC_DIR = obj     # a directory for compiled resource files
-OBJECTS_DIR = obj # a directory for temporary compile output
-QT -= core gui    # exclude qt libraries
+TEMPLATE = app      # project type
+TARGET = holoren    # the application name
+DESTDIR = bin       # the destination directory
+MOC_DIR = obj       # meta object compoliler directory
+RCC_DIR = obj       # a directory for compiled resource files
+OBJECTS_DIR = obj   # a directory for temporary compile output
+QT -= core gui      # exclude qt libraries
+CONFIG -= qt        # no Qt
+CONFIG += console   # this isn't graphical application (no graphic window)
+CONFIG += link_pkgconfig
+PKGCONFIG += sdl
 #CONFIG += qt debug
 
 # tweak compilation flags for gcc.
@@ -48,6 +38,11 @@ win32:INCLUDEPATH += \
   $(MY_LIB_PATH)/SDL_image-1.2.12/include \
   $(MY_LIB_PATH)/SDL-1.2.15/include \
   $(AMDAPPSDKROOT)/include
+
+unix:INCLUDEPATH += \
+  ../../../src  \
+  /usr/include/libxml2 \
+  $(AMDAPPSDKROOT)/include
   
 # additional library directories
 win32:LIBS = \
@@ -65,39 +60,50 @@ win32:LIBS += \
   -llibxml2 \
   -lOpenCL
   
-#unix: LIBS += -L$$OUT_PWD/libs/glew/lib -lGLEW -lGLU
+unix:LIBS += \
+  -lSDL \
+  -lSDL_image \
+  -lxml2 \
+  -lOpenCL
+
+#-L$$OUT_PWD/libs/glew/lib -lGLEW -lGLU
+
 
 
 # Header files
 HEADERS += \
-  ../../../src/CBasePointCloudRW.h \
-  ../../../src/CImagePointCloudRW.h \
   ../../../src/config.h \
-  ../../../src/COpenCLRenderer.h \
-  ../../../src/COpticalField.h \
-  ../../../src/CPCPointCloudRW.h \
-  ../../../src/CPointCloud.h \
-  ../../../src/CPointCloudRWFactory.h \
-  ../../../src/CSharedDataPtr.h \
-  ../../../src/CSimpleRenderer.h \
-  ../../../src/CXMLPointCloudRW.h \
-  ../../../src/Geometry.h \
   ../../../src/global.h \
-  ../../../src/IRenderer.h \
   ../../../src/Utils.h \
-  ../../../src/ocl.h
+  ../../../src/Debug.h \
+  ../../../src/CTimer.h \
+  ../../../src/CSharedDataPtr.h \
+  ../../../src/Geometry.h \
+  ../../../src/COpticalField.h \
+  ../../../src/CPointCloud.h \
+  ../../../src/CBasePointCloudRW.h \
+  ../../../src/CXMLPointCloudRW.h \
+  ../../../src/CImagePointCloudRW.h \
+  ../../../src/CPCPointCloudRW.h \
+  ../../../src/CPointCloudRWFactory.h \
+  ../../../src/CBaseRenderer.h \
+  ../../../src/CSimpleRenderer.h \
+  ../../../src/ocl.h \
+  ../../../src/COpenCLRenderer.h
 
 # Source files
 SOURCES += \
-  ../../../src/CBasePointCloudRW.cpp \
-  ../../../src/CImagePointCloudRW.cpp \
-  ../../../src/COpenCLRenderer.cpp \
+  ../../../src/Utils.cpp \
+  ../../../src/Debug.cpp \
+  ../../../src/CTimer.cpp \
   ../../../src/COpticalField.cpp \
-  ../../../src/CPCPointCloudRW.cpp \
   ../../../src/CPointCloud.cpp \
+  ../../../src/CBasePointCloudRW.cpp \
+  ../../../src/CXMLPointCloudRW.cpp \
+  ../../../src/CImagePointCloudRW.cpp \
+  ../../../src/CPCPointCloudRW.cpp \
   ../../../src/CPointCloudRWFactory.cpp \
   ../../../src/CSimpleRenderer.cpp \
-  ../../../src/CXMLPointCloudRW.cpp \
-  ../../../src/main.cpp \
-  ../../../src/Utils.cpp \
-  ../../../src/ocl.cpp
+  ../../../src/ocl.cpp \
+  ../../../src/COpenCLRenderer.cpp \
+  ../../../src/main.cpp
