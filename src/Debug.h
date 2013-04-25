@@ -32,6 +32,33 @@
 #  define WARN(x)
 #endif
 
+/** Macros to identify a location in code */
+#ifdef HOLOREN_DEBUG
+#  define DBGLOC() \
+     std::cerr << detail::formatCodeLoc(HOLOREN_FILE, \
+                                        HOLOREN_LINE, \
+                                        HOLOREN_FUNC_PLAIN) \
+               << std::endl
+#  define DBGSTRLOC() \
+     detail::formatCodeLoc(HOLOREN_FILE, \
+                           HOLOREN_LINE, \
+                           HOLOREN_FUNC_PLAIN)
+#else
+#  define DBGLOC()
+#  define DBGSTRLOC() ''
+#endif
+
+/** A namespace with private helper function, you should not use functions in this namespace */
+namespace detail {
+  
+/**
+ * This function will print a formatted code location
+ */
+std::string formatCodeLoc(const char *filepath,
+                          int line_num,
+                          const char *func_name);
+}
+
 namespace Debug {
 
 /**

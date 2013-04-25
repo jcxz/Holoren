@@ -54,6 +54,19 @@ bool strToDbl(const char *str, double *res);
 bool strToUInt(const char *str, unsigned int *res);
 
 /**
+ * This function will convert the the given string
+ * to an unsigned long integer. The string must be entirely
+ * convertible (i.e. composed of numbers from start to finish,
+ * including an optional initial sign)
+ *
+ * @param str the string to be converted
+ * @param res a pointer to variable where the result will be saved
+ *
+ * @reutrn true on success, false on error
+ */
+bool strToULong(const char *str, unsigned long *res);
+
+/**
  * A function to do a case insensitive compare of two c-like strings
  */
 inline int strCaseCmp(const char *str1, const char *str2)
@@ -65,6 +78,16 @@ inline int strCaseCmp(const char *str1, const char *str2)
 #endif
 }
 
+/**
+ * A Fucntion to find the last occurance of any of the characters in set
+ *
+ * @param str the string to be scanned
+ * @param set a set of characters to be searched for
+ *
+ * @return a pointer to the character found or NULL if any of the characters
+ *         in the set could be found in str
+ */
+const char *strSetEnd(const char *str, const char *set);
 
 /**
  * A function to extract filename from the given path

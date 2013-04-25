@@ -5,13 +5,44 @@
  * @date 18.11.2012
  */
 
-#include <cstdarg>
-#include <cstdio>
+#include "global.h"
+#include "Debug.h"
+#include "Utils.h"
+
+//#include <cstdarg>
+//#include <cstdio>
 #include <iostream>
 #include <iomanip>
+#include <string>
 
-#include "Debug.h"
 
+namespace detail {
+
+  /**
+ * This function will print a formatted code location
+ */
+std::string formatCodeLoc(const char *filepath,
+                          int line_num,
+                          const char *func_name)
+{
+  std::string res;
+
+  if (filepath != NULL)
+  {
+    const char *filename = Utils::getFileName(filepath);
+    res += ((filename == NULL) ? filepath : (filename + 1));
+    res += " : ";
+  }
+
+  res += "ln";
+  res += std::to_string(line_num);
+  res += " : ";
+  res += func_name;
+
+  return res;
+}
+
+}
 
 
 /* a private namespace with helper functions */

@@ -47,6 +47,7 @@
 /** Define portable line, function, and file macros */
 # define HOLOREN_FILE __FILE__
 # define HOLOREN_LINE __LINE__
+# define HOLOREN_FUNC_PLAIN __FUNCTION__
 #if defined(HOLOREN_CC_MSVC)
 # define HOLOREN_FUNC __FUNCSIG__
 #elif defined(HOLOREN_CC_GCC)

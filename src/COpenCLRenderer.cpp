@@ -4,7 +4,6 @@
 #include "global.h"
 #include "COpenCLRenderer.h"
 #include "CPointCloud.h"
-#include "COpticalField.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,6 +25,9 @@ static const char *KERNEL_ALGORITHM2 = "compObjWave_small";
 
 /** Kernel function (a main entry point to OpenCL program) for the third algorithm */
 static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
+
+/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
+static const char *KERNEL_ALGORITHM4 = "compObjWave_big_flat";
 
 
 
@@ -55,16 +57,17 @@ bool COpenCLRenderer::open(const char *filename)
 
   DBG("selected device:\n" << m_device);
 
-  /* get the value of how many bytes of data can be allocated (and processed) at once by GPU */
-  err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_max_chunk_size);
-  if (err != CL_SUCCESS)
+  /* infer the appropriate chunk size if it is not set by user */
+  if (m_max_chunk_size == 0)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
-    goto error;
+    /* get the value of how many bytes of data can be allocated (and processed) at once by GPU */
+    err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_max_chunk_size);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = OpenCL::clErrToStr(err);
+      goto error;
+    }
   }
-
-  /* calculate the number of pixels in row and column for a given chunk size */
-  // TODO
 
   /* create OpenCL context for all GPU devices on the machine */
   m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
@@ -138,6 +141,7 @@ bool COpenCLRenderer::open(const char *filename)
     {
       case ALGORITHM_TYPE_2: kernel = KERNEL_ALGORITHM2; break;
       case ALGORITHM_TYPE_3: kernel = KERNEL_ALGORITHM3; break;
+      case ALGORITHM_TYPE_4: kernel = KERNEL_ALGORITHM4; break;
       default: m_err_msg = "Unknown algorithm type"; goto error;
     }
 
@@ -217,6 +221,10 @@ bool COpenCLRenderer::renderHologram(const CPointCloud & pc, COpticalField *of)
  */
 bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of)
 {
+  /* check on preconditions */
+  HOLOREN_ASSERT(of != NULL);
+  HOLOREN_ASSERT((m_max_chunk_size % sizeof(COpticalField::CComplex)) == 0);
+
   /* intialize local variables */
   cl_int err = CL_SUCCESS;
 
@@ -250,6 +258,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   {
     case ALGORITHM_TYPE_2: ret = renderAlgorithm2(pc, pc_buf, of, of_buf); break;
     case ALGORITHM_TYPE_3: ret = renderAlgorithm3(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_4: ret = renderAlgorithm4(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
   }
 
@@ -470,7 +479,6 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   DBG("corner_x   : " << corner_x);
   DBG("corner_y   : " << corner_y);
 
-#if 1
   SET_ARG(0, pc_buf);
   SET_ARG(1, pc_size);
   SET_ARG(2, of_buf);
@@ -480,35 +488,10 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   SET_ARG(7, pitch);
   SET_ARG(8, corner_x);
   SET_ARG(9, corner_y);
-#endif
-
-#if 0
-  SET_ARG(0, pc_buf);
-  SET_ARG(1, pc_size);
-  SET_ARG(2, of_buf);
-  SET_ARG(3, hologram_z);
-  SET_ARG(4, k);
-  SET_ARG(5, pitch);
-  SET_ARG(6, corner_x);
-  SET_ARG(7, corner_y);
-#endif
 
   cl_int row_offset = 0;
   cl_int col_offset = 0;
   size_t of_byte_size = of->getByteSize();
- 
-#if 0
-  SET_ARG(0, pc_buf);
-  SET_ARG(1, pc_size);
-  SET_ARG(2, of_buf);
-  SET_ARG(3, row_offset);
-  SET_ARG(4, col_offset);
-  SET_ARG(5, hologram_z);
-  SET_ARG(6, k);
-  SET_ARG(7, pitch);
-  SET_ARG(8, corner_x);
-  SET_ARG(9, corner_y);
-#endif
 
   /* break the optical field into chunks that can be processed by gpu and
      render the object wave of hologram */
@@ -520,10 +503,8 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     DBG("row_offset           : " << (row_offset));
     DBG("col_offset           : " << (col_offset));
 
-#if 1
     SET_ARG(3, row_offset);
     SET_ARG(4, col_offset);
-#endif
 
     // this is an array which defines the number of items in each nested loop
     size_t global_work_size[2] = { (size_t) rows - row_offset, (size_t) cols - col_offset };
@@ -531,7 +512,7 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     DBG("global_work_size[0] == " << global_work_size[0]);
     DBG("global_work_size[1] == " << global_work_size[1]);
     DBG("");
-
+#if 0
     /* execute kernel */
     err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
                                  m_kernel,          // the kernel to be excuted
@@ -564,9 +545,133 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
       m_err_msg = OpenCL::clErrToStr(err);
       return false;
     }
-
+#endif
     row_offset += 4096;
     col_offset += 4096;
+  }
+
+  /* to cancel kernel argument setting macro */
+  #undef SET_ARG
+
+  return true;
+}
+
+
+/**
+ */
+bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+{
+  DBGLOC();
+
+  DBG("Algorithm 4");
+
+  /* a macro to set the given kernel argument type */
+  // the static_cast<> is for msvc 2010, which lacks the proper support of c++11
+  #define SET_ARG(num, arg) \
+    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
+    if (err != CL_SUCCESS) \
+    { \
+      m_err_msg = DBGSTRLOC(); \
+      m_err_msg += "Argument "; \
+      m_err_msg += std::to_string(static_cast<long long>(num));\
+      m_err_msg += ": "; \
+      m_err_msg += OpenCL::clErrToStr(err); \
+      return false; \
+    }
+
+  cl_int err = CL_SUCCESS;
+
+  /* set kernel arguments */
+  cl_uint pc_size = pc.size();
+  cl_int rows = of->getNumRows();
+  cl_int cols = of->getNumCols();
+  cl_float hologram_z = (cl_float) m_hologram_z;
+  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
+  cl_float pitch = of->getPitch();
+  cl_float corner_x = -(cols - 1) * pitch / 2;
+  cl_float corner_y = -(rows - 1) * pitch / 2;
+  
+  DBG("pc_size    : " << pc_size);
+  DBG("rows       : " << rows);
+  DBG("cols       : " << cols);
+  DBG("hologram_z : " << hologram_z);
+  DBG("k          : " << k);
+  DBG("sampling   : " << pitch);
+  DBG("size_x     : " << (cols - 1) * pitch);
+  DBG("size_y     : " << (rows - 1) * pitch);
+  DBG("corner_x   : " << corner_x);
+  DBG("corner_y   : " << corner_y);
+
+  SET_ARG(0, pc_buf);
+  SET_ARG(1, pc_size);
+  SET_ARG(2, of_buf);
+  
+  SET_ARG(4, cols);
+  SET_ARG(5, hologram_z);
+  SET_ARG(6, k);
+  SET_ARG(7, pitch);
+  SET_ARG(8, corner_x);
+  SET_ARG(9, corner_y);
+
+  size_t of_byte_size = of->getByteSize();
+  size_t global_work_size = m_max_chunk_size / sizeof(COpticalField::CComplex);
+  size_t offset = 0;
+
+  DBG("of_byte_size     : " << of_byte_size);
+  DBG("m_max_chunk_size : " << m_max_chunk_size);
+  DBG("global_work_size : " << global_work_size);
+
+  /* break the optical field into chunks that can be processed by gpu and
+     render the object wave of hologram */
+  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += m_max_chunk_size, offset += global_work_size)
+  {
+    DBG("chunk                : " << chunk);
+    DBG("of_byte_size - chunk : " << (of_byte_size - chunk));
+    DBG("of->data() + chunk   : " << (unsigned long long int) ((const char *) (of->data()) + chunk));
+    DBG("offset               : " << (offset));
+    DBG("");
+
+    SET_ARG(3, offset);
+
+#if 1
+    /* execute kernel */
+    err = clEnqueueNDRangeKernel(m_cmd_queue,        // the command queue
+                                 m_kernel,           // the kernel to be excuted
+                                 1,                  // the number of nested for loops that OpenCL will generate
+                                 NULL,               // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                                 &global_work_size,  // the number of items in each nested for loop
+                                 NULL,               // this is a local work size, not really sure how it relates to the above parameters
+                                 0,
+                                 NULL,
+                                 NULL);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
+      return false;
+    }
+
+#ifdef HOLOREN_DEBUG_KERNEL
+    err = clFinish(m_cmd_queue);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += OpenCL::clErrToStr(err);
+      return false;
+    }
+#endif
+
+    /* read the result */
+    err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, m_max_chunk_size, (((char *) of->data()) + chunk), 0, NULL, NULL);
+    if (err != CL_SUCCESS)
+    {
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
+      return false;
+    }
+#endif
   }
 
   /* to cancel kernel argument setting macro */

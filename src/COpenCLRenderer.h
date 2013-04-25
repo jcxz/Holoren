@@ -7,6 +7,7 @@
 
 #include "CBaseRenderer.h"
 #include "ocl.h"
+#include "COpticalField.h"
 
 #include <vector>
 #include <string>
@@ -20,7 +21,8 @@ class COpenCLRenderer : public CBaseRenderer
   public:
     enum EAlgorithmType {
       ALGORITHM_TYPE_2,
-      ALGORITHM_TYPE_3
+      ALGORITHM_TYPE_3,
+      ALGORITHM_TYPE_4
     };
 
   public:
@@ -48,9 +50,34 @@ class COpenCLRenderer : public CBaseRenderer
       close();
     }
 
+    /**
+     * A method to set the type of rendering algorithm
+     */
     void setAlgorithmType(EAlgorithmType type)
     {
       m_alg_type = type;
+      return;
+    }
+
+    /**
+     * A method to retrieve the value of currently used
+     * chunk size
+     */
+    size_t getChunkSize(void) const
+    {
+      return m_max_chunk_size;
+    }
+
+    /**
+     * A method to set the preferred chunk size (in optical field elements)
+     * If this value is not set then the open() method
+     * will set the appropriate value according to
+     * the maximum number of bytes that can be allocated
+     * for a single memory object.
+     */
+    void setChunkSize(cl_ulong chunk_elems)
+    {
+      m_max_chunk_size = chunk_elems * sizeof(COpticalField::CComplex);
       return;
     }
 
@@ -86,6 +113,12 @@ class COpenCLRenderer : public CBaseRenderer
      * in several smaller chunks
      */
     bool renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+    
+    /**
+     * The third rendering algorithm, can render large holograms, by dividing the calculation
+     * in several smaller chunks
+     */
+    bool renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
     
     /**
      * A method to read the opencl program from a file

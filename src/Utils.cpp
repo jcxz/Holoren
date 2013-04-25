@@ -65,6 +65,44 @@ bool strToUInt(const char *str, unsigned int *res)
 
 /**
  */
+bool strToULong(const char *str, unsigned long *res)
+{
+  errno = 0;
+  char *endptr = NULL;
+
+  *res = ::strtoul(str, &endptr, 10);
+  if ((errno != 0) || (*endptr != 0) || (endptr == str))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ */
+const char *strSetEnd(const char *str, const char *set)
+{
+  if ((str == NULL) || (set == NULL))
+  {
+    return NULL;
+  }
+
+  while (*set)
+  {
+    const char *found = ::strrchr(str, *set);
+    if (found)
+    {
+      return found;
+    }
+    ++set;
+  }
+
+  return NULL;
+}
+
+/**
+ */
 const char *getFileName(const char *path)
 {
   if ((path == NULL) || (*path == 0))
@@ -72,22 +110,22 @@ const char *getFileName(const char *path)
     return NULL;
   }
 
-//#ifdef HOLOREN_OS_WIN
-//  return ::strrchr(path, '\\');
-//#else
+#ifdef HOLOREN_OS_WIN
+  return strSetEnd(path, "\\/");
+#else
   return ::strrchr(path, '/');
-//#endif
+#endif
 }
 
 /**
  */
 const char *getFileName(const std::string & path)
 {
-//#ifdef HOLOREN_OS_WIN
-//  size_t pos = path.rfind('\\');
-//#else
+#ifdef HOLOREN_OS_WIN
+  size_t pos = path.find_last_of("\\/");
+#else
   size_t pos = path.rfind('/');
-//#endif
+#endif
   return (pos == std::string::npos) ? (NULL) : (&path.front() + pos);
 }
 

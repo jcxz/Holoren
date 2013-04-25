@@ -26,7 +26,8 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
                                     "          -r simple|opencl|none\n"
-                                    "          -a alg2|alg3\n"
+                                    "          -a alg2|alg3|alg4\n"
+                                    "          -c chunk_size\n"
                                     "          -f cl_source_file\n";
 
 /** a timer to meassure execution time of different sections of code */
@@ -51,6 +52,7 @@ typedef struct {
   const char *cl_source;                     /// the location of OpenCL source file
   ERendererType renderer;                    /// the type of rendering engine
   COpenCLRenderer::EAlgorithmType alg_type;  /// the type of rendering algorithm that will be used
+  unsigned long chunk_size;                  /// the size of processed chunk
   double sampling;                           /// pitch between individual samples
   double lambda;                             /// light wavelength
   double hologram_z;                         /// hologram placement
@@ -83,12 +85,12 @@ static const char *renToStr(ERendererType type)
 static const char *algToStr(COpenCLRenderer::EAlgorithmType type)
 {
   static const char *strings[] = {
-    "Simple",
-    "OpenCL",
-    "None"
+    "alg2",
+    "alg3",
+    "alg4"
   };
 
-  if ((type < REN_SIMPLE) || (type > REN_NONE))
+  if ((type < COpenCLRenderer::ALGORITHM_TYPE_2) || (type > COpenCLRenderer::ALGORITHM_TYPE_4))
   {
     return "Unknown";
   }
@@ -111,6 +113,7 @@ std::ostream & operator<<(std::ostream & os, const tParams & params)
   os << "hologram z            : " << params.hologram_z                                        << std::endl;
   os << "Rendering engine      : " << renToStr(params.renderer)                                << std::endl;
   os << "Rendering algorithm   : " << algToStr(params.alg_type)                                << std::endl;
+  os << "Chunk size            : " << params.chunk_size                                        << std::endl;
   os << "OpenCL source file    : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
 
   return os;
@@ -133,6 +136,7 @@ static void resetParams(tParams *params)
   params->hologram_z = 0.0f;
   params->renderer = REN_SIMPLE;
   params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
+  params->chunk_size = 0;    // 0 means unspecified
   params->cl_source = NULL;
 
   return;
@@ -230,9 +234,27 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
       {
         params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_3;
       }
+      else if (Utils::strCaseCmp(argv[i], "alg4") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_4;
+      }
       else
       {
         std::cerr << "Uknown rendering algorithm: \"" << argv[i] << "\"" << std::endl;
+        return false;
+      }
+    }
+    else if (CMP_SHORT_OPT(argv[i], 'c'))
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Option -c requires an argument" << std::endl;
+        return false;
+      }
+
+      if (!Utils::strToULong(argv[i], &params->chunk_size))
+      {
+        std::cerr << "Failed to convert argument " << argv[i] << " of option -c to number" << std::endl;
         return false;
       }
     }
@@ -388,6 +410,7 @@ static CBaseRenderer *createRenderer(const tParams & params)
         std::cout << "Renderer engine: OpenCL" << std::endl;
         COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
         ren->setAlgorithmType(params.alg_type);
+        ren->setChunkSize(params.chunk_size);
         return ren;
       }
       break;
