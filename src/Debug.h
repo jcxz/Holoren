@@ -45,7 +45,7 @@
                            HOLOREN_FUNC_PLAIN)
 #else
 #  define DBGLOC()
-#  define DBGSTRLOC() ''
+#  define DBGSTRLOC() ""
 #endif
 
 /** A namespace with private helper function, you should not use functions in this namespace */

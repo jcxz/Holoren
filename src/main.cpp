@@ -13,6 +13,7 @@
 #include "CTimer.h"
 
 #include <iostream>
+#include <ctime>
 
 
 
@@ -28,7 +29,8 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -r simple|opencl|none\n"
                                     "          -a alg2|alg3|alg4\n"
                                     "          -c chunk_size\n"
-                                    "          -f cl_source_file\n";
+                                    "          -f cl_source_file\n"
+                                    "          -p performace_log";
 
 /** a timer to meassure execution time of different sections of code */
 static CTimer g_timer;
@@ -56,6 +58,7 @@ typedef struct {
   double sampling;                           /// pitch between individual samples
   double lambda;                             /// light wavelength
   double hologram_z;                         /// hologram placement
+  const char *perf_log;                      /// a pointer to performance log file
 } tParams;
 
 
@@ -115,6 +118,7 @@ std::ostream & operator<<(std::ostream & os, const tParams & params)
   os << "Rendering algorithm   : " << algToStr(params.alg_type)                                << std::endl;
   os << "Chunk size            : " << params.chunk_size                                        << std::endl;
   os << "OpenCL source file    : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
+  os << "Performance log file  : " << ((params.perf_log == NULL) ?  "NULL" : params.perf_log)  << std::endl;
 
   return os;
 }
@@ -138,6 +142,7 @@ static void resetParams(tParams *params)
   params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
   params->chunk_size = 0;    // 0 means unspecified
   params->cl_source = NULL;
+  params->perf_log = NULL;   // no logging by default
 
   return;
 }
@@ -344,6 +349,22 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
 
       params->cl_source = argv[i];
     }
+    else if (CMP_SHORT_OPT(argv[i], 'p'))
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Option -p requires an argument" << std::endl;
+        return false;
+      }
+
+      if (params->perf_log != NULL)
+      {
+        std::cerr << "Performance log file already given" << std::endl;
+        return false;
+      }
+
+      params->perf_log = argv[i];
+    }
     else
     {
       std::cerr << "Unrecognized option: " << argv[i] << std::endl;
@@ -410,7 +431,7 @@ static CBaseRenderer *createRenderer(const tParams & params)
         std::cout << "Renderer engine: OpenCL" << std::endl;
         COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
         ren->setAlgorithmType(params.alg_type);
-        ren->setChunkSize(params.chunk_size);
+        ren->setGlobalWorkSize(params.chunk_size);
         return ren;
       }
       break;
@@ -421,6 +442,50 @@ static CBaseRenderer *createRenderer(const tParams & params)
   }
 
   return NULL;
+}
+
+
+/**
+ * A function to log information about application's performance
+ */
+static void writePerfLog(const tParams & params, const CPointCloud & pc, const COpticalField & of, const CBaseRenderer *ren)
+{
+  /* check if creating a log was actually requested and
+     that the input parameters are valid */
+  if ((params.perf_log == NULL) || (ren == NULL))
+  {
+    return;
+  }
+
+  std::cout << "Writing performance log" << std::endl;
+  
+  std::ofstream perf_log(params.perf_log, std::ofstream::app);
+  if (!perf_log)
+  {
+    std::cerr << "Failed to create performance log" << std::endl;
+    return;
+  }
+
+  perf_log << "================================================================================" << std::endl;
+  perf_log << "date                        : "   << Utils::fmtDateTime("%d.%m.%Y", time(NULL))   << std::endl;
+  perf_log << "input file                  : \"" << params.ifilename << '\"'                     << std::endl;
+  perf_log << "point sources               : "   << pc.size()                                    << std::endl;
+  perf_log << "optical field (rows x cols) : "   << of.getNumRows()  << 'x' << of.getNumCols()   << std::endl;
+
+  if (params.renderer == REN_OPENCL)
+  {
+    const COpenCLRenderer *ocl_ren = static_cast<const COpenCLRenderer *>(ren);
+    perf_log << "algorithm                   : " << algToStr(params.alg_type)    << std::endl;
+    perf_log << "global_work_size            : " << ocl_ren->getGlobalWorkSize() << std::endl;
+    perf_log << "max_chunk_size              : " << ocl_ren->getChunkSize()      << std::endl;
+  }
+
+  perf_log << "rendering time              : " << g_timer                                        << std::endl;
+  perf_log << "================================================================================" << std::endl;
+
+  perf_log.close();
+
+  return;
 }
 
 
@@ -508,12 +573,15 @@ int main(int argc, char *argv[])
     delete p_ren;
     return 1;
   }
+  
+  DBG_T_END(g_timer, "** Rendering finished: ");
+
+  /* create a performance log before closing the renderer */
+  writePerfLog(params, pc, of, p_ren);
 
   p_ren->close();
 
   delete p_ren;
-
-  DBG_T_END(g_timer, "** Rendering finished: ");
 
   std::cout << "Point cloud rendered successfully" << std::endl;
 

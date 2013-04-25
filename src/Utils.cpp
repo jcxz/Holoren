@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <cerrno>
+#include <ctime>
 
 
 namespace Utils {
@@ -31,6 +32,7 @@ bool strToFP(const char *str, tFPType *res)
   return true;
 }
 
+
 /**
  */
 bool strToDbl(const char *str, double *res)
@@ -46,6 +48,7 @@ bool strToDbl(const char *str, double *res)
 
   return true;
 }
+
 
 /**
  */
@@ -63,6 +66,7 @@ bool strToUInt(const char *str, unsigned int *res)
   return true;
 }
 
+
 /**
  */
 bool strToULong(const char *str, unsigned long *res)
@@ -78,6 +82,7 @@ bool strToULong(const char *str, unsigned long *res)
 
   return true;
 }
+
 
 /**
  */
@@ -101,6 +106,7 @@ const char *strSetEnd(const char *str, const char *set)
   return NULL;
 }
 
+
 /**
  */
 const char *getFileName(const char *path)
@@ -117,6 +123,7 @@ const char *getFileName(const char *path)
 #endif
 }
 
+
 /**
  */
 const char *getFileName(const std::string & path)
@@ -127,6 +134,40 @@ const char *getFileName(const std::string & path)
   size_t pos = path.rfind('/');
 #endif
   return (pos == std::string::npos) ? (NULL) : (&path.front() + pos);
+}
+
+
+/**
+ */
+const char *fmtDateTime(const char *fmt, time_t time, bool utc)
+{
+  HOLOREN_ASSERT(fmt != NULL);
+
+  static char buf[256];
+  struct tm *broken_down_time;
+
+  if (utc)
+  {
+    broken_down_time = gmtime(&time);
+  }
+  else
+  {
+    broken_down_time = localtime(&time);
+  }
+
+  if (broken_down_time == NULL)
+  {
+    return "";
+  }
+
+  errno = 0;
+  size_t len = strftime(buf, sizeof(buf), fmt, broken_down_time);
+  if ((len == 0) && (errno != 0))
+  {
+    return "";
+  }
+
+  return buf;
 }
 
 } /// End of namespace Utils

@@ -40,7 +40,7 @@ class CTimerWindows
         m_frekv(1.0f)  // 1.0f to avoid division by zero on QueryPerformanceFrequency failure
     {
       LARGE_INTEGER f;
-      if (!::QueryPerformanceFrequency(&f))  // get the frequency in counts per second
+      if (::QueryPerformanceFrequency(&f) != FALSE)  // get the frequency in counts per second
       {
         WARN("QueryPerformanceFrequency failed: high resolution timer not available on this platform, you might get incorrect results");
         return;
@@ -54,7 +54,7 @@ class CTimerWindows
      */
     inline bool start(void)
     {
-      return ::QueryPerformanceCounter(&m_start);
+      return (::QueryPerformanceCounter(&m_start) != FALSE);
     }
 
     /**
@@ -62,7 +62,7 @@ class CTimerWindows
      */
     inline bool stop(void)
     {
-      return ::QueryPerformanceCounter(&m_end);
+      return (::QueryPerformanceCounter(&m_end) != FALSE);
     }
 
     /**
@@ -187,7 +187,7 @@ std::ostream & operator<<(std::ostream & os, const CTimer & timer);
        { \
          WARN("Failed to start timer"); \
        } \
-     } while (0)
+     } while (0,0)    // owl likes to disable warnings about `conditional expression is constant`
 
 #  define DBG_T_END(timer, msg) \
      do { \
@@ -200,7 +200,7 @@ std::ostream & operator<<(std::ostream & os, const CTimer & timer);
        { \
          std::cerr << timer << std::endl; \
        } \
-     } while (0)
+     } while (0,0)  // O RLY
 #else
 #  define DBG_T_START(timer, msg) \
      (void) (timer), (void) (msg)

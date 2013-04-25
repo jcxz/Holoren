@@ -56,7 +56,7 @@
 # define HOLOREN_FUNC __FUNCTION__
 #endif
 
-/** Silence MSVC CRT warnings */
+/** Silence noisy but otherwise useless MSVC warnings */
 #if defined(HOLOREN_CC_MSVC)
 # define _CRT_SECURE_NO_WARNINGS
 #endif

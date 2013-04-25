@@ -72,7 +72,7 @@ bool strToULong(const char *str, unsigned long *res);
 inline int strCaseCmp(const char *str1, const char *str2)
 {
 #ifdef HOLOREN_CC_MSVC
-  return stricmp(str1, str2);
+  return _stricmp(str1, str2);
 #else
   return strcasecmp(str1, str2);
 #endif
@@ -117,6 +117,24 @@ const char *getFileName(const char *path);
  *       without trailing '/' (or trailing '\' on Windows) as a path with filename.
  */
 const char *getFileName(const std::string & path);
+
+/**
+ * This function will format the given time value according
+ * to the format string.
+ *
+ * @param fmt the format string (the same as for strftime)
+ *            For example %T %Y-%m-%d prints the time and date
+ * @param time the time value to be formated
+ * @param utc if true UTC time will be considered, otherwise
+ *            local time zone based time will be considered
+ *
+ * @return a statically alllocated string on success,
+ *         an empty string on error
+ *
+ * @note due to the function returning a statically allocated
+ *       string it is not reentrant
+ */
+const char *fmtDateTime(const char *fmt, time_t time, bool utc = false);
 
 } // End of namespace Utils
 

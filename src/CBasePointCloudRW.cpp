@@ -1,6 +1,7 @@
 /**
  */
 
+#include "config.h"
 #include "global.h"
 #include "CBasePointCloudRW.h"
 #include "CPointCloud.h"

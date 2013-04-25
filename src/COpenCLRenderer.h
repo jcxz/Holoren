@@ -61,11 +61,19 @@ class COpenCLRenderer : public CBaseRenderer
 
     /**
      * A method to retrieve the value of currently used
-     * chunk size
+     * chunk size (in bytes)
      */
-    size_t getChunkSize(void) const
+    cl_ulong getChunkSize(void) const
     {
       return m_max_chunk_size;
+    }
+
+    /**
+     * A method to get the value of current global_work_size
+     */
+    size_t getGlobalWorkSize(void) const
+    {
+      return m_max_chunk_size / sizeof(COpticalField::CComplex);
     }
 
     /**
@@ -75,9 +83,9 @@ class COpenCLRenderer : public CBaseRenderer
      * the maximum number of bytes that can be allocated
      * for a single memory object.
      */
-    void setChunkSize(cl_ulong chunk_elems)
+    void setGlobalWorkSize(size_t work_size)
     {
-      m_max_chunk_size = chunk_elems * sizeof(COpticalField::CComplex);
+      m_max_chunk_size = work_size * sizeof(COpticalField::CComplex);
       return;
     }
 

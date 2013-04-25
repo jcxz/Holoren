@@ -275,7 +275,7 @@ cl_device_id selectDevice(uint32_t *options, cl_int *cl_err)
         continue;  // ignore device enumeration errors for a single platform (others may work)
       }
       
-      ESelectionOpts device_type;
+      ESelectionOpts device_type = (ESelectionOpts) 0;
 
       /* select the one that is the most suitable according to given options */
       for (devices_it = devices.begin(); devices_it != devices.end(); ++devices_it)

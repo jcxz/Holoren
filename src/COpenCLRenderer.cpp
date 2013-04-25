@@ -51,7 +51,9 @@ bool COpenCLRenderer::open(const char *filename)
   m_device = OpenCL::selectDevice(&flags, &err);
   if (m_device == NULL)
   {
-    m_err_msg = (err != CL_SUCCESS) ? OpenCL::clErrToStr(err) : ("The given combination of devices and platforms could not be matched");
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += (err != CL_SUCCESS) ? OpenCL::clErrToStr(err) : ("The given combination of devices and platforms could not be matched");
     goto error;
   }
 
@@ -64,7 +66,9 @@ bool COpenCLRenderer::open(const char *filename)
     err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_max_chunk_size);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       goto error;
     }
   }
@@ -73,7 +77,9 @@ bool COpenCLRenderer::open(const char *filename)
   m_context = clCreateContext(NULL, 1, &m_device, NULL, NULL, &err);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     goto error;
   }
 
@@ -90,7 +96,9 @@ bool COpenCLRenderer::open(const char *filename)
     m_program = clCreateProgramWithSource(m_context, 1, &src_strings, &src_sizes, &err);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       goto error;
     }
   }
@@ -148,7 +156,9 @@ bool COpenCLRenderer::open(const char *filename)
     m_kernel = clCreateKernel(m_program, kernel, &err);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       goto error;
     }
   }
@@ -157,7 +167,9 @@ bool COpenCLRenderer::open(const char *filename)
   m_cmd_queue = clCreateCommandQueue(m_context, m_device, 0, &err);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     goto error;
   }
 
@@ -239,7 +251,9 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   cl_mem pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 
@@ -247,8 +261,10 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, m_max_chunk_size, NULL, &err);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
     clReleaseMemObject(pc_buf);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
   
@@ -280,7 +296,11 @@ bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, CO
     err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
     if (err != CL_SUCCESS) \
     { \
-      m_err_msg = OpenCL::clErrToStr(err); \
+      m_err_msg = DBGSTRLOC(); \
+      m_err_msg += "Argument "; \
+      m_err_msg += std::to_string(static_cast<long long>(num));\
+      m_err_msg += ": "; \
+      m_err_msg += OpenCL::clErrToStr(err); \
       return false; \
     }
 
@@ -332,7 +352,9 @@ bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, CO
                                NULL);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 
@@ -340,7 +362,9 @@ bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, CO
   err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 
@@ -359,7 +383,11 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
     err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
     if (err != CL_SUCCESS) \
     { \
-      m_err_msg = OpenCL::clErrToStr(err); \
+      m_err_msg = DBGSTRLOC(); \
+      m_err_msg += "Argument "; \
+      m_err_msg += std::to_string(static_cast<long long>(num));\
+      m_err_msg += ": "; \
+      m_err_msg += OpenCL::clErrToStr(err); \
       return false; \
     }
 
@@ -412,7 +440,9 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
                                NULL);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 
@@ -420,7 +450,9 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
   err = clFinish(m_cmd_queue);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 #endif
@@ -429,7 +461,9 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
   err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
   if (err != CL_SUCCESS)
   {
-    m_err_msg = OpenCL::clErrToStr(err);
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
     return false;
   }
 
@@ -449,7 +483,8 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
     if (err != CL_SUCCESS) \
     { \
-      m_err_msg = "Argument "; \
+      m_err_msg = DBGSTRLOC(); \
+      m_err_msg += "Argument "; \
       m_err_msg += std::to_string(static_cast<long long>(num));\
       m_err_msg += ": "; \
       m_err_msg += OpenCL::clErrToStr(err); \
@@ -512,7 +547,7 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     DBG("global_work_size[0] == " << global_work_size[0]);
     DBG("global_work_size[1] == " << global_work_size[1]);
     DBG("");
-#if 0
+
     /* execute kernel */
     err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
                                  m_kernel,          // the kernel to be excuted
@@ -525,7 +560,9 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
                                  NULL);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
 
@@ -533,7 +570,9 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     err = clFinish(m_cmd_queue);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
 #endif
@@ -542,10 +581,12 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
     err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of_byte_size - chunk, (((char *) of->data()) + chunk), 0, NULL, NULL);
     if (err != CL_SUCCESS)
     {
-      m_err_msg = OpenCL::clErrToStr(err);
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
+      m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
-#endif
+
     row_offset += 4096;
     col_offset += 4096;
   }
@@ -657,6 +698,7 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
     if (err != CL_SUCCESS)
     {
       m_err_msg = DBGSTRLOC();
+      m_err_msg += ": ";
       m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
@@ -694,13 +736,14 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   std::ifstream is(filename, std::ifstream::binary);
   if (!is)
   {
-    m_err_msg = "Failed to open OpenCL program file";
+    m_err_msg = DBGSTRLOC();
+    m_err_msg = ": Failed to open OpenCL program file";
     return false;
   }
 
   /* get the size of the file to be read */
   is.seekg(0, is.end);
-  long program_size = is.tellg();
+  std::ifstream::streamoff program_size = is.tellg();
   is.seekg(0, is.beg);
 
   DBG("Source size: " << program_size);
@@ -709,12 +752,13 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
      in is.read() (as the size of program buf will be changed to 0) */
   if (program_size == 0)
   {
-    m_err_msg = "OpenCL program file is empty";
+    m_err_msg = DBGSTRLOC();
+    m_err_msg = ": OpenCL program file is empty";
     return false;
   }
 
   /* allocate the memory in string */
-  program_buf->resize(program_size);
+  program_buf->resize(static_cast<std::string::size_type>(program_size));
   //program_buf->clear();
   //program_buf->reserve();
 
@@ -727,7 +771,8 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
 
   if (!is)
   {
-    m_err_msg = "Failed to read OpenCL program";
+    m_err_msg = DBGSTRLOC();
+    m_err_msg = ": Failed to read OpenCL program";
     return false;
   }
 

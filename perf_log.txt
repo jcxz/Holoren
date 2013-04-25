@@ -1,0 +1,15 @@
+
+This file is an automatically generated log by holoren. It logs information
+about running times of rendering together with relevant information about
+current parameter set.
+
+================================================================================
+date                        : 25.04.2013
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1000x1000
+algorithm                   : alg4
+global_work_size            : 1000000
+max_chunk_size              : 8000000
+rendering time              : Elapsed time: 9s 49ms 290us
+================================================================================
