@@ -16,7 +16,7 @@
 /build/msvc2012/IBP_holoren/*.user
 /build/msvc2012/IBP_holoren/*.filters
 /build/msvc2012/IBP_holoren/*.bmp
-/build/msvc2012/IBP_holoren/out.txt
+/build/msvc2012/IBP_holoren/*.txt
     
 /build/msvc2012/test_ocl_selectDevice/Debug/
 /build/msvc2012/test_ocl_selectDevice/Debug/*
@@ -27,7 +27,7 @@
 /build/msvc2012/test_ocl_selectDevice/*.suo
 /build/msvc2012/test_ocl_selectDevice/*.user
 /build/msvc2012/test_ocl_selectDevice/*.filters
-/build/msvc2012/test_ocl_selectDevice/out.txt
+/build/msvc2012/test_ocl_selectDevice/*.txt
 
 /build/msvc2012/test_timer_win/Debug/
 /build/msvc2012/test_timer_win/Debug/*
@@ -38,7 +38,7 @@
 /build/msvc2012/test_timer_win/*.suo
 /build/msvc2012/test_timer_win/*.user
 /build/msvc2012/test_timer_win/*.filters
-/build/msvc2012/test_timer_win/out.txt
+/build/msvc2012/test_timer_win/*.txt
 
 #### Visual Studio 2010 ####
 /build/msvc2010/IBP_holoren/ipch/
@@ -53,7 +53,7 @@
 /build/msvc2010/IBP_holoren/*.user
 /build/msvc2010/IBP_holoren/*.filters
 /build/msvc2010/IBP_holoren/*.bmp
-/build/msvc2010/IBP_holoren/out.txt
+/build/msvc2010/IBP_holoren/*.txt
 
 /build/msvc2010/test_ocl_selectDevice/ipch/
 /build/msvc2010/test_ocl_selectDevice/ipch/*
@@ -66,7 +66,7 @@
 /build/msvc2010/test_ocl_selectDevice/*.suo
 /build/msvc2010/test_ocl_selectDevice/*.user
 /build/msvc2010/test_ocl_selectDevice/*.filters
-/build/msvc2010/test_ocl_selectDevice/out.txt
+/build/msvc2010/test_ocl_selectDevice/*.txt
 
 #### Qt Creator ####
 /build/qt_creator/IBP_holoren/bin/
