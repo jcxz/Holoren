@@ -709,22 +709,22 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
   {
     SET_ARG(3, chunk);
 
-    size_t remaining = std::min(m_chunk_size, of_size - chunk);
+    size_t global_work_size = std::min(m_chunk_size, of_size - chunk);
     
     DBG("chunk num.         : " << (chunk / m_chunk_size));
     DBG("chunk              : " << (chunk));
-    DBG("remaining          : " << (remaining));
+    DBG("global_work_size   : " << (global_work_size));
     DBG("of->data() + chunk : " << (unsigned long long int) (of->data() + chunk));
     DBG("");
 
 #if 1
     /* execute kernel */
-    err = clEnqueueNDRangeKernel(m_cmd_queue,    // the command queue
-                                 m_kernel,       // the kernel to be excuted
-                                 1,              // the number of nested for loops that OpenCL will generate
-                                 NULL,           // the starting index of each nested for loop (allways 0, for each nested loop in my case)
-                                 &remaining,     // the number of items in each nested for loop
-                                 NULL,           // this is a local work size, not really sure how it relates to the above parameters
+    err = clEnqueueNDRangeKernel(m_cmd_queue,        // the command queue
+                                 m_kernel,           // the kernel to be excuted
+                                 1,                  // the number of nested for loops that OpenCL will generate
+                                 NULL,               // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                                 &global_work_size,  // the number of items in each nested for loop
+                                 NULL,               // this is a local work size, not really sure how it relates to the above parameters
                                  0,
                                  NULL,
                                  NULL);
@@ -752,7 +752,7 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
                               of_buf,
                               CL_TRUE,
                               0,
-                              remaining * sizeof(COpticalField::CComplex),
+                              global_work_size * sizeof(COpticalField::CComplex),
                               ((char *) (of->data() + chunk)),
                               0,
                               NULL,

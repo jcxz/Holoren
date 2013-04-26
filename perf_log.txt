@@ -130,3 +130,93 @@ algorithm                   : alg4
 chunk size                  : 131072
 rendering time              : Elapsed time: 22s 633ms 182us
 ================================================================================
+================================================================================
+date                        : 02:53:21 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1000x1000
+algorithm                   : alg4
+chunk size                  : 131072
+rendering time              : Elapsed time: 7s 101ms 141us
+================================================================================
+================================================================================
+date                        : 02:58:44 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1000x1000
+algorithm                   : alg4
+chunk size                  : 131072
+rendering time              : Elapsed time: 7s 109ms 720us
+================================================================================
+================================================================================
+date                        : 02:59:22 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1000x1000
+algorithm                   : alg4
+chunk size                  : 1000000
+rendering time              : Elapsed time: 6s 525ms 541us
+================================================================================
+================================================================================
+date                        : 03:00:05 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 434ms 352us
+================================================================================
+================================================================================
+date                        : 14:47:08 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 93ms 551us
+================================================================================
+================================================================================
+date                        : 15:05:48 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 253ms 774us
+================================================================================
+================================================================================
+date                        : 15:08:21 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 169ms 306us
+================================================================================
+================================================================================
+date                        : 15:14:32 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 164ms 764us
+================================================================================
+================================================================================
+date                        : 20:26:42 26.04.2013
+build type                  : debug
+input file                  : "../../../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 2048x2048
+algorithm                   : alg4
+chunk size                  : 1048576
+rendering time              : Elapsed time: 26s 279ms 941us
+================================================================================
