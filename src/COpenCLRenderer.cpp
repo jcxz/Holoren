@@ -29,6 +29,17 @@ static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
 /** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
 static const char *KERNEL_ALGORITHM4 = "compObjWave_big_flat";
 
+/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
+static const char *KERNEL_ALGORITHM5 = "compObjWave_big_aligned";
+
+
+/* Define some convenience error handling macros */
+#define MKERRMSG() 
+#define HANDLE_CL_ERR_GT()
+#define HANDLE_CL_ERR()
+#define CHECK_CL_ERR() 
+#define CHECK_CL_ERR_GT() 
+
 
 
 
@@ -58,19 +69,15 @@ bool COpenCLRenderer::open(const char *filename)
   }
 
   DBG("selected device:\n" << m_device);
-
-  /* infer the appropriate chunk size if it is not set by user */
-  if (m_max_chunk_size == 0)
+  
+  /* get the value of how many bytes of data can be allocated (and processed) at once by GPU */
+  err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_mem_obj_max_size);
+  if (err != CL_SUCCESS)
   {
-    /* get the value of how many bytes of data can be allocated (and processed) at once by GPU */
-    err = OpenCL::getDeviceInfo(m_device, CL_DEVICE_MAX_MEM_ALLOC_SIZE, &m_max_chunk_size);
-    if (err != CL_SUCCESS)
-    {
-      m_err_msg = DBGSTRLOC();
-      m_err_msg += ": ";
-      m_err_msg += OpenCL::clErrToStr(err);
-      goto error;
-    }
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
+    goto error;
   }
 
   /* create OpenCL context for all GPU devices on the machine */
@@ -150,6 +157,7 @@ bool COpenCLRenderer::open(const char *filename)
       case ALGORITHM_TYPE_2: kernel = KERNEL_ALGORITHM2; break;
       case ALGORITHM_TYPE_3: kernel = KERNEL_ALGORITHM3; break;
       case ALGORITHM_TYPE_4: kernel = KERNEL_ALGORITHM4; break;
+      case ALGORITHM_TYPE_5: kernel = KERNEL_ALGORITHM5; break;
       default: m_err_msg = "Unknown algorithm type"; goto error;
     }
 
@@ -235,7 +243,6 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 {
   /* check on preconditions */
   HOLOREN_ASSERT(of != NULL);
-  HOLOREN_ASSERT((m_max_chunk_size % sizeof(COpticalField::CComplex)) == 0);
 
   /* intialize local variables */
   cl_int err = CL_SUCCESS;
@@ -247,8 +254,40 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   DBG("");
 #endif
 
-  /* create memory objects from data passed in as arguments */
-  cl_mem pc_buf = clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err);
+  /* ensure that the right amount of memory is allocated for memory object */   
+  if (m_alg_type == ALGORITHM_TYPE_2)
+  {
+    DBG("of->getByteSize()  : " << of->getByteSize());
+    DBG("m_mem_obj_max_size : " << m_mem_obj_max_size);
+    if (of->getByteSize() > m_mem_obj_max_size)
+    {
+      m_err_msg = DBGSTRLOC();
+      m_err_msg += ": The optical field is too large for algorithm 2";
+      return false;
+    }
+    
+    m_chunk_size = of->getSize();
+  }
+  else if (m_chunk_size == 0)
+  { // chunk size is described in elements (not in bytes)
+    m_chunk_size = m_mem_obj_max_size / sizeof(COpticalField::CComplex);
+  }
+  else if (m_chunk_size > of->getSize())
+  {
+    m_chunk_size = of->getSize();
+  }
+
+  /* create a memory object for point cloud data */
+  cl_mem pc_buf = ((m_alg_type == ALGORITHM_TYPE_5) ?
+                     (
+                       DBG("pc_buf allocated size: " << (pc.size() * sizeof(cl_float4))),
+                       clCreateBuffer(m_context, CL_MEM_READ_ONLY, pc.size() * sizeof(cl_float4), NULL, &err)
+                     ) :
+                     (
+                       DBG("pc_buf allocated size: " << pc.getByteSize()),
+                       clCreateBuffer(m_context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, pc.getByteSize(), (void *) pc.data(), &err)
+                     )
+                  );
   if (err != CL_SUCCESS)
   {
     m_err_msg = DBGSTRLOC();
@@ -257,8 +296,14 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     return false;
   }
 
-  //cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, of->getByteSize(), NULL, &err);
-  cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, m_max_chunk_size, NULL, &err);
+  if ((m_alg_type == ALGORITHM_TYPE_5) && (!fillPCMemObj(pc, pc_buf)))
+  {
+    clReleaseMemObject(pc_buf);
+    return false;
+  }
+
+  /* create a memory object for the optical field */
+  cl_mem of_buf = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, m_chunk_size * sizeof(COpticalField::CComplex), NULL, &err);
   if (err != CL_SUCCESS)
   {
     clReleaseMemObject(pc_buf);
@@ -274,7 +319,8 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   {
     case ALGORITHM_TYPE_2: ret = renderAlgorithm2(pc, pc_buf, of, of_buf); break;
     case ALGORITHM_TYPE_3: ret = renderAlgorithm3(pc, pc_buf, of, of_buf); break;
-    case ALGORITHM_TYPE_4: ret = renderAlgorithm4(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_4:
+    case ALGORITHM_TYPE_5: ret = renderAlgorithm4(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
   }
 
@@ -527,10 +573,11 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
   cl_int row_offset = 0;
   cl_int col_offset = 0;
   size_t of_byte_size = of->getByteSize();
+  size_t max_chunk_size = m_chunk_size * sizeof(COpticalField::CComplex);
 
   /* break the optical field into chunks that can be processed by gpu and
      render the object wave of hologram */
-  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += m_max_chunk_size)
+  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += max_chunk_size)
   {
     DBG("chunk                : " << chunk);
     DBG("of_byte_size - chunk : " << (of_byte_size - chunk));
@@ -602,8 +649,6 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
  */
 bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
-  DBGLOC();
-
   DBG("Algorithm 4");
 
   /* a macro to set the given kernel argument type */
@@ -624,6 +669,7 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
 
   /* set kernel arguments */
   cl_uint pc_size = pc.size();
+  size_t of_size = of->getSize();
   cl_int rows = of->getNumRows();
   cl_int cols = of->getNumCols();
   cl_float hologram_z = (cl_float) m_hologram_z;
@@ -654,34 +700,31 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
   SET_ARG(8, corner_x);
   SET_ARG(9, corner_y);
 
-  size_t of_byte_size = of->getByteSize();
-  size_t global_work_size = m_max_chunk_size / sizeof(COpticalField::CComplex);
-  size_t offset = 0;
-
-  DBG("of_byte_size     : " << of_byte_size);
-  DBG("m_max_chunk_size : " << m_max_chunk_size);
-  DBG("global_work_size : " << global_work_size);
+  DBG("of_size     : " << of_size);
+  DBG("m_max_chunk_size : " << m_chunk_size);
 
   /* break the optical field into chunks that can be processed by gpu and
      render the object wave of hologram */
-  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += m_max_chunk_size, offset += global_work_size)
+  for (size_t chunk = 0; chunk < of_size; chunk += m_chunk_size)
   {
-    DBG("chunk                : " << chunk);
-    DBG("of_byte_size - chunk : " << (of_byte_size - chunk));
-    DBG("of->data() + chunk   : " << (unsigned long long int) ((const char *) (of->data()) + chunk));
-    DBG("offset               : " << (offset));
-    DBG("");
+    SET_ARG(3, chunk);
 
-    SET_ARG(3, offset);
+    size_t remaining = std::min(m_chunk_size, of_size - chunk);
+    
+    DBG("chunk num.         : " << (chunk / m_chunk_size));
+    DBG("chunk              : " << (chunk));
+    DBG("remaining          : " << (remaining));
+    DBG("of->data() + chunk : " << (unsigned long long int) (of->data() + chunk));
+    DBG("");
 
 #if 1
     /* execute kernel */
-    err = clEnqueueNDRangeKernel(m_cmd_queue,        // the command queue
-                                 m_kernel,           // the kernel to be excuted
-                                 1,                  // the number of nested for loops that OpenCL will generate
-                                 NULL,               // the starting index of each nested for loop (allways 0, for each nested loop in my case)
-                                 &global_work_size,  // the number of items in each nested for loop
-                                 NULL,               // this is a local work size, not really sure how it relates to the above parameters
+    err = clEnqueueNDRangeKernel(m_cmd_queue,    // the command queue
+                                 m_kernel,       // the kernel to be excuted
+                                 1,              // the number of nested for loops that OpenCL will generate
+                                 NULL,           // the starting index of each nested for loop (allways 0, for each nested loop in my case)
+                                 &remaining,     // the number of items in each nested for loop
+                                 NULL,           // this is a local work size, not really sure how it relates to the above parameters
                                  0,
                                  NULL,
                                  NULL);
@@ -705,7 +748,15 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
 #endif
 
     /* read the result */
-    err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, m_max_chunk_size, (((char *) of->data()) + chunk), 0, NULL, NULL);
+    err = clEnqueueReadBuffer(m_cmd_queue,
+                              of_buf,
+                              CL_TRUE,
+                              0,
+                              remaining * sizeof(COpticalField::CComplex),
+                              ((char *) (of->data() + chunk)),
+                              0,
+                              NULL,
+                              NULL);
     if (err != CL_SUCCESS)
     {
       m_err_msg = DBGSTRLOC();
@@ -725,6 +776,53 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
 
 /**
  */
+bool COpenCLRenderer::fillPCMemObj(const CPointCloud & pc, cl_mem pc_buf)
+{
+  /* Map point cloud buffer */
+  cl_int err = CL_SUCCESS;
+  cl_float4 *data = (cl_float4 *) clEnqueueMapBuffer(m_cmd_queue,
+                                                     pc_buf,
+                                                     CL_TRUE,
+                                                     CL_MAP_WRITE,
+                                                     0,
+                                                     pc.size() * sizeof(cl_float4),
+                                                     0,
+                                                     NULL,
+                                                     NULL,
+                                                     &err);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
+    return false;
+  }
+
+  /* fill the buffer with point sources at correct offsets */
+  for (size_t i = 0; i < pc.size(); ++i)
+  {
+    data[i].s[0] = pc[i].x;
+    data[i].s[1] = pc[i].y;
+    data[i].s[2] = pc[i].z;
+    // skip the last element
+  }
+
+  /* unmap point cloud memory object */
+  err = clEnqueueUnmapMemObject(m_cmd_queue, pc_buf, data, 0, NULL, NULL);
+  if (err != CL_SUCCESS)
+  {
+    m_err_msg = DBGSTRLOC();
+    m_err_msg += ": ";
+    m_err_msg += OpenCL::clErrToStr(err);
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ */
 bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_buf)
 {
   HOLOREN_ASSERT(filename != NULL);
@@ -737,7 +835,7 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   if (!is)
   {
     m_err_msg = DBGSTRLOC();
-    m_err_msg = ": Failed to open OpenCL program file";
+    m_err_msg += ": Failed to open OpenCL program file";
     return false;
   }
 
@@ -753,7 +851,7 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   if (program_size == 0)
   {
     m_err_msg = DBGSTRLOC();
-    m_err_msg = ": OpenCL program file is empty";
+    m_err_msg += ": OpenCL program file is empty";
     return false;
   }
 
@@ -772,7 +870,7 @@ bool COpenCLRenderer::readCLSource(const char *filename, std::string *program_bu
   if (!is)
   {
     m_err_msg = DBGSTRLOC();
-    m_err_msg = ": Failed to read OpenCL program";
+    m_err_msg += ": Failed to read OpenCL program";
     return false;
   }
 

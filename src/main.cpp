@@ -90,10 +90,11 @@ static const char *algToStr(COpenCLRenderer::EAlgorithmType type)
   static const char *strings[] = {
     "alg2",
     "alg3",
-    "alg4"
+    "alg4",
+    "alg5"
   };
 
-  if ((type < COpenCLRenderer::ALGORITHM_TYPE_2) || (type > COpenCLRenderer::ALGORITHM_TYPE_4))
+  if ((type < COpenCLRenderer::ALGORITHM_TYPE_2) || (type > COpenCLRenderer::ALGORITHM_TYPE_5))
   {
     return "Unknown";
   }
@@ -242,6 +243,10 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
       else if (Utils::strCaseCmp(argv[i], "alg4") == 0)
       {
         params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_4;
+      }
+      else if (Utils::strCaseCmp(argv[i], "alg5") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_5;
       }
       else
       {
@@ -431,7 +436,7 @@ static CBaseRenderer *createRenderer(const tParams & params)
         std::cout << "Renderer engine: OpenCL" << std::endl;
         COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
         ren->setAlgorithmType(params.alg_type);
-        ren->setGlobalWorkSize(params.chunk_size);
+        ren->setChunkSize(params.chunk_size);
         return ren;
       }
       break;
@@ -467,7 +472,12 @@ static void writePerfLog(const tParams & params, const CPointCloud & pc, const C
   }
 
   perf_log << "================================================================================" << std::endl;
-  perf_log << "date                        : "   << Utils::fmtDateTime("%d.%m.%Y", time(NULL))   << std::endl;
+  perf_log << "date                        : "   << Utils::fmtDateTime("%H:%M:%S %d.%m.%Y", time(NULL)) << std::endl;
+#ifdef HOLOREN_DEBUG
+  perf_log << "build type                  : debug" << std::endl;
+#else
+  perf_log << "build type                  : release" << std::endl;
+#endif
   perf_log << "input file                  : \"" << params.ifilename << '\"'                     << std::endl;
   perf_log << "point sources               : "   << pc.size()                                    << std::endl;
   perf_log << "optical field (rows x cols) : "   << of.getNumRows()  << 'x' << of.getNumCols()   << std::endl;
@@ -476,8 +486,7 @@ static void writePerfLog(const tParams & params, const CPointCloud & pc, const C
   {
     const COpenCLRenderer *ocl_ren = static_cast<const COpenCLRenderer *>(ren);
     perf_log << "algorithm                   : " << algToStr(params.alg_type)    << std::endl;
-    perf_log << "global_work_size            : " << ocl_ren->getGlobalWorkSize() << std::endl;
-    perf_log << "max_chunk_size              : " << ocl_ren->getChunkSize()      << std::endl;
+    perf_log << "chunk size                  : " << ocl_ren->getChunkSize()      << std::endl;
   }
 
   perf_log << "rendering time              : " << g_timer                                        << std::endl;

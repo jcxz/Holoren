@@ -22,7 +22,8 @@ class COpenCLRenderer : public CBaseRenderer
     enum EAlgorithmType {
       ALGORITHM_TYPE_2,
       ALGORITHM_TYPE_3,
-      ALGORITHM_TYPE_4
+      ALGORITHM_TYPE_4,
+      ALGORITHM_TYPE_5
     };
 
   public:
@@ -36,7 +37,8 @@ class COpenCLRenderer : public CBaseRenderer
         m_program(),
         m_kernel(),
         m_device(),
-        m_max_chunk_size(0),
+        m_chunk_size(0),
+        m_mem_obj_max_size(0),
         m_alg_type(),
         m_err_msg("")
     {
@@ -65,15 +67,7 @@ class COpenCLRenderer : public CBaseRenderer
      */
     cl_ulong getChunkSize(void) const
     {
-      return m_max_chunk_size;
-    }
-
-    /**
-     * A method to get the value of current global_work_size
-     */
-    size_t getGlobalWorkSize(void) const
-    {
-      return m_max_chunk_size / sizeof(COpticalField::CComplex);
+      return m_chunk_size;
     }
 
     /**
@@ -83,9 +77,9 @@ class COpenCLRenderer : public CBaseRenderer
      * the maximum number of bytes that can be allocated
      * for a single memory object.
      */
-    void setGlobalWorkSize(size_t work_size)
+    void setChunkSize(size_t chunk_size)
     {
-      m_max_chunk_size = work_size * sizeof(COpticalField::CComplex);
+      m_chunk_size = chunk_size;
       return;
     }
 
@@ -123,10 +117,15 @@ class COpenCLRenderer : public CBaseRenderer
     bool renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
     
     /**
-     * The third rendering algorithm, can render large holograms, by dividing the calculation
+     * The fourth rendering algorithm, can render large holograms, by dividing the calculation
      * in several smaller chunks
      */
     bool renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+
+    /**
+     * A function to fill the contents of point cloud memory object
+     */
+    bool fillPCMemObj(const CPointCloud & pc, cl_mem pc_buf);
     
     /**
      * A method to read the opencl program from a file
@@ -157,7 +156,8 @@ class COpenCLRenderer : public CBaseRenderer
     cl_program m_program;          /// OpenCL program (destroying it before the computations are done, won't probably do any good)
     cl_kernel m_kernel;            /// kernel that will be executed (will be sent to device for execution)
     cl_device_id m_device;         /// the device used
-    cl_ulong m_max_chunk_size;     /// determines the maximum size amount of data that can be allocated and processed at once by the device
+    size_t m_chunk_size;           /// determines the amount of data that can be allocated and processed at once by the kernel
+    cl_ulong m_mem_obj_max_size;   /// describes the maximum size of a memory object on a given device (in bytes)
     EAlgorithmType m_alg_type;     /// the type of algorithm to be used
     std::string m_err_msg;         /// a string to hold the error message and a build log
 };
