@@ -72,7 +72,7 @@ class CBaseRenderer
      * A method to return a string describing the error
      * that occured whiel rendering or intialising the renderer
      *
-     * @retrun a string describing the error that happened,
+     * @return a string describing the error that happened,
      *         e.g. a build log or an error message from OpenCL/CUDA
      */
     virtual std::string getError(void) const = 0;
@@ -80,7 +80,7 @@ class CBaseRenderer
     /**
      * A method to render only an object wave
      *
-     * @param scene the scene that will be rendered
+     * @param pc the point cloud that will be rendered
      * @param of an optical field where the rendering results will be saved
      *
      * @return true of the operation succeeded, false otherwise
@@ -90,7 +90,7 @@ class CBaseRenderer
     /**
      * A method to render the comple hologram including adding the reference wave
      *
-     * @param scene the scene that will be rendered
+     * @param pc the point cloud that will be rendered
      * @param of an optical field where the rendering results will be saved
      *
      * @return true of the operation succeeded, false otherwise

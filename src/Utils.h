@@ -49,7 +49,7 @@ bool strToDbl(const char *str, double *res);
  * @param str the string to be converted
  * @param res a pointer to variable where the result will be saved
  *
- * @reutrn true on success, false on error
+ * @return true on success, false on error
  */
 bool strToUInt(const char *str, unsigned int *res);
 
@@ -62,7 +62,7 @@ bool strToUInt(const char *str, unsigned int *res);
  * @param str the string to be converted
  * @param res a pointer to variable where the result will be saved
  *
- * @reutrn true on success, false on error
+ * @return true on success, false on error
  */
 bool strToULong(const char *str, unsigned long *res);
 

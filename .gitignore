@@ -78,7 +78,10 @@
 /build/qt_creator/IBP_holoren/Makefile.Debug
 /build/qt_creator/IBP_holoren/Makefile.Release
 
-
-# ignore output directory as it changes often and contains binary files
+#### ignore output directory as it changes often and contains binary files ####
 /output/
 /output/*
+
+#### ignore  generated documentation ####
+/doc/generated/
+/doc/generated/*

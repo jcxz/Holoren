@@ -16,34 +16,6 @@
 #include <string>
 
 
-namespace detail {
-
-  /**
- * This function will print a formatted code location
- */
-std::string formatCodeLoc(const char *filepath,
-                          int line_num,
-                          const char *func_name)
-{
-  std::string res;
-
-  if (filepath != NULL)
-  {
-    const char *filename = Utils::getFileName(filepath);
-    res += ((filename == NULL) ? filepath : (filename + 1));
-    res += " : ";
-  }
-
-  res += "ln";
-  res += std::to_string(line_num);
-  res += " : ";
-  res += func_name;
-
-  return res;
-}
-
-}
-
 
 /* a private namespace with helper functions */
 namespace {
@@ -131,20 +103,36 @@ void hexdumpLine(std::ostream & os,
 
 
 namespace Debug {
+  
+namespace detail {
 
 /**
- * This method will print binary data in human readable format.
- * First a line offset is printed, then a hex dump of binary data and
- * finally an ascii dump of those data.
- *
- * @param aud the targeted audience
- * @param sev the log message error level
- * @param *data the data to be printed
- * @param len the length of the data
- * @param line_width width of the binary dump (e.g. how many bytes
- *                   will be printed on a single line)
- *
- * @return a reference to logger itself, so that the calls can be chained
+ */
+std::string formatCodeLoc(const char *filepath,
+                          int line_num,
+                          const char *func_name)
+{
+  std::string res;
+
+  if (filepath != NULL)
+  {
+    const char *filename = Utils::getFileName(filepath);
+    res += ((filename == NULL) ? filepath : (filename + 1));
+    res += " : ";
+  }
+
+  res += "ln";
+  res += std::to_string(line_num);
+  res += " : ";
+  res += func_name;
+
+  return res;
+}
+
+}  // End of namespace detail
+
+
+/**
  */
 std::ostream & hexdump(std::ostream & os,
                        const void *data,
