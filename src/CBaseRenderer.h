@@ -33,7 +33,7 @@ class CBaseRenderer
     }
 
 	/**
-	 * A function to set the hologram position on z-axis
+	 * A function to set the hologram position on z-axis (in metres)
      *
      * @param z the location of hologram in z axis
 	 */

@@ -143,7 +143,7 @@ bool CImagePointCloudRW::read(CPointCloud *pc)
 
   /* create point sources from grey pixels */
   DBG("Generating point sources");
-  if (!genPointSources(img_surf, treshold, 0.0, 0.000025, pc))
+  if (!genPointSources(img_surf, treshold, 0.0, m_sampling_step, pc))
   //if (!genPointSources(img_surf, treshold, 0.0, 1.0e-3, pc))
   {
     SDL_FreeSurface(img_surf);

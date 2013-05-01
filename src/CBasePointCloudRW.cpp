@@ -25,7 +25,7 @@ void CBasePointCloudRW::sample(const Geometry::SLine & line, CPointCloud *pc)
     pc->addPointSource(Geometry::SPoint3D(line.p1.x + dir.x * t,
                                           line.p1.y + dir.y * t,
                                           line.p1.z + dir.z * t));
-    t += m_step;
+    t += m_sampling_step;
   }
 
   /* this line is to compensate for lack of accuracy in floating point

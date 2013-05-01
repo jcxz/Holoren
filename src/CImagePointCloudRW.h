@@ -20,8 +20,8 @@ class CImagePointCloudRW : public CBasePointCloudRW
     /**
      * Constructor
      */
-    explicit CImagePointCloudRW(const std::string & filename = std::string())
-      : CBasePointCloudRW(filename)
+    explicit CImagePointCloudRW(const std::string & filename = std::string(), float step = 0.000025)
+      : CBasePointCloudRW(filename, step)
     {
     }
 

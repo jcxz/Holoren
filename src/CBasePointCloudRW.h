@@ -27,7 +27,7 @@ class CBasePointCloudRW
     explicit CBasePointCloudRW(const std::string & filename = std::string(), float step = 10e-2)
       : m_filename(filename),
         m_error(""),
-        m_step(step)
+        m_sampling_step(step)
     {
     }
 
@@ -67,21 +67,23 @@ class CBasePointCloudRW
      *
      * @return sampling step
      */
-    float getStep(void) const
+    float getSamplingStep(void) const
     {
-      return m_step;
+      return m_sampling_step;
     }
 
     /**
      * Set the step used for sampling geometry
      * For example a step of 10e-2 means that there
      * will be 10 points generated for each sampled line.
+     * The sampling step for images means the size of pixel
+     * in image in meters.
      *
      * @param step the step to be used
      */
-    void setStep(float step)
+    void setSamplingStep(float step)
     {
-      m_step = step;
+      m_sampling_step = step;
       return;
     }
 
@@ -138,9 +140,7 @@ class CBasePointCloudRW
   protected:
     std::string m_filename;  /// the name of the file to be used for reading/writing
     std::string m_error;     /// error description
-
-  private:
-    float m_step;            /// the step to be used when sampling lines
+    float m_sampling_step;   /// the step to be used when sampling lines/images
 };
 
 #endif

@@ -23,14 +23,15 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -o output_file\n"
                                     "          -h optical_field_num_rows\n"
                                     "          -w optical_field_num_cols\n"
-                                    "          -s sampling\n"
+                                    "          -s optical field sampling\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
                                     "          -r simple|opencl|none\n"
                                     "          -a alg2|alg3|alg4\n"
                                     "          -c chunk_size\n"
                                     "          -f cl_source_file\n"
-                                    "          -p performace_log";
+                                    "          -p performace_log\n"
+                                    "          -t point_cloud_converter_sampling_step (in metres)\n";
 
 /** a timer to meassure execution time of different sections of code */
 static CTimer g_timer;
@@ -59,6 +60,8 @@ typedef struct {
   double lambda;                             /// light wavelength
   double hologram_z;                         /// hologram placement
   const char *perf_log;                      /// a pointer to performance log file
+  double pc_sampling_step;                   /// point cloud converter sampling step (size of a pixel of image)
+                                             /// or the distance between sampled points on a line from XML
 } tParams;
 
 
@@ -108,18 +111,19 @@ static const char *algToStr(COpenCLRenderer::EAlgorithmType type)
  */
 std::ostream & operator<<(std::ostream & os, const tParams & params)
 {
-  os << "input file            : " << ((params.ifilename == NULL) ? "NULL" : params.ifilename) << std::endl;
-  os << "output file           : " << ((params.ofilename == NULL) ? "NULL" : params.ofilename) << std::endl;
-  os << "optical field n. rows : " << params.of_rows                                           << std::endl;
-  os << "optical field n. cols : " << params.of_cols                                           << std::endl;
-  os << "sampling              : " << params.sampling                                          << std::endl;
-  os << "light wavelength      : " << params.lambda                                            << std::endl;
-  os << "hologram z            : " << params.hologram_z                                        << std::endl;
-  os << "Rendering engine      : " << renToStr(params.renderer)                                << std::endl;
-  os << "Rendering algorithm   : " << algToStr(params.alg_type)                                << std::endl;
-  os << "Chunk size            : " << params.chunk_size                                        << std::endl;
-  os << "OpenCL source file    : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
-  os << "Performance log file  : " << ((params.perf_log == NULL) ?  "NULL" : params.perf_log)  << std::endl;
+  os << "input file                : " << ((params.ifilename == NULL) ? "NULL" : params.ifilename) << std::endl;
+  os << "output file               : " << ((params.ofilename == NULL) ? "NULL" : params.ofilename) << std::endl;
+  os << "optical field n. rows     : " << params.of_rows                                           << std::endl;
+  os << "optical field n. cols     : " << params.of_cols                                           << std::endl;
+  os << "sampling                  : " << params.sampling                                          << std::endl;
+  os << "light wavelength          : " << params.lambda                                            << std::endl;
+  os << "hologram z                : " << params.hologram_z                                        << std::endl;
+  os << "Rendering engine          : " << renToStr(params.renderer)                                << std::endl;
+  os << "Rendering algorithm       : " << algToStr(params.alg_type)                                << std::endl;
+  os << "Chunk size                : " << params.chunk_size                                        << std::endl;
+  os << "OpenCL source file        : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
+  os << "Performance log file      : " << ((params.perf_log == NULL) ?  "NULL" : params.perf_log)  << std::endl;
+  os << "Point cloud sampling step : " << params.pc_sampling_step                                  << std::endl;
 
   return os;
 }
@@ -144,6 +148,7 @@ static void resetParams(tParams *params)
   params->chunk_size = 0;    // 0 means unspecified
   params->cl_source = NULL;
   params->perf_log = NULL;   // no logging by default
+  params->pc_sampling_step = 0.000025;
 
   return;
 }
@@ -370,6 +375,20 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
 
       params->perf_log = argv[i];
     }
+    else if (CMP_SHORT_OPT(argv[i], 't'))
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Option -t requires an argument" << std::endl;
+        return false;
+      }
+
+      if (!Utils::strToDbl(argv[i], &params->pc_sampling_step))
+      {
+        std::cerr << "Failed to convert argument " << argv[i] << " of option -t to number" << std::endl;
+        return false;
+      }
+    }
     else
     {
       std::cerr << "Unrecognized option: " << argv[i] << std::endl;
@@ -524,7 +543,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  rw->setStep(10e-4);
+  //rw->setSamplingStep(10e-4);
+  rw->setSamplingStep(params.pc_sampling_step);
 
   /* convert to point cloud from a given file type */
   CPointCloud pc;
