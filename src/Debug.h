@@ -21,7 +21,7 @@
 #  define DBG(x) std::cerr << x << std::endl
 #  define DBGHEX(data, len) Debug::hexdump(std::cerr, data, len)
 #else
-#  define DBG(x)
+#  define DBG(x) ((void) (0))
 #  define DBGHEX(data, len)
 #endif
 

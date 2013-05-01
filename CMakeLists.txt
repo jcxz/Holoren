@@ -166,6 +166,8 @@ set(TEST_DEBUG_SOURCES
   src/global.h
   src/Debug.h
   src/Debug.cpp
+  src/Utils.h
+  src/Utils.cpp
   tests/test_debug.cpp
 )
 
