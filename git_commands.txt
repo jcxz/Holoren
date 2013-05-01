@@ -47,6 +47,18 @@ git diff HEAD~2 file.txt
   differences between current `file.txt` and `file.txt` two revisions back
 
 --------------------------------------------------------------------------------
+When I want to overwrite local changes, i.e. when I get an error message like this:
+
+error: Your local changes to the following files would be overwritten by merge:
+        file.txt
+        Please, commit your changes or stash them before you can merge.
+
+Then i can resolve this issue like this:
+
+git stash save --keep-index
+git stash drop
+
+--------------------------------------------------------------------------------
 Writing .gitignore:
 
 1) All the rules of .gitignore have to be on separate lines, with comments on
