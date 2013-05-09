@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   }
 
   /* set sampling step */
-  rw->setStep(10e-2);
+  rw->setSamplingStep(10e-2);
   
   /* convert to point cloud from a given file type */
   CPointCloud pc;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
   }
   
   /* display the sampled points */
-  std::cout << "Sampled points (step == " << rw->getStep() << "): " << std::endl;
+  std::cout << "Sampled points (step == " << rw->getSamplingStep() << "): " << std::endl;
   std::cout << pc << std::endl;
 
   delete rw;
