@@ -40,6 +40,17 @@
 /build/msvc2012/test_timer_win/*.filters
 /build/msvc2012/test_timer_win/*.txt
 
+/build/msvc2012/test_CPCPointCloudRW/Debug/
+/build/msvc2012/test_CPCPointCloudRW/Debug/*
+/build/msvc2012/test_CPCPointCloudRW/Release/ 
+/build/msvc2012/test_CPCPointCloudRW/Release/*   
+/build/msvc2012/test_CPCPointCloudRW/*.sdf
+/build/msvc2012/test_CPCPointCloudRW/*.opensdf
+/build/msvc2012/test_CPCPointCloudRW/*.suo
+/build/msvc2012/test_CPCPointCloudRW/*.user
+/build/msvc2012/test_CPCPointCloudRW/*.filters
+/build/msvc2012/test_CPCPointCloudRW/*.txt
+
 #### Visual Studio 2010 ####
 /build/msvc2010/IBP_holoren/ipch/
 /build/msvc2010/IBP_holoren/ipch/*
