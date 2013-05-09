@@ -96,7 +96,7 @@ class COpenCLRenderer : public CBaseRenderer
        If I wanted to implement these someday in future
        I would have to do so in terms of retain and release */
     COpenCLRenderer(const COpenCLRenderer & );
-    COpenCLRenderer(COpenCLRenderer && );
+    HOLOREN_DECL_MOVE_CONSTRUCTOR(COpenCLRenderer);
     COpenCLRenderer & operator=(const COpenCLRenderer & );
 
   private:

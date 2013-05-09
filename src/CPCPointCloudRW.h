@@ -53,6 +53,14 @@ class CPCPointCloudRW : public CBasePointCloudRW
      * reader it should just return false.
      */
     virtual bool write(CPointCloud *pc);
+
+  private:
+    /**
+     * A helper function to read a floating point number from input
+     * stream separated by others with given delimiter
+     * The function strips any leading or trailing whitespace.
+     */
+    static bool readFPNumber(std::istream & is, char end_delim, tFPType *num);
 };
 
 #endif

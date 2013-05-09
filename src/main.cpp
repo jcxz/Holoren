@@ -565,6 +565,10 @@ int main(int argc, char *argv[])
 
   std::cout << "Point cloud was loaded successfully" << std::endl;
   std::cout << "Total number of point sources that have to be rendered: " << pc.size() << std::endl;
+#ifdef HOLOREN_HEAVY_DEBUG
+  DBG("Loaded point sources:");
+  DBG(pc);
+#endif
 
   /* set up renderer */
   std::cout << "Setting up renderer" << std::endl;
