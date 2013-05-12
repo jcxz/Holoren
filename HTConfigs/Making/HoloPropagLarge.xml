@@ -7,8 +7,8 @@
   <ImageContainsIntensity>false</ImageContainsIntensity>
   <ImageContainsAmplitude>true</ImageContainsAmplitude>
   <ImageContainsPhase>false</ImageContainsPhase>
-  <Input>FIT-logo_10000x10000.png</Input>
-  <Target>FIT-logo_rek_10000x10000.png</Target>
+  <Input>FIT-logo_10000x10000_8_deg.png</Input>
+  <Target>FIT-logo_rek_10000x10000_8_deg.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
   <Frame>false</Frame>

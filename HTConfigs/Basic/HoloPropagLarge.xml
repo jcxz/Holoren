@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
   <Lambda>6.3e-07</Lambda>
-  <Pitch>2e-06</Pitch>
+  <Pitch>2e-05</Pitch>
   <ForceSettings>false</ForceSettings>
   <RandomizePhase>false</RandomizePhase>
   <ImageContainsIntensity>false</ImageContainsIntensity>
@@ -11,9 +11,9 @@
   <Target>out.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
-  <Frame>false</Frame>
+  <Frame>true</Frame>
   <FrameX>4096</FrameX>
   <FrameY>4096</FrameY>
   <FrameRemove>false</FrameRemove>
-  <Operations>-0.9 prop</Operations>
+  <Operations>-2.0 prop</Operations>
 </Config>
