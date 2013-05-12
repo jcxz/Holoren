@@ -105,12 +105,6 @@ class COpenCLRenderer : public CBaseRenderer
      * and thus it must entirely fit into GPU-s memory
      */
     bool renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
-
-    /**
-     * The third rendering algorithm, can render large holograms, by dividing the calculation
-     * in several smaller chunks
-     */
-    bool renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
     
     /**
      * The fourth rendering algorithm, can render large holograms, by dividing the calculation
