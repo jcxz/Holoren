@@ -27,10 +27,10 @@ static const char *KERNEL_ALGORITHM2 = "compObjWave_SinglePass";
 static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
 
 /** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM4 = "compObjWave_big_flat";
+static const char *KERNEL_ALGORITHM4 = "compObjWave_MultiPass_flat";
 
 /** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM5 = "compObjWave_big_aligned";
+static const char *KERNEL_ALGORITHM5 = "compObjWave_MultiPass_aligned";
 
 
 
