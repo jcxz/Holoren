@@ -21,18 +21,41 @@
 static const char * const DEF_CL_SOURCE = "holoren_obj_wave.cl";
 
 /** Kernel function for the single pass second algorithm */
-static const char * const KERNEL_ALGORITHM2 = "compObjWave_SinglePass";
+static const char * const KERNEL_SINGLEPASS = "compObjWave_SinglePass";
 
 /** Kernel function for the multipass algorithm */
-static const char * const KERNEL_ALGORITHM3 = "compObjWave_MultiPass";
+static const char * const KERNEL_MULTIPASS = "compObjWave_MultiPass";
 
 /** Kernel function for the multipass algorithm, which uses native instructions */
-static const char * const KERNEL_ALGORITHM4 = "compObjWave_MultiPass_native";
+static const char * const KERNEL_MULTIPASS_NATIVE = "compObjWave_MultiPass_native";
 
 /** Kernel function for the multipass algorithm which uses aligned access to point source array */
-static const char * const KERNEL_ALGORITHM5 = "compObjWave_MultiPass_aligned";
+static const char * const KERNEL_MULTIPASS_ALIGNED = "compObjWave_MultiPass_aligned";
 
 
+
+
+
+
+/**
+ * A function to convert COpenCLRenderer::EAlgorithmType to string
+ */
+const char *COpenCLRenderer::algToStr(EAlgorithmType type)
+{
+  static const char *strings[] = {
+    "(SinglePass) An algorithm that uses a single-pass to render the optical field",
+    "(MultiPass) Unoptimised multi-pass rendering algorithm",
+    "(MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions",
+    "(MultiPass Aligned) A multi-pass rendering algorithm that requires each point source to be aligned to float4"
+  };
+
+  if ((type < COpenCLRenderer::ALGORITHM_SINGLEPASS) || (type > COpenCLRenderer::ALGORITHM_INVALID))
+  {
+    return "Invalid rendering algorithm";
+  }
+
+  return strings[type];
+}
 
 
 /**
@@ -145,10 +168,10 @@ bool COpenCLRenderer::open(const char *filename)
     const char *kernel = "";
     switch (m_alg_type)
     {
-      case ALGORITHM_TYPE_2: kernel = KERNEL_ALGORITHM2; break;
-      case ALGORITHM_TYPE_3: kernel = KERNEL_ALGORITHM3; break;
-      case ALGORITHM_TYPE_4: kernel = KERNEL_ALGORITHM4; break;
-      case ALGORITHM_TYPE_5: kernel = KERNEL_ALGORITHM5; break;
+      case ALGORITHM_SINGLEPASS:        kernel = KERNEL_SINGLEPASS;        break;
+      case ALGORITHM_MULTIPASS:         kernel = KERNEL_MULTIPASS;         break;
+      case ALGORITHM_MULTIPASS_NATIVE:  kernel = KERNEL_MULTIPASS_NATIVE;  break;
+      case ALGORITHM_MULTIPASS_ALIGNED: kernel = KERNEL_MULTIPASS_ALIGNED; break;
       default: m_err_msg = "Unknown algorithm type"; goto error;
     }
 
@@ -246,7 +269,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 #endif
 
   /* ensure that the right amount of memory is allocated for memory object */   
-  if (m_alg_type == ALGORITHM_TYPE_2)
+  if (m_alg_type == ALGORITHM_SINGLEPASS)
   {
     DBG("of->getByteSize()  : " << of->getByteSize());
     DBG("m_mem_obj_max_size : " << m_mem_obj_max_size);
@@ -269,7 +292,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   }
 
   /* create a memory object for point cloud data */
-  cl_mem pc_buf = ((m_alg_type == ALGORITHM_TYPE_5) ?
+  cl_mem pc_buf = ((m_alg_type == ALGORITHM_MULTIPASS_ALIGNED) ?
                      (
                        DBG("pc_buf allocated size: " << (pc.size() * sizeof(cl_float4))),
                        clCreateBuffer(m_context, CL_MEM_READ_ONLY, pc.size() * sizeof(cl_float4), NULL, &err)
@@ -287,7 +310,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     return false;
   }
 
-  if ((m_alg_type == ALGORITHM_TYPE_5) && (!fillPCMemObj(pc, pc_buf)))
+  if ((m_alg_type == ALGORITHM_MULTIPASS_ALIGNED) && (!fillPCMemObj(pc, pc_buf)))
   {
     clReleaseMemObject(pc_buf);
     return false;
@@ -308,10 +331,10 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   bool ret = false;
   switch (m_alg_type)
   {
-    case ALGORITHM_TYPE_2: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
-    case ALGORITHM_TYPE_3:
-    case ALGORITHM_TYPE_4:
-    case ALGORITHM_TYPE_5: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_SINGLEPASS: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_MULTIPASS:
+    case ALGORITHM_MULTIPASS_NATIVE:
+    case ALGORITHM_MULTIPASS_ALIGNED: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
   }
 

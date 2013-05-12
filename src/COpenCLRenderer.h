@@ -20,10 +20,11 @@ class COpenCLRenderer : public CBaseRenderer
 {
   public:
     enum EAlgorithmType {
-      ALGORITHM_TYPE_2,
-      ALGORITHM_TYPE_3,
-      ALGORITHM_TYPE_4,
-      ALGORITHM_TYPE_5
+      ALGORITHM_SINGLEPASS,
+      ALGORITHM_MULTIPASS,
+      ALGORITHM_MULTIPASS_NATIVE,
+      ALGORITHM_MULTIPASS_ALIGNED,
+      ALGORITHM_INVALID
     };
 
   public:
@@ -89,6 +90,12 @@ class COpenCLRenderer : public CBaseRenderer
     virtual std::string getError(void) const;
     virtual bool renderObjectWave(const CPointCloud & pc, COpticalField *of);
     virtual bool renderHologram(const CPointCloud & pc, COpticalField *of);
+
+
+    /**
+     * A function to convert algorithm type to a string description.
+     */
+    static const char *algToStr(EAlgorithmType type);
 
     
   private:
