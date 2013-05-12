@@ -57,6 +57,13 @@ class CXMLPointCloudRW : public CBasePointCloudRW
     virtual bool write(CPointCloud *pc);
 
   private:
+    /**
+     * Reads the optional transformations that can be specified for a geometric primitive.
+     * These include rotation and scale. The rotation is allways done aroud object's bounding
+     * box centre.
+     */
+    bool readTransformations(xmlTextReaderPtr reader, Geometry::SMatrix4D *m);
+
     bool processPoint(xmlTextReaderPtr reader, CPointCloud *pc);
     bool processLine(xmlTextReaderPtr reader, CPointCloud *pc);
     bool processCuboid(xmlTextReaderPtr reader, CPointCloud *pc);

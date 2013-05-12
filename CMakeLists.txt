@@ -40,6 +40,7 @@ set(HOLOREN_SOURCES
   src/CTimer.cpp
   src/CSharedDataPtr.h
   src/Geometry.h
+  src/Geometry.cpp
   src/COpticalField.h
   src/COpticalField.cpp
   src/CPointCloud.h
