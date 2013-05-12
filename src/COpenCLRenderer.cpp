@@ -21,7 +21,7 @@
 static const char *DEF_CL_SOURCE = "holoren_obj_wave.cl";
 
 /** Kernel function (a main entry point to OpenCL program) for the second algorithm */
-static const char *KERNEL_ALGORITHM2 = "compObjWave_small";
+static const char *KERNEL_ALGORITHM2 = "compObjWave_SinglePass";
 
 /** Kernel function (a main entry point to OpenCL program) for the third algorithm */
 static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
@@ -31,14 +31,6 @@ static const char *KERNEL_ALGORITHM4 = "compObjWave_big_flat";
 
 /** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
 static const char *KERNEL_ALGORITHM5 = "compObjWave_big_aligned";
-
-
-/* Define some convenience error handling macros */
-#define MKERRMSG() 
-#define HANDLE_CL_ERR_GT()
-#define HANDLE_CL_ERR()
-#define CHECK_CL_ERR() 
-#define CHECK_CL_ERR_GT() 
 
 
 
@@ -317,10 +309,10 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   bool ret = false;
   switch (m_alg_type)
   {
-    case ALGORITHM_TYPE_2: ret = renderAlgorithm2(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_2: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
     case ALGORITHM_TYPE_3: ret = renderAlgorithm3(pc, pc_buf, of, of_buf); break;
     case ALGORITHM_TYPE_4:
-    case ALGORITHM_TYPE_5: ret = renderAlgorithm4(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_5: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
   }
 
@@ -333,7 +325,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 
 /**
  */
-bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+bool COpenCLRenderer::renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
   DBG("Algorithm 2");
 
@@ -560,7 +552,7 @@ bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, CO
 
 /**
  */
-bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+bool COpenCLRenderer::renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
   DBG("Algorithm 4");
 

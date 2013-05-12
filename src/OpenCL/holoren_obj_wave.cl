@@ -1,16 +1,17 @@
 /**
- * Algorithm 2
+ * Algorithm 1
  *
- * A function to compute spherical wave equation for a single point of optical field
+ * A kernel to compute spherical wave equation of a single point in optical field.
+ * This kernel is meant to be used with `renderAlgorithm_SinglePass`.
  */
-__kernel void compObjWave_small(__global float *pc,    /// a point cloud with point sources
-                                uint pc_size,          /// the number of elements in point cloud
-                                __global float2 *of,   /// an output optical field (float2 because this is an array of complex numbers)
-                                float hologram_z,      /// the z depth of hologram
-                                float k,               /// wavenumber
-                                float pitch,           /// pitch between samples
-                                float corner_x,        /// x corner of optical field
-                                float corner_y)        /// y corner of optical field
+__kernel void compObjWave_SinglePass(__global float *pc,    /// a point cloud with point sources
+                                     uint pc_size,          /// the number of elements in point cloud
+                                     __global float2 *of,   /// an output optical field (float2 because this is an array of complex numbers)
+                                     float hologram_z,      /// the z depth of hologram
+                                     float k,               /// wavenumber
+                                     float pitch,           /// pitch between samples
+                                     float corner_x,        /// x corner of optical field
+                                     float corner_y)        /// y corner of optical field
 {
   int row = get_global_id(0);
   int col = get_global_id(1);

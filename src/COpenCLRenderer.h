@@ -101,9 +101,10 @@ class COpenCLRenderer : public CBaseRenderer
 
   private:
     /**
-     * The second rendering algorithm
+     * This rendering algorithm does only one rendering pass, i.e. it enqueues kernel only once
+     * and thus it must entirely fit into GPU-s memory
      */
-    bool renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+    bool renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
 
     /**
      * The third rendering algorithm, can render large holograms, by dividing the calculation
@@ -115,7 +116,7 @@ class COpenCLRenderer : public CBaseRenderer
      * The fourth rendering algorithm, can render large holograms, by dividing the calculation
      * in several smaller chunks
      */
-    bool renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+    bool renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
 
     /**
      * A function to fill the contents of point cloud memory object
