@@ -101,11 +101,6 @@ class COpenCLRenderer : public CBaseRenderer
 
   private:
     /**
-     * The first rendering algorithm
-     */
-    bool renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
-
-    /**
      * The second rendering algorithm
      */
     bool renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
