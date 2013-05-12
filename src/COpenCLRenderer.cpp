@@ -18,19 +18,19 @@
 
 
 /** Kernel file */
-static const char *DEF_CL_SOURCE = "holoren_obj_wave.cl";
+static const char * const DEF_CL_SOURCE = "holoren_obj_wave.cl";
 
-/** Kernel function (a main entry point to OpenCL program) for the second algorithm */
-static const char *KERNEL_ALGORITHM2 = "compObjWave_SinglePass";
+/** Kernel function for the single pass second algorithm */
+static const char * const KERNEL_ALGORITHM2 = "compObjWave_SinglePass";
 
-/** Kernel function (a main entry point to OpenCL program) for the third algorithm */
-static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
+/** Kernel function for the multipass algorithm */
+static const char * const KERNEL_ALGORITHM3 = "compObjWave_MultiPass";
 
-/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM4 = "compObjWave_MultiPass_flat";
+/** Kernel function for the multipass algorithm, which uses native instructions */
+static const char * const KERNEL_ALGORITHM4 = "compObjWave_MultiPass_native";
 
-/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM5 = "compObjWave_MultiPass_aligned";
+/** Kernel function for the multipass algorithm which uses aligned access to point source array */
+static const char * const KERNEL_ALGORITHM5 = "compObjWave_MultiPass_aligned";
 
 
 
@@ -50,7 +50,6 @@ bool COpenCLRenderer::open(const char *filename)
   m_err_msg = "";
 
   /* select the most suitable device */
-  //m_device = selectDevice();
   m_device = OpenCL::selectDevice(&flags, &err);
   if (m_device == NULL)
   {
@@ -310,6 +309,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   switch (m_alg_type)
   {
     case ALGORITHM_TYPE_2: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_TYPE_3:
     case ALGORITHM_TYPE_4:
     case ALGORITHM_TYPE_5: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
@@ -326,7 +326,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
  */
 bool COpenCLRenderer::renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
-  DBG("Algorithm 2");
+  DBG("Single Pass Algorithm");
 
   /* a macro to set the given kernel argument type */
   #define SET_ARG(num, arg) \
@@ -425,7 +425,7 @@ bool COpenCLRenderer::renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem 
  */
 bool COpenCLRenderer::renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
-  DBG("Algorithm 4");
+  DBG("Multi Pass Algorithm");
 
   /* a macro to set the given kernel argument type */
   // the static_cast<> is for msvc 2010, which lacks the proper support of c++11
@@ -493,7 +493,6 @@ bool COpenCLRenderer::renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem p
     DBG("of->data() + chunk : " << (unsigned long long int) (of->data() + chunk));
     DBG("");
 
-#if 1
     /* execute kernel */
     err = clEnqueueNDRangeKernel(m_cmd_queue,        // the command queue
                                  m_kernel,           // the kernel to be excuted
@@ -540,7 +539,6 @@ bool COpenCLRenderer::renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem p
       m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
-#endif
   }
 
   /* to cancel kernel argument setting macro */
