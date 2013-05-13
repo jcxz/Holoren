@@ -1,0 +1,50 @@
+================================================================================
+date                        : 18:24:43 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 268435456
+rendering time              : Elapsed time: 3min 30s 838ms 593us
+================================================================================
+================================================================================
+date                        : 18:28:56 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 268435456
+rendering time              : Elapsed time: 4min 12s 334ms 411us
+================================================================================
+================================================================================
+date                        : 18:33:25 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 268435456
+rendering time              : Elapsed time: 4min 29s 231ms 954us
+================================================================================
+================================================================================
+date                        : 18:38:05 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 268435456
+rendering time              : Elapsed time: 4min 39s 238ms 306us
+================================================================================
+================================================================================
+date                        : 18:42:46 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 268435456
+rendering time              : Elapsed time: 4min 40s 120ms 43us
+================================================================================

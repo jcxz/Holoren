@@ -1,0 +1,50 @@
+================================================================================
+date                        : 18:44:11 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 994ms 402us
+================================================================================
+================================================================================
+date                        : 18:44:15 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 994ms 328us
+================================================================================
+================================================================================
+date                        : 18:44:20 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 994ms 243us
+================================================================================
+================================================================================
+date                        : 18:44:24 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 994ms 341us
+================================================================================
+================================================================================
+date                        : 18:44:28 13.05.2013
+build type                  : release
+input file                  : "../input/img/FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 994ms 691us
+================================================================================

@@ -11,7 +11,7 @@ project(HOLOREN)
 # release and debug flags
 #set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF -DHOLOREN_DEBUG_KERNEL")
 set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF")
-set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3 -DHOLOREN_DEBUG_PERF")
 
 # include a non-standard module from a local directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
