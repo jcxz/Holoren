@@ -40,7 +40,7 @@ class CTimerWindows
         m_frekv(1.0f)  // 1.0f to avoid division by zero on QueryPerformanceFrequency failure
     {
       LARGE_INTEGER f;
-      if (::QueryPerformanceFrequency(&f) != FALSE)  // get the frequency in counts per second
+      if (::QueryPerformanceFrequency(&f) == FALSE)  // get the frequency in counts per second
       {
         WARN("QueryPerformanceFrequency failed: high resolution timer not available on this platform, you might get incorrect results");
         return;
