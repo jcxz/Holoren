@@ -500,41 +500,42 @@ bool CXMLPointCloudRW::processCuboid(xmlTextReaderPtr reader, CPointCloud *pc)
   }
 
 #else
-
-  /* read the transformation matrix */
-  Geometry::SMatrix4D mat_rot_scale;
-  if (!readTransformations(reader, &mat_rot_scale))
   {
-    return false;
-  }
+    /* read the transformation matrix */
+    Geometry::SMatrix4D mat_rot_scale;
+    if (!readTransformations(reader, &mat_rot_scale))
+    {
+      return false;
+    }
 
-  /* make the rotations happen around cuboid center */
-  mat_rot_scale.translate(-w / 2.0f, -h / 2.0f, -d / 2.0f);
+    /* make the rotations happen around cuboid center */
+    mat_rot_scale.translate(-w / 2.0f, -h / 2.0f, -d / 2.0f);
 
-  /* compose the final transformation matrix */
-  Geometry::SMatrix4D m(mat_rot_scale);
-  m.loadIdentity();
-  m.translate(o.x, o.y, o.z);
-  m.multMatrix(mat_rot_scale);
+    /* compose the final transformation matrix */
+    Geometry::SMatrix4D m(mat_rot_scale);
+    m.loadIdentity();
+    m.translate(o.x, o.y, o.z);
+    m.multMatrix(mat_rot_scale);
 
-  /* convert cuboid to lines */
-  for (unsigned int i = 0; i < 4; ++i)
-  {
-    /* vertical line */
-    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x,     o.y + h * (i >> 1), o.z + d * (i & 1)));
-    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w, o.y + h * (i >> 1), o.z + d * (i & 1)));
-    DBG(line);
-    sample(line, pc);
-
-    /* horizontal line */
-    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y,     o.z + d * (i & 1)));
-    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h, o.z + d * (i & 1)));
-    sample(line, pc);
-    
-    /* a line along the depth */
-    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z));
-    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z + d));
-    sample(line, pc);
+    /* convert cuboid to lines */
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+      /* vertical line */
+      line.p1 = m.transformVertex(Geometry::SPoint3D(o.x,     o.y + h * (i >> 1), o.z + d * (i & 1)));
+      line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w, o.y + h * (i >> 1), o.z + d * (i & 1)));
+      DBG(line);
+      sample(line, pc);
+  
+      /* horizontal line */
+      line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y,     o.z + d * (i & 1)));
+      line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h, o.z + d * (i & 1)));
+      sample(line, pc);
+      
+      /* a line along the depth */
+      line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z));
+      line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z + d));
+      sample(line, pc);
+    }
   }
 #endif
 

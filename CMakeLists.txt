@@ -92,6 +92,8 @@ set(TEST_POINT_CLOUD_SAMPLER_SOURCES
   src/global.h
   src/Utils.h
   src/Utils.cpp
+  src/Geometry.h
+  src/Geometry.cpp
   src/CPointCloud.h
   src/CPointCloud.cpp
   src/CBasePointCloudRW.h
@@ -116,6 +118,8 @@ set(TEST_PCRW_FACTORY_SOURCES
   src/global.h
   src/Utils.h
   src/Utils.cpp
+  src/Geometry.h
+  src/Geometry.cpp
   src/CPointCloud.h
   src/CPointCloud.cpp
   src/CBasePointCloudRW.h
