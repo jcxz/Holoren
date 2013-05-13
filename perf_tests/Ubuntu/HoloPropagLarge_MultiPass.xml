@@ -7,8 +7,8 @@
   <ImageContainsIntensity>false</ImageContainsIntensity>
   <ImageContainsAmplitude>true</ImageContainsAmplitude>
   <ImageContainsPhase>false</ImageContainsPhase>
-  <Input>out.Hologram.png</Input>
-  <Target>out.png</Target>
+  <Input>MultiPass_holo.png</Input>
+  <Target>MultiPass_rek.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
   <Frame>true</Frame>

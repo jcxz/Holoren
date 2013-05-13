@@ -1,0 +1,50 @@
+================================================================================
+date                        : 12:41:57 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 134217728
+rendering time              : Elapsed time: 9min 12s 52ms 666us
+================================================================================
+================================================================================
+date                        : 12:50:54 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 134217728
+rendering time              : Elapsed time: 8min 55s 852ms 304us
+================================================================================
+================================================================================
+date                        : 12:59:47 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 134217728
+rendering time              : Elapsed time: 8min 52s 83ms 718us
+================================================================================
+================================================================================
+date                        : 13:08:41 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 134217728
+rendering time              : Elapsed time: 8min 52s 773ms 435us
+================================================================================
+================================================================================
+date                        : 13:17:38 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
+chunk size                  : 134217728
+rendering time              : Elapsed time: 8min 54s 414ms 983us
+================================================================================

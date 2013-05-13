@@ -1,0 +1,50 @@
+================================================================================
+date                        : 13:18:37 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 674ms 428us
+================================================================================
+================================================================================
+date                        : 13:18:41 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 677ms 506us
+================================================================================
+================================================================================
+date                        : 13:18:45 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 675ms 317us
+================================================================================
+================================================================================
+date                        : 13:18:49 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 674ms 626us
+================================================================================
+================================================================================
+date                        : 13:18:53 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
+chunk size                  : 16777216
+rendering time              : Elapsed time: 2s 674ms 512us
+================================================================================

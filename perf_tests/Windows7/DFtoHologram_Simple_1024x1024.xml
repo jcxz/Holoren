@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+  <ProcessLineCnt>512</ProcessLineCnt>
+  <KsiXDeg>0.5</KsiXDeg>
+  <KsiYDeg>0.5</KsiYDeg>
+  <Input>Simple_1024x1024.df</Input>
+  <Target>Simple_1024x1024_holo.png</Target>
+  <UsePhase>false</UsePhase>
+  <HologramInterference>false</HologramInterference>
+  <HologramBipolar>true</HologramBipolar>
+  <PsDPI>150</PsDPI>
+  <PsDotSize>1</PsDotSize>
+  <Binarize>true</Binarize>
+  <Halftonize>false</Halftonize>
+  <HalftonizeCellSize>3</HalftonizeCellSize>
+  <HalftonizeLevelCount>4</HalftonizeLevelCount>
+  <HalftonizeLevelByPixel>false</HalftonizeLevelByPixel>
+</Config>

@@ -1,0 +1,40 @@
+================================================================================
+date                        : 14:00:00 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+rendering time              : Elapsed time: 23min 39s 622ms 822us
+================================================================================
+================================================================================
+date                        : 14:24:51 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+rendering time              : Elapsed time: 24min 47s 431ms 441us
+================================================================================
+================================================================================
+date                        : 14:50:21 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+rendering time              : Elapsed time: 25min 27s 987ms 136us
+================================================================================
+================================================================================
+date                        : 15:15:43 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+rendering time              : Elapsed time: 25min 21s 709ms 301us
+================================================================================
+================================================================================
+date                        : 15:41:22 13.05.2013
+build type                  : release
+input file                  : "D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\input\img\FIT-logo_160x160.png"
+point sources               : 7291
+optical field (rows x cols) : 1024x1024
+rendering time              : Elapsed time: 25min 38s 556ms 894us
+================================================================================

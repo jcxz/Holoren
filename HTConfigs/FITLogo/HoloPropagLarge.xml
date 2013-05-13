@@ -11,9 +11,9 @@
   <Target>out.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
-  <Frame>true</Frame>
-  <FrameX>2048</FrameX>
-  <FrameY>2048</FrameY>
+  <Frame>false</Frame>
+  <FrameX>4096</FrameX>
+  <FrameY>4096</FrameY>
   <FrameRemove>false</FrameRemove>
   <Operations>-0.5 prop</Operations>
 </Config>

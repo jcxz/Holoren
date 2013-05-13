@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HoloPropagLargeEditor>
+  <CfgFiles selected="0">
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Basic/HoloPropagLarge.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Orig/HoloPropagLarge.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/CorticalCafe_CGH/HoloPropagLarge.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Making/HoloPropagLarge.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/FITLogo/HoloPropagLarge.xml</File>
+  </CfgFiles>
+  <BinFiles selected="0">
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/holo_toolkit/HoloPropagLarge.exe</File>
+  </BinFiles>
+  <WorkingDirs selected="0">
+    <Dir>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Basic</Dir>
+    <Dir>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\HTConfigs\Making</Dir>
+    <Dir>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\HTConfigs\FITLogo</Dir>
+  </WorkingDirs>
+  <ShowOutput>true</ShowOutput>
+</HoloPropagLargeEditor>
