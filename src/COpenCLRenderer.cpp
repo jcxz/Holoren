@@ -705,8 +705,10 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
 
   /* break the optical field into chunks that can be processed by gpu and
      render the object wave of hologram */
-  for (size_t chunk = 0; chunk < of_size; chunk += m_chunk_size)
+  for (cl_uint chunk = 0; chunk < of_size; chunk += m_chunk_size)
   {
+    DBG("chunk == " << chunk);
+
     SET_ARG(3, chunk);
 
     size_t global_work_size = std::min(m_chunk_size, of_size - chunk);

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
   <Lambda>6.3e-07</Lambda>
-  <Pitch>2e-05</Pitch>
+  <Pitch>2e-06</Pitch>
   <ForceSettings>false</ForceSettings>
   <RandomizePhase>false</RandomizePhase>
   <ImageContainsIntensity>false</ImageContainsIntensity>
   <ImageContainsAmplitude>true</ImageContainsAmplitude>
   <ImageContainsPhase>false</ImageContainsPhase>
-  <Input>out.Hologram.png</Input>
-  <Target>out.png</Target>
+  <Input>holo.png</Input>
+  <Target>rek.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
   <Frame>true</Frame>
-  <FrameX>4096</FrameX>
-  <FrameY>4096</FrameY>
+  <FrameX>8196</FrameX>
+  <FrameY>8196</FrameY>
   <FrameRemove>false</FrameRemove>
-  <Operations>-0.5 prop</Operations>
+  <Operations>-0.03 prop</Operations>
 </Config>

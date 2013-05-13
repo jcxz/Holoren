@@ -106,7 +106,7 @@ __kernel void compObjWave_big(__global float *pc,    /// a point cloud with poin
 __kernel void compObjWave_big_flat(__global float *pc,    /// a point cloud with point sources
                                    uint pc_size,          /// the number of elements in point cloud
                                    __global float2 *of,   /// an output optical field (float2 because this is an array of complex numbers)
-                                   int offset,            /// offset in the resulting optical field
+                                   uint offset,           /// offset in the resulting optical field
                                    int num_cols,          /// number of pixels in a column of optical field
                                    float hologram_z,      /// the z depth of hologram
                                    float k,               /// wavenumber
@@ -140,7 +140,7 @@ __kernel void compObjWave_big_flat(__global float *pc,    /// a point cloud with
     float4 ps = (float4) (pc[i * 3], pc[i * 3 + 1], pc[i * 3 + 2], 0.0f);  // TODO: optimize this
                                                                            // maybe by passing a float4 aligned array to kernel
     ps = of_pos - ps;
-	ps.w = native_sqrt(ps.x * ps.x + ps.y * ps.y + ps.z * ps.z) * k;
+    ps.w = native_sqrt(ps.x * ps.x + ps.y * ps.y + ps.z * ps.z) * k;
 
     sample.s0 += native_cos(ps.w);
     sample.s1 += native_sin(ps.w);

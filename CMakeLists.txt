@@ -9,7 +9,8 @@ cmake_minimum_required(VERSION 2.8)
 project(HOLOREN)
 
 # release and debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF -DHOLOREN_DEBUG_KERNEL")
+#set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF -DHOLOREN_DEBUG_KERNEL")
+set(CMAKE_CXX_FLAGS_DEBUG "-std=c++11 -Wall -Wextra -pedantic -g -DHOLOREN_DEBUG -DHOLOREN_DEBUG_PERF")
 set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 -Wall -Wextra -pedantic -O3")
 
 # include a non-standard module from a local directory
