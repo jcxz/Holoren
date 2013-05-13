@@ -99,6 +99,7 @@
     <ClCompile Include="..\..\..\src\CTimer.cpp" />
     <ClCompile Include="..\..\..\src\CXMLPointCloudRW.cpp" />
     <ClCompile Include="..\..\..\src\Debug.cpp" />
+    <ClCompile Include="..\..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\ocl.cpp" />
     <ClCompile Include="..\..\..\src\Utils.cpp" />

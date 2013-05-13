@@ -61,6 +61,15 @@
 # define _CRT_SECURE_NO_WARNINGS
 #endif
 
+/**
+ * This macro can be used to declare c++11 move constructor,
+ * which might be usefull for certain tools like Enterprise Architect,
+ * which cannot process C++11 correctly
+ *
+ * @param cls the class name
+ */
+#define HOLOREN_DECL_MOVE_CONSTRUCTOR(cls) cls(cls &&)
+
 /** A macro to designate unused parameters */
 #define HOLOREN_UNUSED(x) ((void) (x))
 

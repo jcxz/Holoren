@@ -18,29 +18,45 @@
 
 
 /** Kernel file */
-static const char *DEF_CL_SOURCE = "holoren_obj_wave.cl";
+static const char * const DEF_CL_SOURCE = "holoren_obj_wave.cl";
 
-/** Kernel function (a main entry point to OpenCL program) for the second algorithm */
-static const char *KERNEL_ALGORITHM2 = "compObjWave_small";
+/** Kernel function for the single pass second algorithm */
+static const char * const KERNEL_SINGLEPASS = "compObjWave_SinglePass";
 
-/** Kernel function (a main entry point to OpenCL program) for the third algorithm */
-static const char *KERNEL_ALGORITHM3 = "compObjWave_big";
+/** Kernel function for the multipass algorithm */
+static const char * const KERNEL_MULTIPASS = "compObjWave_MultiPass";
 
-/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM4 = "compObjWave_big_flat";
+/** Kernel function for the multipass algorithm, which uses native instructions */
+static const char * const KERNEL_MULTIPASS_NATIVE = "compObjWave_MultiPass_native";
 
-/** Kernel function (a main entry point to OpenCL program) for the fourth algorithm */
-static const char *KERNEL_ALGORITHM5 = "compObjWave_big_aligned";
-
-
-/* Define some convenience error handling macros */
-#define MKERRMSG() 
-#define HANDLE_CL_ERR_GT()
-#define HANDLE_CL_ERR()
-#define CHECK_CL_ERR() 
-#define CHECK_CL_ERR_GT() 
+/** Kernel function for the multipass algorithm which uses aligned access to point source array */
+static const char * const KERNEL_MULTIPASS_ALIGNED = "compObjWave_MultiPass_aligned";
 
 
+
+
+
+
+/**
+ * A function to convert COpenCLRenderer::EAlgorithmType to string
+ */
+const char *COpenCLRenderer::algToStr(EAlgorithmType type)
+{
+  static const char *strings[] = {
+    "(SinglePass) An algorithm that uses a single-pass to render the optical field",
+    "(MultiPass) Unoptimised multi-pass rendering algorithm",
+    "(MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU",
+    "(MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions",
+    "(MultiPass Aligned) A multi-pass rendering algorithm that requires each point source to be aligned to float4"
+  };
+
+  if ((type < COpenCLRenderer::ALGORITHM_SINGLEPASS) || (type > COpenCLRenderer::ALGORITHM_INVALID))
+  {
+    return "Invalid rendering algorithm";
+  }
+
+  return strings[type];
+}
 
 
 /**
@@ -53,12 +69,13 @@ bool COpenCLRenderer::open(const char *filename)
 #ifdef HOLOREN_DEBUG_KERNEL
   uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
 #else
-  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
+  uint32_t flags = (m_alg_type == ALGORITHM_MULTIPASS_CPU) ?
+                     (OpenCL::OPT_DEVICE_PREFER_CPU | OpenCL::OPT_PLATFORM_PREFER_ANY) :
+                     (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
 #endif
   m_err_msg = "";
 
   /* select the most suitable device */
-  //m_device = selectDevice();
   m_device = OpenCL::selectDevice(&flags, &err);
   if (m_device == NULL)
   {
@@ -154,10 +171,11 @@ bool COpenCLRenderer::open(const char *filename)
     const char *kernel = "";
     switch (m_alg_type)
     {
-      case ALGORITHM_TYPE_2: kernel = KERNEL_ALGORITHM2; break;
-      case ALGORITHM_TYPE_3: kernel = KERNEL_ALGORITHM3; break;
-      case ALGORITHM_TYPE_4: kernel = KERNEL_ALGORITHM4; break;
-      case ALGORITHM_TYPE_5: kernel = KERNEL_ALGORITHM5; break;
+      case ALGORITHM_SINGLEPASS:        kernel = KERNEL_SINGLEPASS;        break;
+      case ALGORITHM_MULTIPASS:         kernel = KERNEL_MULTIPASS;         break;
+      case ALGORITHM_MULTIPASS_CPU:
+      case ALGORITHM_MULTIPASS_NATIVE:  kernel = KERNEL_MULTIPASS_NATIVE;  break;
+      case ALGORITHM_MULTIPASS_ALIGNED: kernel = KERNEL_MULTIPASS_ALIGNED; break;
       default: m_err_msg = "Unknown algorithm type"; goto error;
     }
 
@@ -255,7 +273,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 #endif
 
   /* ensure that the right amount of memory is allocated for memory object */   
-  if (m_alg_type == ALGORITHM_TYPE_2)
+  if (m_alg_type == ALGORITHM_SINGLEPASS)
   {
     DBG("of->getByteSize()  : " << of->getByteSize());
     DBG("m_mem_obj_max_size : " << m_mem_obj_max_size);
@@ -278,7 +296,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   }
 
   /* create a memory object for point cloud data */
-  cl_mem pc_buf = ((m_alg_type == ALGORITHM_TYPE_5) ?
+  cl_mem pc_buf = ((m_alg_type == ALGORITHM_MULTIPASS_ALIGNED) ?
                      (
                        DBG("pc_buf allocated size: " << (pc.size() * sizeof(cl_float4))),
                        clCreateBuffer(m_context, CL_MEM_READ_ONLY, pc.size() * sizeof(cl_float4), NULL, &err)
@@ -296,7 +314,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
     return false;
   }
 
-  if ((m_alg_type == ALGORITHM_TYPE_5) && (!fillPCMemObj(pc, pc_buf)))
+  if ((m_alg_type == ALGORITHM_MULTIPASS_ALIGNED) && (!fillPCMemObj(pc, pc_buf)))
   {
     clReleaseMemObject(pc_buf);
     return false;
@@ -317,10 +335,11 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   bool ret = false;
   switch (m_alg_type)
   {
-    case ALGORITHM_TYPE_2: ret = renderAlgorithm2(pc, pc_buf, of, of_buf); break;
-    case ALGORITHM_TYPE_3: ret = renderAlgorithm3(pc, pc_buf, of, of_buf); break;
-    case ALGORITHM_TYPE_4:
-    case ALGORITHM_TYPE_5: ret = renderAlgorithm4(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_SINGLEPASS: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
+    case ALGORITHM_MULTIPASS:
+    case ALGORITHM_MULTIPASS_CPU:
+    case ALGORITHM_MULTIPASS_NATIVE:
+    case ALGORITHM_MULTIPASS_ALIGNED: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;
   }
 
@@ -333,96 +352,9 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
 
 /**
  */
-bool COpenCLRenderer::renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+bool COpenCLRenderer::renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
-  DBG("Algorithm 1");
-
-  /* a macro to set the given kernel argument type */
-  #define SET_ARG(num, arg) \
-    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
-    if (err != CL_SUCCESS) \
-    { \
-      m_err_msg = DBGSTRLOC(); \
-      m_err_msg += "Argument "; \
-      m_err_msg += std::to_string(static_cast<long long>(num));\
-      m_err_msg += ": "; \
-      m_err_msg += OpenCL::clErrToStr(err); \
-      return false; \
-    }
-
-  cl_int err = CL_SUCCESS;
-
-  /* set kernel arguments */
-  cl_int rows = of->getNumRows();
-  cl_int cols = of->getNumCols();
-  cl_float hologram_z = (cl_float) m_hologram_z;
-  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
-  cl_float pitch = of->getPitch();
-  cl_float corner_x = -(cols - 1) * pitch / 2;
-  cl_float corner_y = -(rows - 1) * pitch / 2;
-  
-  DBG("rows       : " << rows);
-  DBG("cols       : " << cols);
-  DBG("hologram_z : " << hologram_z);
-  DBG("k          : " << k);
-  DBG("sampling   : " << pitch);
-  DBG("size_x     : " << (cols - 1) * pitch);
-  DBG("size_y     : " << (rows - 1) * pitch);
-  DBG("corner_x   : " << corner_x);
-  DBG("corner_y   : " << corner_y);
-
-  SET_ARG(0, pc_buf);
-  SET_ARG(1, of_buf);
-  SET_ARG(2, rows);
-  SET_ARG(3, cols);
-  SET_ARG(4, hologram_z);
-  SET_ARG(5, k);
-  SET_ARG(6, pitch);
-  SET_ARG(7, corner_x);
-  SET_ARG(8, corner_y);
-
-  /* to cancel kernel argument setting macro */
-  #undef SET_ARG
-
-  /* execute kernel */
-  // this is an array which defines the number of items in each nested loop
-  size_t global_work_size[3] = { pc.size(), of->getNumRows(), of->getNumCols() };
-  err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
-                               m_kernel,          // the kernel to be excuted
-                               3,                 // the number of nested for loops that OpenCL will generate
-                               NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
-                               global_work_size,  // the number of items in each nested for loop
-                               NULL,              // this is a local work size, not really sure how it relates to the above parameters
-                               0,
-                               NULL,
-                               NULL);
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = DBGSTRLOC();
-    m_err_msg += ": ";
-    m_err_msg += OpenCL::clErrToStr(err);
-    return false;
-  }
-
-  /* read out results */
-  err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of->getByteSize(), of->data(), 0, NULL, NULL);
-  if (err != CL_SUCCESS)
-  {
-    m_err_msg = DBGSTRLOC();
-    m_err_msg += ": ";
-    m_err_msg += OpenCL::clErrToStr(err);
-    return false;
-  }
-
-  return true;
-}
-
-
-/**
- */
-bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
-{
-  DBG("Algorithm 2");
+  DBG("Single Pass Algorithm");
 
   /* a macro to set the given kernel argument type */
   #define SET_ARG(num, arg) \
@@ -519,137 +451,9 @@ bool COpenCLRenderer::renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, CO
 
 /**
  */
-bool COpenCLRenderer::renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
+bool COpenCLRenderer::renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
 {
-  DBG("Algorithm 3");
-
-  /* a macro to set the given kernel argument type */
-  // the static_cast<> is for msvc 2010, which lacks the proper support of c++11
-  #define SET_ARG(num, arg) \
-    err = clSetKernelArg(m_kernel, num, sizeof(arg), &arg); \
-    if (err != CL_SUCCESS) \
-    { \
-      m_err_msg = DBGSTRLOC(); \
-      m_err_msg += "Argument "; \
-      m_err_msg += std::to_string(static_cast<long long>(num));\
-      m_err_msg += ": "; \
-      m_err_msg += OpenCL::clErrToStr(err); \
-      return false; \
-    }
-
-  cl_int err = CL_SUCCESS;
-
-  /* set kernel arguments */
-  cl_uint pc_size = pc.size();
-  cl_int rows = of->getNumRows();
-  cl_int cols = of->getNumCols();
-  cl_float hologram_z = (cl_float) m_hologram_z;
-  cl_float k = (2 * M_PI) / of->getWaveLength();    // wave number
-  cl_float pitch = of->getPitch();
-  cl_float corner_x = -(cols - 1) * pitch / 2;
-  cl_float corner_y = -(rows - 1) * pitch / 2;
-  
-  DBG("pc_size    : " << pc_size);
-  DBG("rows       : " << rows);
-  DBG("cols       : " << cols);
-  DBG("hologram_z : " << hologram_z);
-  DBG("k          : " << k);
-  DBG("sampling   : " << pitch);
-  DBG("size_x     : " << (cols - 1) * pitch);
-  DBG("size_y     : " << (rows - 1) * pitch);
-  DBG("corner_x   : " << corner_x);
-  DBG("corner_y   : " << corner_y);
-
-  SET_ARG(0, pc_buf);
-  SET_ARG(1, pc_size);
-  SET_ARG(2, of_buf);
-
-  SET_ARG(5, hologram_z);
-  SET_ARG(6, k);
-  SET_ARG(7, pitch);
-  SET_ARG(8, corner_x);
-  SET_ARG(9, corner_y);
-
-  cl_int row_offset = 0;
-  cl_int col_offset = 0;
-  size_t of_byte_size = of->getByteSize();
-  size_t max_chunk_size = m_chunk_size * sizeof(COpticalField::CComplex);
-
-  /* break the optical field into chunks that can be processed by gpu and
-     render the object wave of hologram */
-  for (cl_ulong chunk = 0; chunk < of_byte_size; chunk += max_chunk_size)
-  {
-    DBG("chunk                : " << chunk);
-    DBG("of_byte_size - chunk : " << (of_byte_size - chunk));
-    DBG("of->data() + chunk   : " << (unsigned long long int) ((const char *) (of->data()) + chunk));
-    DBG("row_offset           : " << (row_offset));
-    DBG("col_offset           : " << (col_offset));
-
-    SET_ARG(3, row_offset);
-    SET_ARG(4, col_offset);
-
-    // this is an array which defines the number of items in each nested loop
-    size_t global_work_size[2] = { (size_t) rows - row_offset, (size_t) cols - col_offset };
-
-    DBG("global_work_size[0] == " << global_work_size[0]);
-    DBG("global_work_size[1] == " << global_work_size[1]);
-    DBG("");
-
-    /* execute kernel */
-    err = clEnqueueNDRangeKernel(m_cmd_queue,       // the command queue
-                                 m_kernel,          // the kernel to be excuted
-                                 2,                 // the number of nested for loops that OpenCL will generate
-                                 NULL,              // the starting index of each nested for loop (allways 0, for each nested loop in my case)
-                                 global_work_size,  // the number of items in each nested for loop
-                                 NULL,              // this is a local work size, not really sure how it relates to the above parameters
-                                 0,
-                                 NULL,
-                                 NULL);
-    if (err != CL_SUCCESS)
-    {
-      m_err_msg = DBGSTRLOC();
-      m_err_msg += ": ";
-      m_err_msg += OpenCL::clErrToStr(err);
-      return false;
-    }
-
-#ifdef HOLOREN_DEBUG_KERNEL
-    err = clFinish(m_cmd_queue);
-    if (err != CL_SUCCESS)
-    {
-      m_err_msg = DBGSTRLOC();
-      m_err_msg += ": ";
-      m_err_msg += OpenCL::clErrToStr(err);
-      return false;
-    }
-#endif
-
-    /* read the result */
-    err = clEnqueueReadBuffer(m_cmd_queue, of_buf, CL_TRUE, 0, of_byte_size - chunk, (((char *) of->data()) + chunk), 0, NULL, NULL);
-    if (err != CL_SUCCESS)
-    {
-      m_err_msg = DBGSTRLOC();
-      m_err_msg += ": ";
-      m_err_msg += OpenCL::clErrToStr(err);
-      return false;
-    }
-
-    row_offset += 4096;
-    col_offset += 4096;
-  }
-
-  /* to cancel kernel argument setting macro */
-  #undef SET_ARG
-
-  return true;
-}
-
-
-/**
- */
-bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf)
-{
-  DBG("Algorithm 4");
+  DBG("Multi Pass Algorithm");
 
   /* a macro to set the given kernel argument type */
   // the static_cast<> is for msvc 2010, which lacks the proper support of c++11
@@ -719,7 +523,6 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
     DBG("of->data() + chunk : " << (unsigned long long int) (of->data() + chunk));
     DBG("");
 
-#if 1
     /* execute kernel */
     err = clEnqueueNDRangeKernel(m_cmd_queue,        // the command queue
                                  m_kernel,           // the kernel to be excuted
@@ -766,7 +569,6 @@ bool COpenCLRenderer::renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, CO
       m_err_msg += OpenCL::clErrToStr(err);
       return false;
     }
-#endif
   }
 
   /* to cancel kernel argument setting macro */

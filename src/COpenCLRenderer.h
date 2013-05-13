@@ -20,10 +20,12 @@ class COpenCLRenderer : public CBaseRenderer
 {
   public:
     enum EAlgorithmType {
-      ALGORITHM_TYPE_2,
-      ALGORITHM_TYPE_3,
-      ALGORITHM_TYPE_4,
-      ALGORITHM_TYPE_5
+      ALGORITHM_SINGLEPASS,          /// single pass algorithm
+      ALGORITHM_MULTIPASS,           /// multipass rendering algorithm (the work load is split into chunks which are sent to device individually if necessary)
+      ALGORITHM_MULTIPASS_CPU,       /// CPU based multipass algorithm
+      ALGORITHM_MULTIPASS_NATIVE,    /// GPU based multipass algorithm that uses native instructions
+      ALGORITHM_MULTIPASS_ALIGNED,   /// GPU based multipass algorithm that requires aligned point cloud memory
+      ALGORITHM_INVALID              /// an invalid algorithm type marker
     };
 
   public:
@@ -90,37 +92,33 @@ class COpenCLRenderer : public CBaseRenderer
     virtual bool renderObjectWave(const CPointCloud & pc, COpticalField *of);
     virtual bool renderHologram(const CPointCloud & pc, COpticalField *of);
 
+
+    /**
+     * A function to convert algorithm type to a string description.
+     */
+    static const char *algToStr(EAlgorithmType type);
+
     
   private:
     /* disable assignment, copy and move
        If I wanted to implement these someday in future
        I would have to do so in terms of retain and release */
     COpenCLRenderer(const COpenCLRenderer & );
-    COpenCLRenderer(COpenCLRenderer && );
+    HOLOREN_DECL_MOVE_CONSTRUCTOR(COpenCLRenderer);
     COpenCLRenderer & operator=(const COpenCLRenderer & );
 
   private:
     /**
-     * The first rendering algorithm
+     * This rendering algorithm does only one rendering pass, i.e. it enqueues kernel only once
+     * and thus it must entirely fit into GPU-s memory
      */
-    bool renderAlgorithm1(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
-
-    /**
-     * The second rendering algorithm
-     */
-    bool renderAlgorithm2(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
-
-    /**
-     * The third rendering algorithm, can render large holograms, by dividing the calculation
-     * in several smaller chunks
-     */
-    bool renderAlgorithm3(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+    bool renderAlgorithm_SinglePass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
     
     /**
      * The fourth rendering algorithm, can render large holograms, by dividing the calculation
      * in several smaller chunks
      */
-    bool renderAlgorithm4(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
+    bool renderAlgorithm_MultiPass(const CPointCloud & pc, cl_mem pc_buf, COpticalField *of, cl_mem of_buf);
 
     /**
      * A function to fill the contents of point cloud memory object

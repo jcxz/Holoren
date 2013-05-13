@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
   <Lambda>6.3e-07</Lambda>
-  <Pitch>2e-06</Pitch>
+  <Pitch>2e-05</Pitch>
   <ForceSettings>false</ForceSettings>
   <RandomizePhase>false</RandomizePhase>
   <ImageContainsIntensity>false</ImageContainsIntensity>
   <ImageContainsAmplitude>true</ImageContainsAmplitude>
   <ImageContainsPhase>false</ImageContainsPhase>
-  <Input>FIT-logo_10000x10000_8_deg.png</Input>
-  <Target>FIT-logo_rek_10000x10000_8_deg.png</Target>
+  <Input>Simple_holo.png</Input>
+  <Target>Simple_rek.png</Target>
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
-  <Frame>false</Frame>
-  <FrameX>4096</FrameX>
-  <FrameY>4096</FrameY>
+  <Frame>true</Frame>
+  <FrameX>2048</FrameX>
+  <FrameY>2048</FrameY>
   <FrameRemove>false</FrameRemove>
-  <Operations>-0.11 prop</Operations>
+  <Operations>-0.5 prop</Operations>
 </Config>

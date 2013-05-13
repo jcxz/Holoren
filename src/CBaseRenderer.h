@@ -5,6 +5,8 @@
 #ifndef CBASERENDERER_H
 #define CBASERENDERER_H
 
+#include "global.h"
+
 #include <string>
 
 
@@ -100,7 +102,7 @@ class CBaseRenderer
   private:
     /* disable assignment, copy and move */
     CBaseRenderer(const CBaseRenderer & );
-    CBaseRenderer(CBaseRenderer && );
+    HOLOREN_DECL_MOVE_CONSTRUCTOR(CBaseRenderer);
     CBaseRenderer & operator=(const CBaseRenderer & );
 
   protected:

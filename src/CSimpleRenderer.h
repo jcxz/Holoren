@@ -30,7 +30,7 @@ class CSimpleRenderer : public CBaseRenderer
        Though this is not technically necessary for this class,
        it is to keep it consistent with OpenCL renderer */
     CSimpleRenderer(const CSimpleRenderer & );
-    CSimpleRenderer(CSimpleRenderer && );
+    HOLOREN_DECL_MOVE_CONSTRUCTOR(CSimpleRenderer);
     CSimpleRenderer & operator=(const CSimpleRenderer & );
 };
 

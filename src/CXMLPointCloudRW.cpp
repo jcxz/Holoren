@@ -8,12 +8,19 @@
 #include "CXMLPointCloudRW.h"
 
 
+#ifndef M_PI
+# define M_PI 3.1415926535897932384626433832795f
+#endif
+
+
+
 static void cleanup_handler(void)
 {
   DBG("Cleaningup parser");
   xmlCleanupParser();
   return;
 }
+
 
 /**
  */
@@ -135,6 +142,104 @@ error:
 bool CXMLPointCloudRW::write(CPointCloud *pc)
 {
   HOLOREN_UNUSED(pc);
+  return false;
+}
+
+
+/**
+ */
+bool CXMLPointCloudRW::readTransformations(xmlTextReaderPtr reader, Geometry::SMatrix4D *m)
+{
+  HOLOREN_ASSERT(m != NULL);
+  
+  xmlChar *value = NULL;
+  tFPType rot_x = 0.0f;
+  tFPType rot_y = 0.0f;
+  tFPType rot_z = 0.0f;
+  tFPType scale_x = 1.0f;
+  tFPType scale_y = 1.0f;
+  tFPType scale_z = 1.0f;
+
+  /* convert rotX attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "rotX");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &rot_x)))
+  {
+    m_error = "Failed to convert attribute rotX transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+
+  /* convert rotY attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "rotY");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &rot_y)))
+  {
+    m_error = "Failed to convert attribute rotY transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+
+  /* convert rotZ attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "rotZ");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &rot_z)))
+  {
+    m_error = "Failed to convert attribute rotZ transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+  
+  /* convert scaleX attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "scaleX");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &scale_x)))
+  {
+    m_error = "Failed to convert attribute scaleX transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+  
+  /* convert scaleY attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "scaleY");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &scale_y)))
+  {
+    m_error = "Failed to convert attribute scaleY transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+  
+  /* convert scaleZ attribute */
+  value = xmlTextReaderGetAttribute(reader, (xmlChar *) "scaleZ");
+  if ((value != NULL) && (!Utils::strToFP((const char *) value, &scale_z)))
+  {
+    m_error = "Failed to convert attribute scaleZ transformation";
+    goto error;
+  }
+
+  xmlFree(value);
+
+  /* print attributes for debug purposes */
+  DBG("*** Transformations ***");
+  DBG("rot_x == " << rot_x);
+  DBG("rot_y == " << rot_y);
+  DBG("rot_z == " << rot_z);
+  DBG("scale_x == " << scale_x);
+  DBG("scale_y == " << scale_y);
+  DBG("scale_z == " << scale_z);
+
+  /* apply all transformations */
+  m->loadIdentity();  // reset matrix
+  m->scale(scale_x, scale_y, scale_z);
+  m->rotateX(rot_x * (M_PI / 180));
+  m->rotateY(rot_y * (M_PI / 180));
+  m->rotateZ(rot_z * (M_PI / 180));
+
+  return true;
+
+error:
+  xmlFree(value);
   return false;
 }
 
@@ -269,6 +374,18 @@ bool CXMLPointCloudRW::processLine(xmlTextReaderPtr reader, CPointCloud *pc)
   DBG("line.p2.x == " << line.p2.x);
   DBG("line.p2.y == " << line.p2.y);
   DBG("line.p2.z == " << line.p2.z);
+  
+  /* read the transformation matrix */
+  //Geometry::SMatrix4D m;
+  //if (!readTransformations(reader, &m))
+  //{
+  //  return false;
+  //}
+
+  //line.p1 = m.transformVertex(line.p1);
+  //line.p2 = m.transformVertex(line.p2);
+
+  //DBG(line);
 
   /* add the line to the scene */
   sample(line, pc);
@@ -342,7 +459,7 @@ bool CXMLPointCloudRW::processCuboid(xmlTextReaderPtr reader, CPointCloud *pc)
 
   xmlFree(value);
 
-  /* convert z attribute */
+  /* convert depth attribute */
   value = xmlTextReaderGetAttribute(reader, (xmlChar *) "depth");
   if (!Utils::strToFP((const char *) value, &d))
   {
@@ -360,13 +477,15 @@ bool CXMLPointCloudRW::processCuboid(xmlTextReaderPtr reader, CPointCloud *pc)
   DBG("width  == " << w);
   DBG("height == " << h);
   DBG("depth  == " << d);
-
+ 
+#if 0
   /* convert cuboid to lines */
   for (unsigned int i = 0; i < 4; ++i)
   {
     /* vertical line */
     line.p1 = Geometry::SPoint3D(o.x,     o.y + h * (i >> 1), o.z + d * (i & 1));
     line.p2 = Geometry::SPoint3D(o.x + w, o.y + h * (i >> 1), o.z + d * (i & 1));
+    DBG(line);
     sample(line, pc);
 
     /* horizontal line */
@@ -379,6 +498,45 @@ bool CXMLPointCloudRW::processCuboid(xmlTextReaderPtr reader, CPointCloud *pc)
     line.p2 = Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z + d);
     sample(line, pc);
   }
+
+#else
+
+  /* read the transformation matrix */
+  Geometry::SMatrix4D mat_rot_scale;
+  if (!readTransformations(reader, &mat_rot_scale))
+  {
+    return false;
+  }
+
+  /* make the rotations happen around cuboid center */
+  mat_rot_scale.translate(-w / 2.0f, -h / 2.0f, -d / 2.0f);
+
+  /* compose the final transformation matrix */
+  Geometry::SMatrix4D m(mat_rot_scale);
+  m.loadIdentity();
+  m.translate(o.x, o.y, o.z);
+  m.multMatrix(mat_rot_scale);
+
+  /* convert cuboid to lines */
+  for (unsigned int i = 0; i < 4; ++i)
+  {
+    /* vertical line */
+    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x,     o.y + h * (i >> 1), o.z + d * (i & 1)));
+    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w, o.y + h * (i >> 1), o.z + d * (i & 1)));
+    DBG(line);
+    sample(line, pc);
+
+    /* horizontal line */
+    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y,     o.z + d * (i & 1)));
+    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h, o.z + d * (i & 1)));
+    sample(line, pc);
+    
+    /* a line along the depth */
+    line.p1 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z));
+    line.p2 = m.transformVertex(Geometry::SPoint3D(o.x + w * (i >> 1), o.y + h * (i & 1), o.z + d));
+    sample(line, pc);
+  }
+#endif
 
   return true;
 

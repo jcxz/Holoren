@@ -27,7 +27,7 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
                                     "          -r simple|opencl|none\n"
-                                    "          -a alg2|alg3|alg4\n"
+                                    "          -a SinglePass|MultiPass|MultiPassCPU|MultiPassNative|MultiPassAligned\n"
                                     "          -c chunk_size\n"
                                     "          -f cl_source_file\n"
                                     "          -p performace_log\n"
@@ -86,27 +86,6 @@ static const char *renToStr(ERendererType type)
 
 
 /**
- * A function to convert COpenCLRenderer::EAlgorithmType to string
- */
-static const char *algToStr(COpenCLRenderer::EAlgorithmType type)
-{
-  static const char *strings[] = {
-    "alg2",
-    "alg3",
-    "alg4",
-    "alg5"
-  };
-
-  if ((type < COpenCLRenderer::ALGORITHM_TYPE_2) || (type > COpenCLRenderer::ALGORITHM_TYPE_5))
-  {
-    return "Unknown";
-  }
-
-  return strings[type];
-}
-
-
-/**
  * A function to print command line argument (for debugging purposes)
  */
 std::ostream & operator<<(std::ostream & os, const tParams & params)
@@ -119,7 +98,7 @@ std::ostream & operator<<(std::ostream & os, const tParams & params)
   os << "light wavelength          : " << params.lambda                                            << std::endl;
   os << "hologram z                : " << params.hologram_z                                        << std::endl;
   os << "Rendering engine          : " << renToStr(params.renderer)                                << std::endl;
-  os << "Rendering algorithm       : " << algToStr(params.alg_type)                                << std::endl;
+  os << "Rendering algorithm       : " << COpenCLRenderer::algToStr(params.alg_type)               << std::endl;
   os << "Chunk size                : " << params.chunk_size                                        << std::endl;
   os << "OpenCL source file        : " << ((params.cl_source == NULL) ? "NULL" : params.cl_source) << std::endl;
   os << "Performance log file      : " << ((params.perf_log == NULL) ?  "NULL" : params.perf_log)  << std::endl;
@@ -144,7 +123,7 @@ static void resetParams(tParams *params)
   params->lambda = 630e-9;
   params->hologram_z = 0.0f;
   params->renderer = REN_SIMPLE;
-  params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
+  params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS_NATIVE;
   params->chunk_size = 0;    // 0 means unspecified
   params->cl_source = NULL;
   params->perf_log = NULL;   // no logging by default
@@ -237,25 +216,29 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
         return false;
       }
 
-      if (Utils::strCaseCmp(argv[i], "alg2") == 0)
+      if (Utils::strCaseCmp(argv[i], "SinglePass") == 0)
       {
-        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_2;
+        params->alg_type = COpenCLRenderer::ALGORITHM_SINGLEPASS;
       }
-      else if (Utils::strCaseCmp(argv[i], "alg3") == 0)
+      else if (Utils::strCaseCmp(argv[i], "MultiPass") == 0)
       {
-        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_3;
+        params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS;
       }
-      else if (Utils::strCaseCmp(argv[i], "alg4") == 0)
+      else if (Utils::strCaseCmp(argv[i], "MultiPassCPU") == 0)
       {
-        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_4;
+        params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS_CPU;
       }
-      else if (Utils::strCaseCmp(argv[i], "alg5") == 0)
+      else if (Utils::strCaseCmp(argv[i], "MultiPassNative") == 0)
       {
-        params->alg_type = COpenCLRenderer::ALGORITHM_TYPE_5;
+        params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS_NATIVE;
+      }
+      else if (Utils::strCaseCmp(argv[i], "MultiPassAligned") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS_ALIGNED;
       }
       else
       {
-        std::cerr << "Uknown rendering algorithm: \"" << argv[i] << "\"" << std::endl;
+        std::cerr << "Unknown rendering algorithm: \"" << argv[i] << "\"" << std::endl;
         return false;
       }
     }
@@ -453,6 +436,7 @@ static CBaseRenderer *createRenderer(const tParams & params)
     case REN_OPENCL:
       {
         std::cout << "Renderer engine: OpenCL" << std::endl;
+        std::cout << "Rendering algorithm: " << COpenCLRenderer::algToStr(params.alg_type) << std::endl;
         COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
         ren->setAlgorithmType(params.alg_type);
         ren->setChunkSize(params.chunk_size);
@@ -504,7 +488,7 @@ static void writePerfLog(const tParams & params, const CPointCloud & pc, const C
   if (params.renderer == REN_OPENCL)
   {
     const COpenCLRenderer *ocl_ren = static_cast<const COpenCLRenderer *>(ren);
-    perf_log << "algorithm                   : " << algToStr(params.alg_type)    << std::endl;
+    perf_log << "algorithm                   : " << COpenCLRenderer::algToStr(params.alg_type)   << std::endl;
     perf_log << "chunk size                  : " << ocl_ren->getChunkSize()      << std::endl;
   }
 
@@ -565,6 +549,10 @@ int main(int argc, char *argv[])
 
   std::cout << "Point cloud was loaded successfully" << std::endl;
   std::cout << "Total number of point sources that have to be rendered: " << pc.size() << std::endl;
+#ifdef HOLOREN_HEAVY_DEBUG
+  DBG("Loaded point sources:");
+  DBG(pc);
+#endif
 
   /* set up renderer */
   std::cout << "Setting up renderer" << std::endl;

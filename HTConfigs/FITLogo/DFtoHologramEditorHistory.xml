@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DFtoHologramEditor>
+  <CfgFiles selected="0">
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Basic/DFtoHologram.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Orig/DFtoHologram.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Making/DFtoHologram.xml</File>
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/FITLogo/DFtoHologram.xml</File>
+  </CfgFiles>
+  <BinFiles selected="0">
+    <File>D:/AC601/VirtualBOXShare/Ubuntu/IBP/holo_toolkit/DFtoHologram.exe</File>
+  </BinFiles>
+  <WorkingDirs selected="0">
+    <Dir>D:/AC601/VirtualBOXShare/Ubuntu/IBP/code/v4/HTConfigs/Basic</Dir>
+    <Dir>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\HTConfigs\Making</Dir>
+    <Dir>D:\AC601\VirtualBOXShare\Ubuntu\IBP\code\v4\HTConfigs\FITLogo</Dir>
+  </WorkingDirs>
+  <ShowOutput>true</ShowOutput>
+</DFtoHologramEditor>

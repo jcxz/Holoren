@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Config>
   <ProcessLineCnt>512</ProcessLineCnt>
-  <KsiXDeg>8</KsiXDeg>
-  <KsiYDeg>0</KsiYDeg>
-  <Input>../../output/FIT-logo_img497x497_df10000x10000.df</Input>
-  <Target>FIT-logo_10000x10000_8_deg.png</Target>
+  <KsiXDeg>0.5</KsiXDeg>
+  <KsiYDeg>0.5</KsiYDeg>
+  <Input>Simple_1024x1024.df</Input>
+  <Target>Simple_1024x1024_holo.png</Target>
   <UsePhase>false</UsePhase>
   <HologramInterference>false</HologramInterference>
   <HologramBipolar>true</HologramBipolar>
