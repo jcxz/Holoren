@@ -45,6 +45,7 @@ const char *COpenCLRenderer::algToStr(EAlgorithmType type)
   static const char *strings[] = {
     "(SinglePass) An algorithm that uses a single-pass to render the optical field",
     "(MultiPass) Unoptimised multi-pass rendering algorithm",
+    "(MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU",
     "(MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions",
     "(MultiPass Aligned) A multi-pass rendering algorithm that requires each point source to be aligned to float4"
   };
@@ -68,7 +69,9 @@ bool COpenCLRenderer::open(const char *filename)
 #ifdef HOLOREN_DEBUG_KERNEL
   uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_INTEL);
 #else
-  uint32_t flags = (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
+  uint32_t flags = (m_alg_type == ALGORITHM_MULTIPASS_CPU) ?
+                     (OpenCL::OPT_DEVICE_PREFER_CPU | OpenCL::OPT_PLATFORM_PREFER_ANY) :
+                     (OpenCL::OPT_DEVICE_PREFER_ANY | OpenCL::OPT_PLATFORM_PREFER_ANY);
 #endif
   m_err_msg = "";
 
@@ -170,6 +173,7 @@ bool COpenCLRenderer::open(const char *filename)
     {
       case ALGORITHM_SINGLEPASS:        kernel = KERNEL_SINGLEPASS;        break;
       case ALGORITHM_MULTIPASS:         kernel = KERNEL_MULTIPASS;         break;
+      case ALGORITHM_MULTIPASS_CPU:
       case ALGORITHM_MULTIPASS_NATIVE:  kernel = KERNEL_MULTIPASS_NATIVE;  break;
       case ALGORITHM_MULTIPASS_ALIGNED: kernel = KERNEL_MULTIPASS_ALIGNED; break;
       default: m_err_msg = "Unknown algorithm type"; goto error;
@@ -333,6 +337,7 @@ bool COpenCLRenderer::renderObjectWave(const CPointCloud & pc, COpticalField *of
   {
     case ALGORITHM_SINGLEPASS: ret = renderAlgorithm_SinglePass(pc, pc_buf, of, of_buf); break;
     case ALGORITHM_MULTIPASS:
+    case ALGORITHM_MULTIPASS_CPU:
     case ALGORITHM_MULTIPASS_NATIVE:
     case ALGORITHM_MULTIPASS_ALIGNED: ret = renderAlgorithm_MultiPass(pc, pc_buf, of, of_buf); break;
     default: m_err_msg = "Unknown algorithm type"; break;

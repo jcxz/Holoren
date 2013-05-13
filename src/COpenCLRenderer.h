@@ -20,11 +20,12 @@ class COpenCLRenderer : public CBaseRenderer
 {
   public:
     enum EAlgorithmType {
-      ALGORITHM_SINGLEPASS,
-      ALGORITHM_MULTIPASS,
-      ALGORITHM_MULTIPASS_NATIVE,
-      ALGORITHM_MULTIPASS_ALIGNED,
-      ALGORITHM_INVALID
+      ALGORITHM_SINGLEPASS,          /// single pass algorithm
+      ALGORITHM_MULTIPASS,           /// multipass rendering algorithm (the work load is split into chunks which are sent to device individually if necessary)
+      ALGORITHM_MULTIPASS_CPU,       /// CPU based multipass algorithm
+      ALGORITHM_MULTIPASS_NATIVE,    /// GPU based multipass algorithm that uses native instructions
+      ALGORITHM_MULTIPASS_ALIGNED,   /// GPU based multipass algorithm that requires aligned point cloud memory
+      ALGORITHM_INVALID              /// an invalid algorithm type marker
     };
 
   public:

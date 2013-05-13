@@ -27,7 +27,7 @@ static const char * const g_usage = "USAGE:\n"
                                     "          -l lambda\n"
                                     "          -z hologram_z\n"
                                     "          -r simple|opencl|none\n"
-                                    "          -a SinglePass|MultiPass|MultiPassNative|MultiPassAligned\n"
+                                    "          -a SinglePass|MultiPass|MultiPassCPU|MultiPassNative|MultiPassAligned\n"
                                     "          -c chunk_size\n"
                                     "          -f cl_source_file\n"
                                     "          -p performace_log\n"
@@ -223,6 +223,10 @@ static bool parseArgs(int argc, char *argv[], tParams *params)
       else if (Utils::strCaseCmp(argv[i], "MultiPass") == 0)
       {
         params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS;
+      }
+      else if (Utils::strCaseCmp(argv[i], "MultiPassCPU") == 0)
+      {
+        params->alg_type = COpenCLRenderer::ALGORITHM_MULTIPASS_CPU;
       }
       else if (Utils::strCaseCmp(argv[i], "MultiPassNative") == 0)
       {
@@ -432,6 +436,7 @@ static CBaseRenderer *createRenderer(const tParams & params)
     case REN_OPENCL:
       {
         std::cout << "Renderer engine: OpenCL" << std::endl;
+        std::cout << "Rendering algorithm: " << COpenCLRenderer::algToStr(params.alg_type) << std::endl;
         COpenCLRenderer *ren = new COpenCLRenderer(params.hologram_z);
         ren->setAlgorithmType(params.alg_type);
         ren->setChunkSize(params.chunk_size);

@@ -104,8 +104,8 @@ enum ESelectionOpts
  * @param options a pointer to variable with selection flags. Passing NULL to this
  *                parameter equals passing (OPT_PLATFORM_PREFER_ANY | OPT_DEVICE_PREFER_ANY).
  *                If the value of opts is any other than NULL, then upon function return,
- *                this variable will contain ored combination of deviceas and platforms that
- *                were choosen. So for exemple if an AMD GPU was selected, then the upon function
+ *                this variable will contain ored combination of devices and platforms that
+ *                were choosen. So for example if an AMD GPU was selected, then the upon function
  *                return variable pointed to by opts will contain value (OPT_PLATFORM_PREFER_AMD | OPT_DEVICE_PREFER_GPU)
  * @param cl_err if this parameter is other than NULL, then upon function return it will contain
  *               an opencl error, that occured during its operation. When NULL is returned from this
