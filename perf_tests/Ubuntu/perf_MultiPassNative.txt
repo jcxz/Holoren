@@ -1,50 +1,50 @@
 ================================================================================
-date                        : 18:44:11 13.05.2013
+date                        : 20:57:42 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
 algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
 chunk size                  : 16777216
-rendering time              : Elapsed time: 2s 994ms 402us
+rendering time              : Elapsed time: 2s 994ms 364us
 ================================================================================
 ================================================================================
-date                        : 18:44:15 13.05.2013
+date                        : 20:57:46 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
 algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
 chunk size                  : 16777216
-rendering time              : Elapsed time: 2s 994ms 328us
+rendering time              : Elapsed time: 2s 994ms 80us
 ================================================================================
 ================================================================================
-date                        : 18:44:20 13.05.2013
+date                        : 20:57:51 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
 algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
 chunk size                  : 16777216
-rendering time              : Elapsed time: 2s 994ms 243us
+rendering time              : Elapsed time: 2s 994ms 129us
 ================================================================================
 ================================================================================
-date                        : 18:44:24 13.05.2013
+date                        : 20:57:55 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
 algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
 chunk size                  : 16777216
-rendering time              : Elapsed time: 2s 994ms 341us
+rendering time              : Elapsed time: 2s 994ms 418us
 ================================================================================
 ================================================================================
-date                        : 18:44:28 13.05.2013
+date                        : 20:57:59 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
 algorithm                   : (MultiPass Native) An optimised multi-pass rendering algorithm that uses native instructions
 chunk size                  : 16777216
-rendering time              : Elapsed time: 2s 994ms 691us
+rendering time              : Elapsed time: 2s 994ms 77us
 ================================================================================

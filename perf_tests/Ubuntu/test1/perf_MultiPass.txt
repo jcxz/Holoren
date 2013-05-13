@@ -1,50 +1,50 @@
 ================================================================================
-date                        : 20:38:27 13.05.2013
+date                        : 18:43:02 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
-algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
-chunk size                  : 268435456
-rendering time              : Elapsed time: 4min 12s 591ms 842us
+algorithm                   : (MultiPass) Unoptimised multi-pass rendering algorithm
+chunk size                  : 16777216
+rendering time              : Elapsed time: 15s 136ms 378us
 ================================================================================
 ================================================================================
-date                        : 20:43:54 13.05.2013
+date                        : 18:43:17 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
-algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
-chunk size                  : 268435456
-rendering time              : Elapsed time: 5min 26s 959ms 569us
+algorithm                   : (MultiPass) Unoptimised multi-pass rendering algorithm
+chunk size                  : 16777216
+rendering time              : Elapsed time: 15s 117ms 385us
 ================================================================================
 ================================================================================
-date                        : 20:47:50 13.05.2013
+date                        : 18:43:33 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
-algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
-chunk size                  : 268435456
-rendering time              : Elapsed time: 3min 54s 874ms 948us
+algorithm                   : (MultiPass) Unoptimised multi-pass rendering algorithm
+chunk size                  : 16777216
+rendering time              : Elapsed time: 15s 116ms 798us
 ================================================================================
 ================================================================================
-date                        : 20:51:56 13.05.2013
+date                        : 18:43:50 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
-algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
-chunk size                  : 268435456
-rendering time              : Elapsed time: 4min 4s 927ms 281us
+algorithm                   : (MultiPass) Unoptimised multi-pass rendering algorithm
+chunk size                  : 16777216
+rendering time              : Elapsed time: 15s 117ms 295us
 ================================================================================
 ================================================================================
-date                        : 20:56:15 13.05.2013
+date                        : 18:44:06 13.05.2013
 build type                  : release
 input file                  : "../input/img/FIT-logo_160x160.png"
 point sources               : 7291
 optical field (rows x cols) : 1024x1024
-algorithm                   : (MultiPass CPU) Multi-pass rendering algorithm that utilizes CPU
-chunk size                  : 268435456
-rendering time              : Elapsed time: 4min 18s 565ms 51us
+algorithm                   : (MultiPass) Unoptimised multi-pass rendering algorithm
+chunk size                  : 16777216
+rendering time              : Elapsed time: 15s 116ms 606us
 ================================================================================

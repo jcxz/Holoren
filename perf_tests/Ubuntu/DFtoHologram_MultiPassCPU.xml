@@ -3,8 +3,8 @@
   <ProcessLineCnt>512</ProcessLineCnt>
   <KsiXDeg>0.5</KsiXDeg>
   <KsiYDeg>0.5</KsiYDeg>
-  <Input>../../output/out.df</Input>
-  <Target>out.Hologram.png</Target>
+  <Input>MultiPassCPU.df</Input>
+  <Target>MultiPassCPU_holo.png</Target>
   <UsePhase>false</UsePhase>
   <HologramInterference>false</HologramInterference>
   <HologramBipolar>true</HologramBipolar>
