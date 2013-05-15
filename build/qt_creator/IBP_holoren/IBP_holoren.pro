@@ -15,7 +15,7 @@ QT -= core gui      # exclude qt libraries
 CONFIG -= qt        # no Qt
 CONFIG += console   # this isn't graphical application (no graphic window)
 CONFIG += link_pkgconfig
-PKGCONFIG += sdl
+#PKGCONFIG += sdl
 #CONFIG += qt debug
 
 # tweak compilation flags for gcc.

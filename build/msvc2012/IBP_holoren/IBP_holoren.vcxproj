@@ -125,11 +125,7 @@
     <ClInclude Include="..\..\..\src\Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\OpenCL\holoren.cl" />
-    <None Include="..\..\..\src\OpenCL\holoren_debug.cl" />
     <None Include="..\..\..\src\OpenCL\holoren_obj_wave.cl" />
-    <None Include="..\..\..\src\OpenCL\holoren_serial.cl" />
-    <None Include="..\..\..\src\OpenCL\holoren_serial_optimized.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

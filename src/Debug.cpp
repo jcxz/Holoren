@@ -138,7 +138,7 @@ std::string formatCodeLoc(const char *filepath,
   }
 
   res += "ln";
-  res += std::to_string(line_num);
+  res += std::to_string(static_cast<long long>(line_num));
   res += " : ";
   res += func_name;
 
