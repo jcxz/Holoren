@@ -12,8 +12,8 @@
   <ImageIntensityMaximum>0</ImageIntensityMaximum>
   <ImageIntensityMinimum>0</ImageIntensityMinimum>
   <Frame>true</Frame>
-  <FrameX>2048</FrameX>
-  <FrameY>2048</FrameY>
+  <FrameX>1024</FrameX>
+  <FrameY>1024</FrameY>
   <FrameRemove>false</FrameRemove>
   <Operations>-0.5 prop</Operations>
 </Config>

@@ -10,7 +10,7 @@
   <HologramBipolar>true</HologramBipolar>
   <PsDPI>150</PsDPI>
   <PsDotSize>1</PsDotSize>
-  <Binarize>false</Binarize>
+  <Binarize>true</Binarize>
   <Halftonize>false</Halftonize>
   <HalftonizeCellSize>3</HalftonizeCellSize>
   <HalftonizeLevelCount>4</HalftonizeLevelCount>
