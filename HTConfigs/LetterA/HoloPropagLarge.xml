@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+  <Lambda>6.3e-07</Lambda>
+  <Pitch>2e-05</Pitch>
+  <ForceSettings>false</ForceSettings>
+  <RandomizePhase>false</RandomizePhase>
+  <ImageContainsIntensity>false</ImageContainsIntensity>
+  <ImageContainsAmplitude>true</ImageContainsAmplitude>
+  <ImageContainsPhase>false</ImageContainsPhase>
+  <Input>LetterA_holo.png</Input>
+  <Target>LetterA_rek.png</Target>
+  <ImageIntensityMaximum>0</ImageIntensityMaximum>
+  <ImageIntensityMinimum>0</ImageIntensityMinimum>
+  <Frame>true</Frame>
+  <FrameX>1024</FrameX>
+  <FrameY>1024</FrameY>
+  <FrameRemove>false</FrameRemove>
+  <Operations>-0.5 prop</Operations>
+</Config>
