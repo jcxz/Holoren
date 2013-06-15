@@ -1,0 +1,21 @@
+<file>
+  <desc>
+    This file contains combinations of command line arguments known to work (or at least they show something).
+    The first item in each test is its brief description, i.e. what its supposed to produce,
+    second item is the combination of command line arguments to achieve this and the last item
+    is the directory with HoloToolkit configuration files.
+    These can be used directly with HoloToolkit Utilities or that can be opened in HTConfigManager from tools directory.
+  </desc>
+  <examples>
+    <example>
+      <desc>A simple hologram of FIT logo</desc>
+      <params>-z 0.5 -s 0.00002 -w 1024 -h 1024 -i "../../input/img/FIT-logo_160x160.png" -a alg4 -o "../../output/out.df" -r opencl -f "../../src/OpenCL/holoren_obj_wave.cl" -p "../../perf_log.txt"</params>
+      <configs>HTConfigs/FITLogo</configs>
+    </example>
+    <example>
+      <desc>A simple hologram of letter A</desc>
+      <params>-z 0.5 -s 0.00002 -w 512 -h 512 -t 0.000125 -i "../../input/img/letterA.gif" -r simple -o  "../../output/out.df"</params>
+      <configs>HTConfigs/letterA</configs>
+    </example>
+  </examples>
+</file>

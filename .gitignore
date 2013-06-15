@@ -1,3 +1,7 @@
+#### ignore specific files ###
+perf_log.txt
+cmd_line_params.txt
+
 #### ignore all vim swap files ###
 *.swp
 
