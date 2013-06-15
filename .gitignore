@@ -61,7 +61,7 @@ cmd_line_params.txt
 /build/msvc2010/IBP_holoren/Debug/
 /build/msvc2010/IBP_holoren/Debug/*
 /build/msvc2010/IBP_holoren/Release/   
-/build/msvc2010/IBP_holoren/Release/* 
+/build/msvc2010/IBP_holoren/Release/*
 /build/msvc2010/IBP_holoren/*.sdf
 /build/msvc2010/IBP_holoren/*.opensdf
 /build/msvc2010/IBP_holoren/*.suo
