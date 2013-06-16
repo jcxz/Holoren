@@ -114,3 +114,7 @@ And some even try to run holography in real time (of course by employing certain
    (http://www.youtube.com/watch?feature=player_embedded&v=ttHJ3mmvZEw)
  - [http://www.seereal.com/]
    (http://www.seereal.com/)
+   
+The video from the optical reconstruction of my own hologram:
+
+ - [https://www.youtube.com/watch?v=Re91mA0Q4sU](https://www.youtube.com/watch?v=Re91mA0Q4sU)
